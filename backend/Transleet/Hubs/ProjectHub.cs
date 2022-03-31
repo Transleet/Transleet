@@ -1,37 +1,38 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+
 using Transleet.Models;
 
 namespace Transleet.Hubs;
 
-public class ProjectHub:Hub
+public class ProjectHub : Hub
 {
-    public async Task UpdateEntry(Entry e)
+    public async Task SendEntry(Entry e)
     {
-        await Clients.All.SendAsync("ReceiveUpdateTranslation",e.Id,e);
+        await Clients.All.SendAsync("ReceiveTranslation", e.Id, e);
     }
 
-    public async Task UpdateTranslation(Translation trans)
+    public async Task SendTranslation(Translation trans)
     {
-        await Clients.All.SendAsync("ReceiveUpdateTranslation", trans.Id, trans);
+        await Clients.All.SendAsync("ReceiveTranslation", trans.Id, trans);
     }
 
-    public async Task UpdateTerm(Term term)
+    public async Task SendTerm(Term term)
     {
-        await Clients.All.SendAsync("ReceiveUpdateTerm", term.Id, term);
+        await Clients.All.SendAsync("ReceiveTerm", term.Id, term);
     }
 
-    public async Task UpdateTranslationCollection(TranslationCollection collection)
+    public async Task SendTranslationCollection(TranslationCollection collection)
     {
-        await Clients.All.SendAsync("ReceiveUpdateTranslationCollection", collection.Id, collection);
+        await Clients.All.SendAsync("ReceiveTranslationCollection", collection.Id, collection);
     }
 
-    public async Task UpdateTranslationCollections(Project project, List<TranslationCollection> collections)
+    public async Task SendAllTranslationCollections(Project project, List<TranslationCollection> collections)
     {
-        await Clients.All.SendAsync("ReceiveUpdateTranslationCollections", project.Id, collections);
+        await Clients.All.SendAsync("ReceiveAllTranslationCollections", project.Id, collections);
     }
 
-    public async Task UpdateTerms(Project project,List<Term> terms)
+    public async Task SendAllTerms(Project project, List<Term> terms)
     {
-        await Clients.All.SendAsync("ReceiveUpdateAllTerms", project.Id, terms);
+        await Clients.All.SendAsync("ReceiveAllTerms", project.Id, terms);
     }
 }
