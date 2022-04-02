@@ -1,11 +1,9 @@
-﻿using AspNetCore.Identity.MongoDbCore.Models;
-using MongoDB.Bson;
-using MongoDbGenericRepository.Attributes;
+﻿
+using Microsoft.AspNetCore.Identity;
 
 namespace Transleet.Models
 {
-    [CollectionName("Roles")]
-    public class ApplicationRole : MongoIdentityRole<ObjectId>
+    public class ApplicationRole:IdentityRole<Guid>
     {
 
     }

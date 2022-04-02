@@ -1,13 +1,10 @@
 ﻿#nullable enable
 using System.Text.Json.Serialization;
-using AspNetCore.Identity.MongoDbCore.Models;
-using MongoDB.Bson;
-using MongoDbGenericRepository.Attributes;
+using Microsoft.AspNetCore.Identity;
 
 namespace Transleet.Models
 {
-    [CollectionName("Users")]
-    public class ApplicationUser : MongoIdentityUser<ObjectId>
+    public class ApplicationUser:IdentityUser<Guid>
     {
         public GithubUserInfo? GithubUserInfo { get; set; }
     }

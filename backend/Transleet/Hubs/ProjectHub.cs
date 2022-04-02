@@ -1,12 +1,25 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-
+using Orleans;
 using Transleet.Models;
 
 namespace Transleet.Hubs;
 
 public class ProjectHub : Hub
 {
-    public async Task SendEntry(Entry e)
+    private readonly IClusterClient _clusterClient;
+
+    public ProjectHub(IClusterClient clusterClient)
+    {
+        _clusterClient = clusterClient;
+    }
+
+    public async Task SendProjects()
+    {
+
+        await Clients.Caller.SendAsync("ReceiveProject");
+    }
+
+    public async Task SendEntry(Entry e) 
     {
         await Clients.All.SendAsync("ReceiveTranslation", e.Id, e);
     }
