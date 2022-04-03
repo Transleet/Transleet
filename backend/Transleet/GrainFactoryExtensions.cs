@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading.Tasks;
+﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Orleans;
-using Transleet.IdentityStore.Grains;
+using Transleet.Grains;
 
-namespace Transleet.IdentityStore
+namespace Transleet
 {
     public static class GrainFactoryExtensions
     {

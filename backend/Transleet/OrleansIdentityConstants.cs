@@ -1,4 +1,4 @@
-﻿namespace Transleet.IdentityStore
+﻿namespace Transleet
 {
     public static class OrleansIdentityConstants
     {

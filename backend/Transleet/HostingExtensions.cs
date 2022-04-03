@@ -8,7 +8,7 @@ using Transleet.Hubs;
 using Transleet.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Transleet.IdentityStore.Stores;
+using Transleet.Stores;
 
 namespace Transleet;
 

@@ -6,8 +6,6 @@ using Orleans.Providers;
 using Serilog;
 using Transleet;
 using Transleet.Grains;
-using Transleet.IdentityStore;
-using Transleet.IdentityStore.Grains;
 using Transleet.Models;
 
 var builder = WebApplication.CreateBuilder(args);

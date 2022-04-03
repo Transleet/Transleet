@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
+﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Orleans;
 using Orleans.Concurrency;
 using Orleans.Runtime;
 
-namespace Transleet.IdentityStore.Grains
+namespace Transleet.Grains
 {
     /// <summary>
     /// Identity Role grain
