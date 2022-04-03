@@ -40,7 +40,7 @@ builder.Host
             options.Invariant = invariant;
             options.ConnectionString = connectionString;
         });
-        siloBuilder.AddAdoNetGrainStorage(OrleansIdentityConstants.OrleansStorageProvider, options =>
+        siloBuilder.AddAdoNetGrainStorage("Default", options =>
         {
             options.Invariant = invariant;
             options.ConnectionString = connectionString;

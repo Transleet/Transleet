@@ -4,13 +4,9 @@ using Orleans;
 
 namespace Transleet.Models;
 
-public class Project:IGrainWithStringKey
+public record Project:IGrainWithStringKey
 {
-    [Key]
-    public Guid Id { get; set; }
-    
-    public Guid OwnerId { get; set; }
-
+    public Guid Key { get; set; }
     public string? DisplayName { get; set; }
     public string Name { get; set; } = null!;
     public string? ProjectImage { get; set; }

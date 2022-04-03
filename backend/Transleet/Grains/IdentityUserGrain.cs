@@ -67,7 +67,7 @@ namespace Transleet.Grains
 
         public IdentityUserGrain(
             ILookupNormalizer normalizer,
-            [PersistentState("IdentityUser", OrleansIdentityConstants.OrleansStorageProvider)]
+            [PersistentState("IdentityUser", "Default")]
         IPersistentState<IdentityUserGrainState<TUser, TRole>> data)
         {
             _data = data;
@@ -102,7 +102,8 @@ namespace Transleet.Grains
             if (Exists && login != null)
             {
                 _data.State.Logins.Add(login);
-                await GrainFactory.AddOrUpdateToLookup(login.LoginProvider, login.ProviderKey, _id);
+                var lookup = GrainFactory.GetGrain<ILookupGrain>(TransleetConstants.LoginLookup);
+                await lookup.AddOrUpdateAsync(login.ProviderKey, _id);
                 await _data.WriteStateAsync();
             }
         }
@@ -148,14 +149,16 @@ namespace Transleet.Grains
             user.NormalizedEmail = _normalizer.NormalizeEmail(user.Email);
             user.NormalizedUserName = _normalizer.NormalizeName(user.UserName);
 
-            if (!await GrainFactory.AddOrUpdateToLookup(OrleansIdentityConstants.EmailLookup, user.NormalizedEmail, _id))
+            var lookup = GrainFactory.GetGrain<ILookupGrain>(TransleetConstants.EmailLookup);
+            if (!await lookup.AddOrUpdateAsync(user.NormalizedEmail, _id))
             {
                 return IdentityResult.Failed(_errorDescriber.DuplicateEmail(user.Email));
             }
 
-            if (!await GrainFactory.AddOrUpdateToLookup(OrleansIdentityConstants.UsernameLookup, user.NormalizedUserName, _id))
+            var lookup1 = GrainFactory.GetGrain<ILookupGrain>(TransleetConstants.UsernameLookup);
+            if (!await lookup1.AddOrUpdateAsync(user.NormalizedUserName, _id))
             {
-                await GrainFactory.SafeRemoveFromLookup(OrleansIdentityConstants.EmailLookup, user.NormalizedEmail, _id);
+                await GrainFactory.SafeRemoveFromLookup(TransleetConstants.EmailLookup, user.NormalizedEmail, _id);
                 return IdentityResult.Failed(_errorDescriber.DuplicateUserName(user.UserName));
             }
 
@@ -171,8 +174,8 @@ namespace Transleet.Grains
             if (_data.State.User == null)
                 return IdentityResult.Failed(_errorDescriber.DefaultError());
 
-            await GrainFactory.RemoveFromLookup(OrleansIdentityConstants.EmailLookup, _data.State.User.NormalizedEmail);
-            await GrainFactory.RemoveFromLookup(OrleansIdentityConstants.UsernameLookup, _data.State.User.NormalizedUserName);
+            await GrainFactory.RemoveFromLookup(TransleetConstants.EmailLookup, _data.State.User.NormalizedEmail);
+            await GrainFactory.RemoveFromLookup(TransleetConstants.UsernameLookup, _data.State.User.NormalizedUserName);
             await Task.WhenAll(_data.State.Roles.Select(r => GrainFactory.GetGrain<IIdentityRoleGrain<TUser, TRole>>(r).RemoveUser(_id)));
             await _data.ClearStateAsync();
 
@@ -272,7 +275,7 @@ namespace Transleet.Grains
                 {
                     _data.State.Logins.Remove(loginToRemove);
 
-                    await GrainFactory.RemoveFromLookup(loginProvider, providerKey);
+                    await GrainFactory.RemoveFromLookup(TransleetConstants.LoginLookup, providerKey);
                     await _data.WriteStateAsync();
                 }
             }
@@ -343,17 +346,19 @@ namespace Transleet.Grains
             var newEmail = _normalizer.NormalizeEmail(user.Email);
             var newUsername = _normalizer.NormalizeName(user.UserName);
 
-            if (newEmail != _data.State.User.NormalizedEmail && !await GrainFactory.AddOrUpdateToLookup(OrleansIdentityConstants.EmailLookup, newEmail, _id))
+            var lookup = GrainFactory.GetGrain<ILookupGrain>(TransleetConstants.EmailLookup);
+            if (newEmail != _data.State.User.NormalizedEmail && !await lookup.AddOrUpdateAsync(newEmail, _id))
             {
                 return IdentityResult.Failed(_errorDescriber.DuplicateEmail(newEmail));
             }
 
-            if (newUsername != _data.State.User.NormalizedUserName && !await GrainFactory.AddOrUpdateToLookup(OrleansIdentityConstants.UsernameLookup, newUsername, _id))
+            var lookup1 = GrainFactory.GetGrain<ILookupGrain>(TransleetConstants.UsernameLookup);
+            if (newUsername != _data.State.User.NormalizedUserName && !await lookup1.AddOrUpdateAsync(newUsername, _id))
             {
                 // if email changed, then undo that change
                 if (newEmail != _data.State.User.NormalizedEmail)
                 {
-                    await GrainFactory.SafeRemoveFromLookup(OrleansIdentityConstants.EmailLookup, user.NormalizedEmail, _id);
+                    await GrainFactory.SafeRemoveFromLookup(TransleetConstants.EmailLookup, user.NormalizedEmail, _id);
                 }
 
                 return IdentityResult.Failed(_errorDescriber.DuplicateUserName(user.UserName));
@@ -362,12 +367,12 @@ namespace Transleet.Grains
             // Remove old values
             if (newEmail != _data.State.User.NormalizedEmail)
             {
-                await GrainFactory.RemoveFromLookup(OrleansIdentityConstants.EmailLookup, _data.State.User.NormalizedEmail);
+                await GrainFactory.RemoveFromLookup(TransleetConstants.EmailLookup, _data.State.User.NormalizedEmail);
             }
 
             if (newUsername != _data.State.User.NormalizedUserName)
             {
-                await GrainFactory.RemoveFromLookup(OrleansIdentityConstants.UsernameLookup, _data.State.User.NormalizedUserName);
+                await GrainFactory.RemoveFromLookup(TransleetConstants.UsernameLookup, _data.State.User.NormalizedUserName);
             }
 
             _data.State.User = user;

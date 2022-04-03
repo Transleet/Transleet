@@ -22,7 +22,7 @@ namespace Transleet.Grains
         private readonly IPersistentState<HashSet<Guid>> _data;
 
         public IdentityClaimGrain(
-                    [PersistentState("IdentityClaim", OrleansIdentityConstants.OrleansStorageProvider)] IPersistentState<HashSet<Guid>> data)
+                    [PersistentState("IdentityClaim", "Default")] IPersistentState<HashSet<Guid>> data)
         {
             _data = data;
         }

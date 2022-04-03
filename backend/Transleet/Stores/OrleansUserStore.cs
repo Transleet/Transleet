@@ -114,7 +114,7 @@ namespace Transleet.Stores
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
 
-            var grain = await _client.Find<IIdentityUserGrain<TUser, TRole>>(OrleansIdentityConstants.EmailLookup, normalizedEmail);
+            var grain = await _client.Find<IIdentityUserGrain<TUser, TRole>>(TransleetConstants.EmailLookup, normalizedEmail);
             if (grain != null)
             {
                 return await grain.Get();
@@ -135,7 +135,7 @@ namespace Transleet.Stores
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
 
-            var grain = await _client.Find<IIdentityUserGrain<TUser, TRole>>(OrleansIdentityConstants.UsernameLookup, normalizedUserName);
+            var grain = await _client.Find<IIdentityUserGrain<TUser, TRole>>(TransleetConstants.UsernameLookup, normalizedUserName);
             if (grain != null)
             {
                 return await grain.Get();
@@ -319,7 +319,7 @@ namespace Transleet.Stores
 
             if (user.Id == default)
             {
-                throw new ArgumentException("Id cannot be default", nameof(user.Id));
+                throw new ArgumentException("Key cannot be default", nameof(user.Id));
             }
 
             return UserGrain(user.Id).Update(user);
@@ -355,7 +355,7 @@ namespace Transleet.Stores
 
         protected override async Task<IdentityUserLogin<Guid>> FindUserLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
-            var grain = await _client.Find<IIdentityUserGrain<TUser, TRole>>(loginProvider, providerKey);
+            var grain = await _client.Find<IIdentityUserGrain<TUser, TRole>>(TransleetConstants.LoginLookup, providerKey);
             if (grain != null)
             {
                 return await grain.GetLogin(loginProvider, providerKey);
@@ -364,12 +364,12 @@ namespace Transleet.Stores
             return null;
         }
 
-        protected override Task<IdentityUserLogin<Guid>> FindUserLoginAsync(Guid userId, string loginProvider, string providerKey, CancellationToken cancellationToken)
+        protected override Task<IdentityUserLogin<Guid>?> FindUserLoginAsync(Guid userId, string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
             return UserGrain(userId).GetLogin(loginProvider, providerKey);
         }
 
-        protected override async Task<IdentityUserRole<Guid>> FindUserRoleAsync(Guid userId, Guid roleId, CancellationToken cancellationToken)
+        protected override async Task<IdentityUserRole<Guid>?> FindUserRoleAsync(Guid userId, Guid roleId, CancellationToken cancellationToken)
         {
             if (await UserGrain(userId).ContainsRole(roleId))
             {

@@ -13,7 +13,6 @@ namespace Transleet.Stores
         private bool _disposed;
 
         public OrleansRoleStore(IClusterClient client)
-
         {
             _client = client;
         }
@@ -84,7 +83,7 @@ namespace Transleet.Stores
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
 
-            var grain = await _client.Find<IIdentityRoleGrain<TUser, TRole>>(OrleansIdentityConstants.RoleLookup, normalizedRoleName);
+            var grain = await _client.Find<IIdentityRoleGrain<TUser, TRole>>(TransleetConstants.RoleLookup, normalizedRoleName);
 
             if (grain != null)
             {
@@ -102,7 +101,7 @@ namespace Transleet.Stores
                 .ToList();
         }
 
-        public Task<string> GetNormalizedRoleNameAsync(TRole role, CancellationToken cancellationToken)
+        public Task<string?> GetNormalizedRoleNameAsync(TRole role, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();

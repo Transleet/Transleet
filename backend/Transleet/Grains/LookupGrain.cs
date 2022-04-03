@@ -4,70 +4,70 @@ using Orleans.Runtime;
 
 namespace Transleet.Grains
 {
-    public interface ILookupGrain : IGrainWithStringKey
+    public interface ILookupGrain : IGrainWithGuidKey
     {
-        Task<bool> AddOrUpdate(string value, Guid grainKey);
+        Task<bool> AddOrUpdateAsync(string value, Guid grainKey);
 
-        Task Delete(string value);
+        Task DeleteAsync(string value);
 
-        Task DeleteIfMatch(string value, Guid grainKey);
-
-        [AlwaysInterleave]
-        Task<Guid?> Find(string value);
+        Task DeleteIfMatchAsync(string value, Guid grainKey);
 
         [AlwaysInterleave]
-        Task<IReadOnlyDictionary<string, Guid>> GetAll();
+        Task<Guid?> FindAsync(string value);
+
+        [AlwaysInterleave]
+        Task<IReadOnlyDictionary<string, Guid>> GetAllAsync();
     }
 
     public class LookupGrain : Grain, ILookupGrain
     {
-        private readonly IPersistentState<LookupGrainState> _index;
+        private readonly IPersistentState<LookupGrainState> _state;
 
         public LookupGrain(
-            [PersistentState(nameof(LookupGrainState), OrleansIdentityConstants.OrleansStorageProvider)] IPersistentState<LookupGrainState> index)
+            [PersistentState(nameof(LookupGrainState), "Default")] IPersistentState<LookupGrainState> state)
         {
-            _index = index;
+            _state = state;
         }
 
-        public async Task<bool> AddOrUpdate(string value, Guid grainKey)
+        public async Task<bool> AddOrUpdateAsync(string value, Guid grainKey)
         {
-            if (_index.State.Index.ContainsKey(value))
+            if (_state.State.Index.ContainsKey(value))
                 return false;
 
-            _index.State.Index[value] = grainKey;
-            await _index.WriteStateAsync();
+            _state.State.Index[value] = grainKey;
+            await _state.WriteStateAsync();
             return true;
         }
 
-        public Task Delete(string value)
+        public Task DeleteAsync(string value)
         {
-            if (_index.State.Index.Remove(value))
-                return _index.WriteStateAsync();
+            if (_state.State.Index.Remove(value))
+                return _state.WriteStateAsync();
 
             return Task.CompletedTask;
         }
 
-        public Task DeleteIfMatch(string value, Guid grainKey)
+        public Task DeleteIfMatchAsync(string value, Guid grainKey)
         {
-            if (_index.State.Index.ContainsKey(value) && _index.State.Index[value] == grainKey)
+            if (_state.State.Index.ContainsKey(value) && _state.State.Index[value] == grainKey)
             {
-                _index.State.Index.Remove(value);
-                return _index.WriteStateAsync();
+                _state.State.Index.Remove(value);
+                return _state.WriteStateAsync();
             }
             return Task.CompletedTask;
         }
 
-        public Task<Guid?> Find(string value)
+        public Task<Guid?> FindAsync(string value)
         {
-            if (_index.State.Index.ContainsKey(value))
-                return Task.FromResult<Guid?>(_index.State.Index[value]);
+            if (_state.State.Index.ContainsKey(value))
+                return Task.FromResult<Guid?>(_state.State.Index[value]);
 
             return Task.FromResult<Guid?>(default);
         }
 
-        public Task<IReadOnlyDictionary<string, Guid>> GetAll()
+        public Task<IReadOnlyDictionary<string, Guid>> GetAllAsync()
         {
-            return Task.FromResult<IReadOnlyDictionary<string, Guid>>(_index.State.Index);
+            return Task.FromResult<IReadOnlyDictionary<string, Guid>>(_state.State.Index);
         }
     }
 

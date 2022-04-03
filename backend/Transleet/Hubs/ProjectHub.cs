@@ -41,11 +41,11 @@ public class ProjectHub : Hub
 
     public async Task SendAllTranslationCollections(Project project, List<TranslationCollection> collections)
     {
-        await Clients.All.SendAsync("ReceiveAllTranslationCollections", project.Id, collections);
+        await Clients.All.SendAsync("ReceiveAllTranslationCollections", project.Key, collections);
     }
 
     public async Task SendAllTerms(Project project, List<Term> terms)
     {
-        await Clients.All.SendAsync("ReceiveAllTerms", project.Id, terms);
+        await Clients.All.SendAsync("ReceiveAllTerms", project.Key, terms);
     }
 }

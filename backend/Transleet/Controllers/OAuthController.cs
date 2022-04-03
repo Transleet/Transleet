@@ -1,9 +1,13 @@
-﻿using System.Net.Http.Headers;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
+using System.Security.Claims;
+using System.Text;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using Transleet.Models;
 
 namespace Transleet.Controllers
@@ -49,50 +53,57 @@ namespace Transleet.Controllers
                 return Redirect(returnUrl + "?state=" + state);
         }
 
-        //[HttpPost("github_callback3")]
-        //public async Task<IActionResult> GithubCallback3()
-        //{
-        //    var request = HttpContext.Request;
-        //    //var request = HttpContext.GetOpenIddictServerRequest();
-        //    //if (request!.GrantType != "github")
-        //    //{
-        //    //    return BadRequest();
-        //    //}
-        //    var accessToken = _dataProtector.Unprotect(state!);
-        //    _logger.LogDebug(accessToken);
-        //    using var httpClient = _httpClientFactory.CreateClient();
-        //    using var userInfoRequest = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/user");
-        //    userInfoRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
-        //    userInfoRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        //    userInfoRequest.Headers.UserAgent.Add(new ProductInfoHeaderValue("Transleet", "1.0.0"));
-        //    using var userInfoResponse = await httpClient.SendAsync(userInfoRequest, HttpContext.RequestAborted);
-        //    userInfoResponse.EnsureSuccessStatusCode();
-        //    var userInfo = await userInfoResponse.Content.ReadFromJsonAsync<GithubUserInfo>(cancellationToken: HttpContext.RequestAborted);
-        //    using var userEmailsRequest = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/user/emails");
-        //    userEmailsRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
-        //    userEmailsRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        //    userEmailsRequest.Headers.UserAgent.Add(new ProductInfoHeaderValue("Transleet", "1.0.0"));
-        //    using var userEmailsResponse = await httpClient.SendAsync(userEmailsRequest, HttpContext.RequestAborted);
-        //    userEmailsResponse.EnsureSuccessStatusCode();
-        //    userInfo!.Emails =
-        //        await userEmailsResponse.Content.ReadFromJsonAsync<List<GithubEmailInfo>>(
-        //            cancellationToken: HttpContext.RequestAborted);
-        //    var primaryEmail = userInfo.Emails!.FirstOrDefault(_ => _.Primary = true);
-        //    var user = await _userManager.FindByEmailAsync(primaryEmail!.Email);
-        //    if (user is null)
-        //    {
-        //        user = new User()
-        //        {
-        //            UserName = userInfo.Name,
-        //            Email = primaryEmail.Email,
-        //            EmailConfirmed = true,
-        //            GithubUserInfo = userInfo
-        //        };
-        //        await _userManager.CreateAsync(user);
-        //    }
-        //    var principal = await _signInManager.CreateUserPrincipalAsync(user);
-        //    return SignIn(principal);
-        //}
+        [HttpPost("github_callback2")]
+        public async Task<IActionResult> GithubCallback3([FromQuery]string state)
+        {
+            var accessToken = _dataProtector.Unprotect(state);
+            _logger.LogDebug(accessToken);
+            using var httpClient = _httpClientFactory.CreateClient();
+            using var userInfoRequest = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/user");
+            userInfoRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
+            userInfoRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            userInfoRequest.Headers.UserAgent.Add(new ProductInfoHeaderValue("Transleet", "1.0.0"));
+            using var userInfoResponse = await httpClient.SendAsync(userInfoRequest, HttpContext.RequestAborted);
+            userInfoResponse.EnsureSuccessStatusCode();
+            var userInfo = await userInfoResponse.Content.ReadFromJsonAsync<GithubUserInfo>(cancellationToken: HttpContext.RequestAborted);
+            using var userEmailsRequest = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/user/emails");
+            userEmailsRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
+            userEmailsRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            userEmailsRequest.Headers.UserAgent.Add(new ProductInfoHeaderValue("Transleet", "1.0.0"));
+            using var userEmailsResponse = await httpClient.SendAsync(userEmailsRequest, HttpContext.RequestAborted);
+            userEmailsResponse.EnsureSuccessStatusCode();
+            userInfo!.Emails =
+                await userEmailsResponse.Content.ReadFromJsonAsync<List<GithubEmailInfo>>(
+                    cancellationToken: HttpContext.RequestAborted);
+            var primaryEmail = userInfo.Emails!.FirstOrDefault(_ => _.Primary = true);
+            var user = await _userManager.FindByEmailAsync(primaryEmail!.Email);
+            if (user is null)
+            {
+                user = new User()
+                {
+                    UserName = userInfo.Name,
+                    Email = primaryEmail.Email,
+                    EmailConfirmed = true,
+                    GithubUserInfo = userInfo
+                };
+                await _userManager.CreateAsync(user);
+            }
+            await _signInManager.SignInAsync(user, true);
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_configuration["Authentication:JwtBearer:Key"]);
+            var tokenDescriptor = new SecurityTokenDescriptor()
+            {
+                Issuer = _configuration["Authentication:JwtBearer:Issuer"],
+                Audience = _configuration["Authentication:JwtBearer:Audience"],
+                Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, user.UserName) }),
+                Expires = DateTime.UtcNow.AddDays(7),
+                SigningCredentials =
+                    new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256)
+            };
+            await _signInManager.SignInAsync(user, true);
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return Ok(new { token = tokenHandler.WriteToken(token) });
+        }
     }
 }
 

@@ -1,9 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
-
 using Microsoft.AspNetCore.Mvc;
-
 using Orleans;
-
 using Transleet.Grains;
 using Transleet.Models;
 
@@ -11,7 +8,7 @@ namespace Transleet.Controllers;
 
 
 [ApiController]
-[Route("project")]
+[Route("projects")]
 public class ProjectController : ControllerBase
 {
     private readonly IGrainFactory _factory;
@@ -29,48 +26,32 @@ public class ProjectController : ControllerBase
         return project;
     }
 
-    [HttpGet("list/{ownerId:guid}")]
-    public async IAsyncEnumerable<Project?> GetAllAsync(Guid ownerId)
+    [HttpGet()]
+    public async IAsyncEnumerable<Project?> GetAllAsync()
     {
-        // Get all item keys for this owner.
-        var keys =
-            await _factory.GetGrain<IProjectManagerGrain>(ownerId)
-                .GetAllAsync();
-
-        // Fast path for empty owner.
-        if (keys.Length is 0) yield break;
-
-        // Fan out and get all individual items in parallel.
-        // Issue all requests at the same time.
-        var tasks =
-            keys.Select(key => _factory.GetGrain<IProjectGrain>(key).GetAsync())
-                .ToList();
-
-        // Compose the result as requests complete
-        for (var i = 0; i < keys.Length; ++i)
+        var keys = await _factory.GetGrain<IKeySetGrain>(TransleetConstants.ProjectKeySet).GetAllAsync();
+        foreach (var key in keys)
         {
-            var item = await tasks[i];
-            if (item is null) continue;
-            yield return item;
+            yield return await _factory.GetGrain<IProjectGrain>(key).GetAsync();
         }
     }
 
     [HttpPost]
     public async Task<IActionResult> PostAsync(Project item)
     {
-        item.Id = Guid.NewGuid();
-        await _factory.GetGrain<IProjectGrain>(item.Id).SetAsync(item);
-        return CreatedAtAction(nameof(GetAsync), new { id = item.Id }, item);
+        item.Key = Guid.NewGuid();
+        await _factory.GetGrain<IProjectGrain>(item.Key).SetAsync(item);
+        return CreatedAtAction(nameof(GetAsync), new { id = item.Key }, item);
     }
 
-    [HttpPut]
+    [HttpPut("{id}")]
     public async Task<IActionResult> UpdateAsync(Project item)
     {
-        await _factory.GetGrain<IProjectGrain>(item.Id).SetAsync(item);
+        await _factory.GetGrain<IProjectGrain>(item.Key).SetAsync(item);
         return Ok();
     }
 
-    [HttpDelete("{id:guid}")]
+    [HttpDelete("{id}")]
     public Task DeleteAsync(Guid id) =>
         _factory.GetGrain<IProjectGrain>(id).ClearAsync();
 }
