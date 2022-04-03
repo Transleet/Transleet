@@ -5,10 +5,12 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/Index.vue') },
+      { path: 'home', component: () => import('pages/Index.vue') },
+      { path: 'login', component: () => import('pages/Login.vue') },
       { path: 'search/:query', component: () => import('pages/Index.vue') },
       { path: 'search', component: () => import('pages/Index.vue') },
     ],
+    redirect: '/home',
   },
 
   // Always leave this as last one,
