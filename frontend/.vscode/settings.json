@@ -7,6 +7,6 @@
   "eslint.validate": ["javascript", "javascriptreact", "typescript", "vue"],
   "typescript.tsdk": "node_modules/typescript/lib",
   "[vue]": {
-    "editor.defaultFormatter": "johnsoncodehk.volar"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }

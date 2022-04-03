@@ -8,11 +8,16 @@ export default {
       settings: '设置',
     },
     login: {
-      title: '登录',
       email: '邮箱',
       password: '密码',
+      password2: '再次输入密码',
+      passwordNotMatch: '两次输入的密码不一致',
+      username: '用户名',
       login: '登录',
+      register: '注册',
       github: 'Github登录',
+      valueCannotBeNull: '值不能为空',
+      loginSuccess: '登录成功',
     },
   },
 };

@@ -1,12 +1,14 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+
 using Transleet.Models;
 
 namespace Transleet.Controllers
@@ -39,7 +41,7 @@ namespace Transleet.Controllers
         {
             var resource = await HttpContext.Request.ReadFromJsonAsync<LoginResource>();
             User? user;
-            if (resource.InputText.Contains('@'))
+            if (resource!.InputText.Contains('@'))
             {
                 user = await _userManager.FindByEmailAsync(resource.InputText);
                 if (user is null)
@@ -59,7 +61,7 @@ namespace Transleet.Controllers
             if (await _userManager.CheckPasswordAsync(user, resource.Password))
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.UTF8.GetBytes(_configuration["Authentication:JwtBearer:Key"]);
+                var key = Encoding.UTF8.GetBytes(_configuration["Authentication:JwtBearer:Key"]!);
                 var tokenDescriptor = new SecurityTokenDescriptor()
                 {
                     Issuer = _configuration["Authentication:JwtBearer:Issuer"],

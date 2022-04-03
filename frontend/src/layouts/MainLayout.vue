@@ -66,6 +66,12 @@ const menu: Array<MenuOption> = [
     icon: 'mail',
     class: 'item',
   },
+  {
+    name: 'Register',
+    path: '/register',
+    icon: 'mail',
+    class: 'item',
+  },
 ];
 
 function toggleLeftDrawer() {
