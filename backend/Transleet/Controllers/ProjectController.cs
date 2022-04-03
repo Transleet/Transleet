@@ -1,6 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+
 using Microsoft.AspNetCore.Mvc;
+
 using Orleans;
+
 using Transleet.Grains;
 using Transleet.Models;
 
@@ -26,7 +29,7 @@ public class ProjectController : ControllerBase
         return project;
     }
 
-    [HttpGet("list/{ownerId}")]
+    [HttpGet("list/{ownerId:guid}")]
     public async IAsyncEnumerable<Project?> GetAllAsync(Guid ownerId)
     {
         // Get all item keys for this owner.
@@ -60,14 +63,14 @@ public class ProjectController : ControllerBase
         return CreatedAtAction(nameof(GetAsync), new { id = item.Id }, item);
     }
 
-    [HttpPut("{id}")]
+    [HttpPut]
     public async Task<IActionResult> UpdateAsync(Project item)
     {
         await _factory.GetGrain<IProjectGrain>(item.Id).SetAsync(item);
         return Ok();
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:guid}")]
     public Task DeleteAsync(Guid id) =>
         _factory.GetGrain<IProjectGrain>(id).ClearAsync();
 }
