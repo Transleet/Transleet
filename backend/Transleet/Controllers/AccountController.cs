@@ -7,8 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-using OpenIddict.Abstractions;
-
 using Transleet.Models;
 
 namespace Transleet.Controllers
@@ -17,26 +15,18 @@ namespace Transleet.Controllers
     [Route("account")]
     public class AccountController : ControllerBase
     {
-        private readonly IOpenIddictApplicationManager _applicationManager;
-        private readonly IOpenIddictAuthorizationManager _authorizationManager;
-        private readonly IOpenIddictScopeManager _scopeManager;
+        
         private readonly IConfiguration _configuration;
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<User> _signInManager;
+        private readonly UserManager<User> _userManager;
         private readonly ILogger<AccountController> _logger;
 
         public AccountController(
-            IOpenIddictApplicationManager applicationManager,
-            IOpenIddictAuthorizationManager authorizationManager,
-            IOpenIddictScopeManager scopeManager,
-            SignInManager<ApplicationUser> signInManager,
-            UserManager<ApplicationUser> userManager,
+            SignInManager<User> signInManager,
+            UserManager<User> userManager,
             ILogger<AccountController> logger,
             IConfiguration configuration)
         {
-            _applicationManager = applicationManager;
-            _authorizationManager = authorizationManager;
-            _scopeManager = scopeManager;
             _signInManager = signInManager;
             _userManager = userManager;
             _configuration = configuration;
@@ -52,11 +42,14 @@ namespace Transleet.Controllers
                 return StatusCode(StatusCodes.Status409Conflict);
             }
 
-            user = new ApplicationUser { UserName = model.Username, Email = model.Email };
+            user = new User { UserName = model.Username, Email = model.Email };
             var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
-                return Ok();
+                return Ok(new
+                {
+                    username =user.UserName,email =user.Email
+                });
             }
 
             return BadRequest();

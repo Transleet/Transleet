@@ -2,10 +2,13 @@ using Newtonsoft.Json;
 using Orleans;
 using Orleans.Configuration;
 using Orleans.Hosting;
+using Orleans.IdentityStore;
+using Orleans.IdentityStore.Grains;
 using Orleans.Providers;
 using Serilog;
 using Transleet;
 using Transleet.Grains;
+using Transleet.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,11 +21,13 @@ builder.Host
             options.ServiceId = "dev";
         });
         siloBuilder.ConfigureApplicationParts(parts =>
-            parts.AddApplicationPart(typeof(ProjectGrain).Assembly).WithReferences());
+        {
+            parts.AddApplicationPart(typeof(ProjectGrain).Assembly).WithReferences();
+            parts.AddApplicationPart(typeof(IIdentityUserGrain<,>).Assembly).WithReferences();
+        });
 
         var invariant = "System.Data.SqlClient";
         var connectionString = builder.Configuration["Database:ConnectionString"];
-        
         siloBuilder.UseAdoNetClustering(options =>
         {
             options.Invariant = invariant;
@@ -34,6 +39,11 @@ builder.Host
             options.ConnectionString = connectionString;
         });
         siloBuilder.AddAdoNetGrainStorageAsDefault(options =>
+        {
+            options.Invariant = invariant;
+            options.ConnectionString = connectionString;
+        });
+        siloBuilder.AddAdoNetGrainStorage(OrleansIdentityConstants.OrleansStorageProvider, options =>
         {
             options.Invariant = invariant;
             options.ConnectionString = connectionString;
