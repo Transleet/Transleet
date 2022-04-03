@@ -2,12 +2,12 @@ using Newtonsoft.Json;
 using Orleans;
 using Orleans.Configuration;
 using Orleans.Hosting;
-using Orleans.IdentityStore;
-using Orleans.IdentityStore.Grains;
 using Orleans.Providers;
 using Serilog;
 using Transleet;
 using Transleet.Grains;
+using Transleet.IdentityStore;
+using Transleet.IdentityStore.Grains;
 using Transleet.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,8 +22,7 @@ builder.Host
         });
         siloBuilder.ConfigureApplicationParts(parts =>
         {
-            parts.AddApplicationPart(typeof(ProjectGrain).Assembly).WithReferences();
-            parts.AddApplicationPart(typeof(IIdentityUserGrain<,>).Assembly).WithReferences();
+            parts.AddApplicationPart(typeof(LookupGrain).Assembly).WithReferences();
         });
 
         var invariant = "System.Data.SqlClient";
@@ -57,6 +56,7 @@ builder.Host
         siloBuilder.ConfigureEndpoints(siloPort: 11111, gatewayPort: 30000);
 
     });
+
 builder.Host.UseSerilog((ctx, lc) => lc
         .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}")
         .Enrich.FromLogContext()

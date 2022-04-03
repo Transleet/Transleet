@@ -8,6 +8,7 @@ using Transleet.Hubs;
 using Transleet.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Transleet.IdentityStore.Stores;
 
 namespace Transleet;
 
@@ -49,9 +50,11 @@ internal static class HostingExtensions
 
         });
         builder.Services
+            .AddTransient<IRoleClaimStore<Role>, OrleansRoleStore<User, Role>>()
+            .AddSingleton<ILookupNormalizer, UpperInvariantLookupNormalizer>()
             .AddIdentity<User, Role>()
-            .AddOrleansStore()
-            .AddDefaultTokenProviders();
+            .AddRoleStore<OrleansRoleStore<User,Role>>()
+            .AddUserStore<OrleansUserStore<User,Role>>();
 
         builder.Services.AddAuthentication(options =>
             {

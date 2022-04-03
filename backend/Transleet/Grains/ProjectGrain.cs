@@ -4,16 +4,25 @@ using Transleet.Models;
 
 namespace Transleet.Grains
 {
+    public interface IProjectGrain:IGrainWithGuidKey
+    {
+        Task SetAsync(Project item);
+
+        Task ClearAsync();
+
+        Task<Project?> GetAsync();
+    }
+
     public class ProjectGrain : Grain, IProjectGrain
     {
         private readonly ILogger<ProjectGrain> _logger;
         private readonly IPersistentState<State> _state;
 
-        public ProjectGrain(ILogger<ProjectGrain> logger, [PersistentState("State")]IPersistentState<State> state)
+        public ProjectGrain(ILogger<ProjectGrain> logger, [PersistentState("State")] IPersistentState<State> state)
         {
             _logger = logger;
             _state = state;
-        }   
+        }
 
         private static string GrainType => nameof(ProjectGrain);
         private Guid GrainKey => this.GetPrimaryKey();
