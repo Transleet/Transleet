@@ -53,15 +53,11 @@ internal static class HostingExtensions
             .AddTransient<IRoleClaimStore<Role>, OrleansRoleStore<User, Role>>()
             .AddSingleton<ILookupNormalizer, UpperInvariantLookupNormalizer>()
             .AddIdentity<User, Role>()
-            .AddRoleStore<OrleansRoleStore<User,Role>>()
-            .AddUserStore<OrleansUserStore<User,Role>>();
+            .AddRoleStore<OrleansRoleStore<User, Role>>()
+            .AddUserStore<OrleansUserStore<User, Role>>();
 
-        builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
             {
                 options.RequireHttpsMetadata = false;
                 options.SaveToken = true;
@@ -75,6 +71,23 @@ internal static class HostingExtensions
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Authentication:JwtBearer:Key"])),
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
+                };
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+
+                        // If the request is for our hub...
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            (path.StartsWithSegments("/hubs")))
+                        {
+                            // Read the token out of the query string
+                            context.Token = accessToken;
+                        }
+                        return Task.CompletedTask;
+                    }
                 };
             })
             .AddOAuth("Github", options =>
@@ -92,7 +105,7 @@ internal static class HostingExtensions
             options.AddPolicy("myCorsPolicy", corsPolicyBuilder =>
                 {
                     corsPolicyBuilder
-                        .WithOrigins("https://github.com","http://localhost:3000")
+                        .WithOrigins("https://github.com", "http://localhost:3000")
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials();
@@ -107,6 +120,7 @@ internal static class HostingExtensions
         app.UseHttpsRedirection();
         app.UseRouting();
         app.UseSerilogRequestLogging();
+        app.UseCors("myCorsPolicy");
         app.UseAuthentication();
         app.UseAuthorization();
         if (app.Environment.IsDevelopment())
@@ -114,11 +128,11 @@ internal static class HostingExtensions
             app.UseSwagger();
             app.UseSwaggerUI();
         }
-        app.UseCors("myCorsPolicy");
         app.UseEndpoints(endpoints =>
         {
+            endpoints.MapHub<ProjectHub>("/hubs/project");
+            endpoints.MapHub<AuthHub>("/hubs/auth");
             endpoints.MapControllers();
-            endpoints.MapHub<ProjectHub>("/project");
         });
         return app;
     }

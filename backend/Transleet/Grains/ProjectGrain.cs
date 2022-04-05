@@ -40,11 +40,6 @@ namespace Transleet.Grains
             await _state.WriteStateAsync();
             await GrainFactory.GetGrain<IKeySetGrain>(TransleetConstants.ProjectKeySet).AddAsync(item.Key);
 
-
-            _logger.LogInformation(
-                "{@GrainType} {@GrainKey} now contains {@Project}",
-                GrainType, GrainKey, item);
-
             GetStreamProvider("SMS")
                 .GetStream<ProjectNotification>(TransleetConstants.ProjectKeySet, nameof(IProjectGrain))
                 .OnNextAsync(new ProjectNotification(item.Key, item))
@@ -61,11 +56,6 @@ namespace Transleet.Grains
             await GrainFactory.GetGrain<IKeySetGrain>(TransleetConstants.ProjectKeySet).DeleteAsync(itemKey);
             // clear the state
             await _state.ClearStateAsync();
-
-            // for sample debugging
-            _logger.LogInformation(
-                "{@GrainType} {@GrainKey} is now cleared",
-                GrainType, GrainKey);
 
             // notify listeners - best effort only
             GetStreamProvider("SMS")

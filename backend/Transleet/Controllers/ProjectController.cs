@@ -6,7 +6,6 @@ using Transleet.Models;
 
 namespace Transleet.Controllers;
 
-
 [ApiController]
 [Route("projects")]
 public class ProjectController : ControllerBase

@@ -35,7 +35,7 @@ namespace Transleet.Controllers
 
         [AllowAnonymous]
         [HttpPost("token"), Produces("application/json")]
-        public async Task<IActionResult> Exchange()
+        public async Task<IActionResult> GetToken()
         {
             var resource = await HttpContext.Request.ReadFromJsonAsync<LoginResource>();
             User? user;

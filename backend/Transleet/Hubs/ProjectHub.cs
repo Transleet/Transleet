@@ -1,51 +1,43 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 using Orleans;
+using Transleet.Grains;
 using Transleet.Models;
 
 namespace Transleet.Hubs;
 
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class ProjectHub : Hub
 {
-    private readonly IClusterClient _clusterClient;
+    private readonly IGrainFactory _grainFactory;
 
-    public ProjectHub(IClusterClient clusterClient)
+    public ProjectHub(IGrainFactory grainFactory)
     {
-        _clusterClient = clusterClient;
+        _grainFactory = grainFactory;
     }
 
-    public async Task SendProjects()
+    public async Task<Project> CreateProject(Project project)
     {
-
-        await Clients.Caller.SendAsync("ReceiveProject");
+        project.Key = Guid.NewGuid();
+        var grain = _grainFactory.GetGrain<IProjectGrain>(project.Key);
+        await grain.SetAsync(project);
+        return project;
     }
 
-    public async Task SendEntry(Entry e) 
+    public async IAsyncEnumerable<Project> GetAllProjects()
     {
-        await Clients.All.SendAsync("ReceiveTranslation", e.Id, e);
+        var keys = await _grainFactory.GetGrain<IKeySetGrain>(TransleetConstants.ProjectKeySet).GetAllAsync();
+        foreach (var key in keys)
+        {
+            var grain = _grainFactory.GetGrain<IProjectGrain>(key);
+            yield return await grain.GetAsync();
+        }
     }
 
-    public async Task SendTranslation(Translation trans)
-    {
-        await Clients.All.SendAsync("ReceiveTranslation", trans.Id, trans);
-    }
 
-    public async Task SendTerm(Term term)
+    public async Task RemoveProject(Guid key)
     {
-        await Clients.All.SendAsync("ReceiveTerm", term.Id, term);
-    }
-
-    public async Task SendTranslationCollection(TranslationCollection collection)
-    {
-        await Clients.All.SendAsync("ReceiveTranslationCollection", collection.Id, collection);
-    }
-
-    public async Task SendAllTranslationCollections(Project project, List<TranslationCollection> collections)
-    {
-        await Clients.All.SendAsync("ReceiveAllTranslationCollections", project.Key, collections);
-    }
-
-    public async Task SendAllTerms(Project project, List<Term> terms)
-    {
-        await Clients.All.SendAsync("ReceiveAllTerms", project.Key, terms);
+        await _grainFactory.GetGrain<IProjectGrain>(key).ClearAsync();
     }
 }
