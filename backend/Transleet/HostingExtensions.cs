@@ -131,7 +131,6 @@ internal static class HostingExtensions
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapHub<ProjectHub>("/hubs/project");
-            endpoints.MapHub<AuthHub>("/hubs/auth");
             endpoints.MapControllers();
         });
         return app;

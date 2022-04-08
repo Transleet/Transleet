@@ -7,7 +7,6 @@ using Transleet.Models;
 
 namespace Transleet.Hubs;
 
-[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class ProjectHub : Hub
 {
     private readonly IGrainFactory _grainFactory;
@@ -15,14 +14,6 @@ public class ProjectHub : Hub
     public ProjectHub(IGrainFactory grainFactory)
     {
         _grainFactory = grainFactory;
-    }
-
-    public async Task<Project> CreateProject(Project project)
-    {
-        project.Key = Guid.NewGuid();
-        var grain = _grainFactory.GetGrain<IProjectGrain>(project.Key);
-        await grain.SetAsync(project);
-        return project;
     }
 
     public async IAsyncEnumerable<Project> GetAllProjects()
@@ -35,7 +26,23 @@ public class ProjectHub : Hub
         }
     }
 
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task<Project> CreateProject(Project project)
+    {
+        project.Key = Guid.NewGuid();
+        var grain = _grainFactory.GetGrain<IProjectGrain>(project.Key);
+        await grain.SetAsync(project);
+        return project;
+    }
 
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task UpdateProject(Project project)
+    {
+        var grain = _grainFactory.GetGrain<IProjectGrain>(project.Key);
+        await grain.SetAsync(project);
+    }
+
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task RemoveProject(Guid key)
     {
         await _grainFactory.GetGrain<IProjectGrain>(key).ClearAsync();
