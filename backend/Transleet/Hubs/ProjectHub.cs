@@ -7,7 +7,7 @@ using Transleet.Models;
 
 namespace Transleet.Hubs;
 
-[Authorize]
+[AllowAnonymous]
 public class ProjectHub : Hub
 {
     private readonly IGrainFactory _grainFactory;
@@ -17,6 +17,12 @@ public class ProjectHub : Hub
         _grainFactory = grainFactory;
     }
 
+    public Task<Project?> Get(Guid key)
+    {
+        var grain = _grainFactory.GetGrain<IProjectGrain>(key);
+        return grain.GetAsync();
+    }
+    
     public async IAsyncEnumerable<Project?> GetAll()
     {
         var keys = await _grainFactory.GetGrain<IKeySetGrain>(TransleetConstants.ProjectKeySet).GetAllAsync();
@@ -26,13 +32,7 @@ public class ProjectHub : Hub
             yield return await grain.GetAsync();
         }
     }
-
-    public Task<Project?> Get(Guid key)
-    {
-        var grain = _grainFactory.GetGrain<IProjectGrain>(key);
-        return grain.GetAsync();
-    }
-
+    [Authorize]
     public async Task<Project> Create(Project project)
     {
         project.Key = Guid.NewGuid();
@@ -40,13 +40,13 @@ public class ProjectHub : Hub
         await grain.SetAsync(project);
         return project;
     }
-
+    [Authorize]
     public async Task Update(Project project)
     {
         var grain = _grainFactory.GetGrain<IProjectGrain>(project.Key);
         await grain.SetAsync(project);
     }
-
+    [Authorize]
     public async Task Delete(Guid key)
     {
         await _grainFactory.GetGrain<IProjectGrain>(key).ClearAsync();
