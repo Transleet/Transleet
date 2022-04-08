@@ -1,6 +1,10 @@
 export default {
   general: {
     name: 'Transleet',
+    signalrState: {
+      connected: '已连接',
+      disconnected: '已断开，点击重新连接',
+    },
     drawer: {
       commonuse: '常用功能',
       home: '主页',
