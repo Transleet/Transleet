@@ -16,7 +16,7 @@ public class ProjectHub : Hub
         _grainFactory = grainFactory;
     }
 
-    public async IAsyncEnumerable<Project> GetAllProjects()
+    public async IAsyncEnumerable<Project?> GetAll()
     {
         var keys = await _grainFactory.GetGrain<IKeySetGrain>(TransleetConstants.ProjectKeySet).GetAllAsync();
         foreach (var key in keys)
@@ -25,9 +25,15 @@ public class ProjectHub : Hub
             yield return await grain.GetAsync();
         }
     }
+    
+    public Task<Project?> Get(Guid key)
+    {
+        var grain = _grainFactory.GetGrain<IProjectGrain>(key);
+        return grain.GetAsync();
+    }
 
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task<Project> CreateProject(Project project)
+    public async Task<Project> Create(Project project)
     {
         project.Key = Guid.NewGuid();
         var grain = _grainFactory.GetGrain<IProjectGrain>(project.Key);
@@ -36,14 +42,14 @@ public class ProjectHub : Hub
     }
 
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task UpdateProject(Project project)
+    public async Task Update(Project project)
     {
         var grain = _grainFactory.GetGrain<IProjectGrain>(project.Key);
         await grain.SetAsync(project);
     }
 
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public async Task RemoveProject(Guid key)
+    public async Task Delete(Guid key)
     {
         await _grainFactory.GetGrain<IProjectGrain>(key).ClearAsync();
     }
