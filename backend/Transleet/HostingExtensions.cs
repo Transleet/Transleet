@@ -3,10 +3,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using Transleet.Controllers;
-using Transleet.Grains;
 using Transleet.Hubs;
 using Transleet.Models;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Transleet.Stores;
 
@@ -56,7 +54,10 @@ internal static class HostingExtensions
             .AddRoleStore<OrleansRoleStore<User, Role>>()
             .AddUserStore<OrleansUserStore<User, Role>>();
 
-        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
             .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
             {
                 options.RequireHttpsMetadata = false;
