@@ -27,7 +27,7 @@ public class ProjectsHub : Hub
 
     public async IAsyncEnumerable<Project?> GetAll()
     {
-        var keys = await _grainFactory.GetGrain<IKeySetGrain>(TransleetConstants.ProjectKeySet).GetAllAsync();
+        var keys = await _grainFactory.GetKeySet(typeof(IProjectGrain).FullName).GetAllAsync();
         foreach (var key in keys)
         {
             var grain = _grainFactory.GetGrain<IProjectGrain>(key);
@@ -37,7 +37,7 @@ public class ProjectsHub : Hub
 
     public async IAsyncEnumerable<Project?> GetTopTen()
     {
-        var keys = (await _grainFactory.GetGrain<IKeySetGrain>(TransleetConstants.ProjectKeySet).GetAllAsync()).TakeLast(10);
+        var keys = (await _grainFactory.GetKeySet(typeof(IProjectGrain).FullName).GetAllAsync()).TakeLast(10);
         foreach (var key in keys)
         {
             var grain = _grainFactory.GetGrain<IProjectGrain>(key);

@@ -1,4 +1,6 @@
 ﻿using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Orleans;
 using Transleet.Grains;
@@ -7,19 +9,26 @@ namespace Transleet
 {
     public static class GrainFactoryExtensions
     {
-        public static Task RemoveFromLookup(this IGrainFactory factory, Guid lookupName, string value)
+        public static ILookupGrain GetLookup<TGrain>(this IGrainFactory factory, string propertyName)
         {
-            return factory.GetGrain<ILookupGrain>(lookupName).DeleteAsync(value);
+            return factory.GetLookup(typeof(TGrain).FullName, propertyName);
+        }
+        public static ILookupGrain GetLookup(this IGrainFactory factory, string grainType, string propertyName)
+        {
+            return factory.GetGrain<ILookupGrain>(new Guid(MD5.HashData(Encoding.UTF8.GetBytes(grainType + propertyName))));
+        }
+        public static IKeySetGrain GetKeySet<TGrain>(this IGrainFactory factory)
+        {
+            return factory.GetKeySet(typeof(TGrain).FullName);
+        }
+        public static IKeySetGrain GetKeySet(this IGrainFactory factory, string grainType)
+        {
+            return factory.GetGrain<IKeySetGrain>(new Guid(MD5.HashData(Encoding.UTF8.GetBytes(grainType))));
         }
 
-        public static Task SafeRemoveFromLookup(this IGrainFactory factory, Guid lookupName, string value, Guid grainKey)
+        public static async Task<TGrain?> FindAsync<TGrain>(this IGrainFactory factory, string propertyName, string value) where TGrain : IGrain
         {
-            return factory.GetGrain<ILookupGrain>(lookupName).DeleteIfMatchAsync(value, grainKey);
-        }
-
-        public static async Task<TGrain?> Find<TGrain>(this IGrainFactory factory, Guid lookupName, string value) where TGrain : IGrain
-        {
-            var result = await factory.GetGrain<ILookupGrain>(lookupName).FindAsync(value);
+            var result = await factory.GetLookup<TGrain>(propertyName).FindAsync(value);
 
             if (result != null)
             {
@@ -28,6 +37,7 @@ namespace Transleet
 
             return default;
         }
+
 
         internal static IIdentityClaimGrainInternal GetGrain(this IGrainFactory factory, Claim claim)
         {

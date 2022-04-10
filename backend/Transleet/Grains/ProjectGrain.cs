@@ -6,7 +6,7 @@ using Transleet.Models;
 
 namespace Transleet.Grains
 {
-    public interface IProjectGrain : IGrainWithGuidKey,IGrainWithKeySetId,IGrainWithStreamId
+    public interface IProjectGrain : IGrainWithGuidKey
     {
         Task SetAsync(Project item);
 
@@ -19,8 +19,6 @@ namespace Transleet.Grains
     {
         private readonly ILogger<ProjectGrain> _logger;
         private readonly IPersistentState<ProjectGrainState> _state;
-        private static readonly Guid s_keySetId = new(MD5.HashData(Encoding.UTF8.GetBytes(nameof(IProjectGrain))));
-        private static readonly Guid s_streamId = new(MD5.HashData(Encoding.UTF8.GetBytes(nameof(IProjectGrain))));
 
         public ProjectGrain(ILogger<ProjectGrain> logger, [PersistentState(nameof(ProjectGrainState), "Default")] IPersistentState<ProjectGrainState> state)
         {
@@ -28,11 +26,8 @@ namespace Transleet.Grains
             _state = state;
         }
 
-        private static string GrainType => nameof(ProjectGrain);
+        private static string GrainType => typeof(IProjectGrain).FullName;
         private Guid GrainKey => this.GetPrimaryKey();
-        public Task<Guid> GetKeySetId() => Task.FromResult(s_keySetId);
-
-        public Task<Guid> GetStreamId() => Task.FromResult(s_streamId);
 
         public async Task SetAsync(Project item)
         {
@@ -44,10 +39,10 @@ namespace Transleet.Grains
 
             _state.State.Item = item;
             await _state.WriteStateAsync();
-            await GrainFactory.GetGrain<IKeySetGrain>(TransleetConstants.ProjectKeySet).AddAsync(item.Key);
+            await GrainFactory.GetKeySet(GrainType).AddAsync(item.Key);
 
             GetStreamProvider("SMS")
-                .GetStream<ProjectNotification,IProjectGrain>(this)
+                .GetStream<ProjectNotification>(GrainType)
                 .OnNextAsync(new ProjectNotification(item.Key, item))
                 .Ignore();
         }
@@ -59,13 +54,13 @@ namespace Transleet.Grains
 
             // hold on to the keys
             var itemKey = _state.State.Item.Key;
-            await GrainFactory.GetGrain<IKeySetGrain>(TransleetConstants.ProjectKeySet).DeleteAsync(itemKey);
+            await GrainFactory.GetKeySet(GrainType).DeleteAsync(itemKey);
             // clear the state
             await _state.ClearStateAsync();
 
             // notify listeners - best effort only
             GetStreamProvider("SMS")
-                .GetStream<ProjectNotification>(TransleetConstants.ProjectKeySet, nameof(IProjectGrain))
+                .GetStream<ProjectNotification>(GrainType)
                 .OnNextAsync(new ProjectNotification(itemKey, null))
                 .Ignore();
 

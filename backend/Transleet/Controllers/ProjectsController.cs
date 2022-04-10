@@ -27,7 +27,7 @@ public class ProjectsController : ControllerBase
     [HttpGet()]
     public async IAsyncEnumerable<Project?> GetAllAsync()
     {
-        var keys = await _factory.GetGrain<IKeySetGrain>(TransleetConstants.ProjectKeySet).GetAllAsync();
+        var keys = await _factory.GetKeySet<IProjectGrain>().GetAllAsync();
         foreach (var key in keys)
         {
             yield return await _factory.GetGrain<IProjectGrain>(key).GetAsync();

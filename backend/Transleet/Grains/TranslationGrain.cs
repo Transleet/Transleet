@@ -6,7 +6,7 @@ using Transleet.Models;
 
 namespace Transleet.Grains
 {
-    public interface ITranslationGrain : IGrainWithGuidKey,IGrainWithStreamId
+    public interface ITranslationGrain : IGrainWithGuidKey
     {
         Task SetAsync(Translation item);
 
@@ -26,7 +26,7 @@ namespace Transleet.Grains
             _state = state;
         }
 
-        private static string GrainType => nameof(TranslationGrain);
+        private static string GrainType => typeof(ITranslationGrain).FullName;
         private Guid GrainKey => this.GetPrimaryKey();
 
         public Task<Guid> GetStreamId() => Task.FromResult(s_streamId);
@@ -43,7 +43,7 @@ namespace Transleet.Grains
             await _state.WriteStateAsync();
 
             GetStreamProvider("SMS")
-                .GetStream<TranslationNotification,ITranslationGrain>(this)
+                .GetStream<TranslationNotification>(GrainType)
                 .OnNextAsync(new TranslationNotification(item.Key, item))
                 .Ignore();
         }
@@ -61,7 +61,7 @@ namespace Transleet.Grains
 
             // notify listeners - best effort only
             GetStreamProvider("SMS")
-                .GetStream<TranslationNotification,ITranslationGrain>(this)
+                .GetStream<TranslationNotification>(GrainType)
                 .OnNextAsync(new TranslationNotification(itemKey, null))
                 .Ignore();
 

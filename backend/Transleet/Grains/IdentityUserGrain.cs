@@ -1,5 +1,8 @@
 ﻿using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.VisualBasic;
 using Orleans;
 using Orleans.Concurrency;
 using Orleans.Runtime;
@@ -11,47 +14,47 @@ namespace Transleet.Grains
         where TRole : IdentityRole<Guid>
     {
         Task AddClaims(IList<IdentityUserClaim<Guid>> claims);
-        
+
         Task AddLogin(IdentityUserLogin<Guid> login);
-        
+
         Task AddToken(IdentityUserToken<Guid> token);
-        
+
         Task AddToRole(Guid roleId);
-        
+
         [AlwaysInterleave]
         Task<bool> ContainsRole(Guid id);
-        
+
         Task<IdentityResult> Create(TUser user);
-        
+
         Task<IdentityResult> Delete();
-        
+
         [AlwaysInterleave]
         Task<TUser> Get();
-        
+
         Task<IList<IdentityUserClaim<Guid>>> GetClaims();
-        
+
         [AlwaysInterleave]
         Task<IdentityUserLogin<Guid>> GetLogin(string loginProvider, string providerKey);
-        
+
         [AlwaysInterleave]
         Task<IList<IdentityUserLogin<Guid>>> GetLogins();
-        
+
         [AlwaysInterleave]
         Task<IList<string>> GetRoles();
-        
+
         [AlwaysInterleave]
         Task<IdentityUserToken<Guid>> GetToken(string loginProvider, string name);
-        
+
         Task RemoveClaims(IList<Claim> claims);
-        
+
         Task RemoveLogin(string loginProvider, string providerKey);
-        
+
         Task RemoveRole(Guid id, bool updateRoleGrain);
-        
+
         Task RemoveToken(IdentityUserToken<Guid> token);
-        
+
         Task ReplaceClaims(Claim claim, Claim newClaim);
-        
+
         Task<IdentityResult> Update(TUser user);
     }
 
@@ -63,7 +66,6 @@ namespace Transleet.Grains
         private readonly IPersistentState<IdentityUserGrainState<TUser, TRole>> _data;
         private readonly IdentityErrorDescriber _errorDescriber = new IdentityErrorDescriber();
         private readonly ILookupNormalizer _normalizer;
-        private Guid _id;
 
         public IdentityUserGrain(
             ILookupNormalizer normalizer,
@@ -75,6 +77,8 @@ namespace Transleet.Grains
         }
 
         private bool Exists => _data.State?.User != null;
+        private static string GrainType => typeof(IIdentityUserGrain<TUser, TRole>).FullName;
+        private Guid GrainKey => this.GetPrimaryKey();
 
         public Task AddClaims(IList<IdentityUserClaim<Guid>> claims)
         {
@@ -87,7 +91,7 @@ namespace Transleet.Grains
                     if (!_data.State.Claims.Any(x => x.ClaimType == c.ClaimType && x.ClaimValue == c.ClaimValue))
                     {
                         _data.State.Claims.Add(c);
-                        tasks.Add(GrainFactory.GetGrain(c).AddUserId(_id));
+                        tasks.Add(GrainFactory.GetGrain(c).AddUserId(GrainKey));
                     }
                 }
                 tasks.Add(_data.WriteStateAsync());
@@ -102,8 +106,8 @@ namespace Transleet.Grains
             if (Exists && login != null)
             {
                 _data.State.Logins.Add(login);
-                var lookup = GrainFactory.GetGrain<ILookupGrain>(TransleetConstants.LoginLookup);
-                await lookup.AddOrUpdateAsync(login.ProviderKey, _id);
+                var lookup = GrainFactory.GetLookup(GrainType, "Logins");
+                await lookup.AddOrUpdateAsync(login.ProviderKey, GrainKey);
                 await _data.WriteStateAsync();
             }
         }
@@ -124,7 +128,7 @@ namespace Transleet.Grains
             if (Exists && _data.State.Roles.Add(roleId))
             {
                 return Task.WhenAll(
-                    GrainFactory.GetGrain<IIdentityRoleGrain<TUser, TRole>>(roleId).AddUser(_id),
+                    GrainFactory.GetGrain<IIdentityRoleGrain<TUser, TRole>>(roleId).AddUser(GrainKey),
                     _data.WriteStateAsync());
             }
 
@@ -149,16 +153,16 @@ namespace Transleet.Grains
             user.NormalizedEmail = _normalizer.NormalizeEmail(user.Email);
             user.NormalizedUserName = _normalizer.NormalizeName(user.UserName);
 
-            var lookup = GrainFactory.GetGrain<ILookupGrain>(TransleetConstants.EmailLookup);
-            if (!await lookup.AddOrUpdateAsync(user.NormalizedEmail, _id))
+            var lookup = GrainFactory.GetLookup<IIdentityUserGrain<TUser,TRole>>( "Emails");
+            if (!await lookup.AddOrUpdateAsync(user.NormalizedEmail, GrainKey))
             {
                 return IdentityResult.Failed(_errorDescriber.DuplicateEmail(user.Email));
             }
 
-            var lookup1 = GrainFactory.GetGrain<ILookupGrain>(TransleetConstants.UsernameLookup);
-            if (!await lookup1.AddOrUpdateAsync(user.NormalizedUserName, _id))
+            var lookup1 = GrainFactory.GetLookup(GrainType, "Usernames");
+            if (!await lookup1.AddOrUpdateAsync(user.NormalizedUserName, GrainKey))
             {
-                await GrainFactory.SafeRemoveFromLookup(TransleetConstants.EmailLookup, user.NormalizedEmail, _id);
+                await lookup.DeleteIfMatchAsync(user.NormalizedEmail, GrainKey);
                 return IdentityResult.Failed(_errorDescriber.DuplicateUserName(user.UserName));
             }
 
@@ -173,10 +177,11 @@ namespace Transleet.Grains
         {
             if (_data.State.User == null)
                 return IdentityResult.Failed(_errorDescriber.DefaultError());
-
-            await GrainFactory.RemoveFromLookup(TransleetConstants.EmailLookup, _data.State.User.NormalizedEmail);
-            await GrainFactory.RemoveFromLookup(TransleetConstants.UsernameLookup, _data.State.User.NormalizedUserName);
-            await Task.WhenAll(_data.State.Roles.Select(r => GrainFactory.GetGrain<IIdentityRoleGrain<TUser, TRole>>(r).RemoveUser(_id)));
+            var lookup = GrainFactory.GetLookup(GrainType, "Emails");
+            var lookup1 = GrainFactory.GetLookup(GrainType, "Usernames");
+            await lookup.DeleteAsync(_data.State.User.NormalizedEmail);
+            await lookup1.DeleteAsync(_data.State.User.NormalizedUserName);
+            await Task.WhenAll(_data.State.Roles.Select(r => GrainFactory.GetGrain<IIdentityRoleGrain<TUser, TRole>>(r).RemoveUser(GrainKey)));
             await _data.ClearStateAsync();
 
             return IdentityResult.Success;
@@ -240,12 +245,6 @@ namespace Transleet.Grains
             return Task.FromResult<IdentityUserToken<Guid>>(null);
         }
 
-        public override Task OnActivateAsync()
-        {
-            _id = this.GetPrimaryKey();
-            return Task.CompletedTask;
-        }
-
         public Task RemoveClaims(IList<Claim> claims)
         {
             var writeRequired = false;
@@ -256,7 +255,7 @@ namespace Transleet.Grains
                 {
                     writeRequired = true;
                     _data.State.Claims.Remove(m);
-                    tasks.Add(GrainFactory.GetGrain(m).RemoveUserId(_id));
+                    tasks.Add(GrainFactory.GetGrain(m).RemoveUserId(GrainKey));
                 }
             }
 
@@ -274,8 +273,8 @@ namespace Transleet.Grains
                 if (loginToRemove != null)
                 {
                     _data.State.Logins.Remove(loginToRemove);
-
-                    await GrainFactory.RemoveFromLookup(TransleetConstants.LoginLookup, providerKey);
+                    var lookup = GrainFactory.GetLookup(GrainType, "Logins");
+                    await lookup.DeleteAsync(providerKey);
                     await _data.WriteStateAsync();
                 }
             }
@@ -287,7 +286,7 @@ namespace Transleet.Grains
             {
                 if (updateRoleGrain)
                 {
-                    await GrainFactory.GetGrain<IIdentityRoleGrain<TUser, TRole>>(id).RemoveUser(_id);
+                    await GrainFactory.GetGrain<IIdentityRoleGrain<TUser, TRole>>(id).RemoveUser(GrainKey);
                 }
 
                 await _data.WriteStateAsync();
@@ -312,17 +311,17 @@ namespace Transleet.Grains
         public Task ReplaceClaims(Claim claim, Claim newClaim)
         {
             var matchedClaims = _data.State.Claims
-                .Where(uc => uc.UserId.Equals(_id) && uc.ClaimValue == claim.Value && uc.ClaimType == claim.Type);
+                .Where(uc => uc.UserId.Equals(GrainKey) && uc.ClaimValue == claim.Value && uc.ClaimType == claim.Type);
 
             if (matchedClaims.Any())
             {
                 var tasks = new List<Task>();
                 foreach (var c in matchedClaims)
                 {
-                    tasks.Add(GrainFactory.GetGrain(c).RemoveUserId(_id));
+                    tasks.Add(GrainFactory.GetGrain(c).RemoveUserId(GrainKey));
                     c.ClaimValue = newClaim.Value;
                     c.ClaimType = newClaim.Type;
-                    tasks.Add(GrainFactory.GetGrain(c).AddUserId(_id));
+                    tasks.Add(GrainFactory.GetGrain(c).AddUserId(GrainKey));
                 }
 
                 tasks.Add(_data.WriteStateAsync());
@@ -346,19 +345,19 @@ namespace Transleet.Grains
             var newEmail = _normalizer.NormalizeEmail(user.Email);
             var newUsername = _normalizer.NormalizeName(user.UserName);
 
-            var lookup = GrainFactory.GetGrain<ILookupGrain>(TransleetConstants.EmailLookup);
-            if (newEmail != _data.State.User.NormalizedEmail && !await lookup.AddOrUpdateAsync(newEmail, _id))
+            var lookup = GrainFactory.GetLookup(GrainType, "Emails");
+            if (newEmail != _data.State.User.NormalizedEmail && !await lookup.AddOrUpdateAsync(newEmail, GrainKey))
             {
                 return IdentityResult.Failed(_errorDescriber.DuplicateEmail(newEmail));
             }
 
-            var lookup1 = GrainFactory.GetGrain<ILookupGrain>(TransleetConstants.UsernameLookup);
-            if (newUsername != _data.State.User.NormalizedUserName && !await lookup1.AddOrUpdateAsync(newUsername, _id))
+            var lookup1 = GrainFactory.GetLookup(GrainType, "Usernames");
+            if (newUsername != _data.State.User.NormalizedUserName && !await lookup1.AddOrUpdateAsync(newUsername, GrainKey))
             {
                 // if email changed, then undo that change
                 if (newEmail != _data.State.User.NormalizedEmail)
                 {
-                    await GrainFactory.SafeRemoveFromLookup(TransleetConstants.EmailLookup, user.NormalizedEmail, _id);
+                    await lookup.DeleteIfMatchAsync(user.NormalizedEmail, GrainKey);
                 }
 
                 return IdentityResult.Failed(_errorDescriber.DuplicateUserName(user.UserName));
@@ -367,12 +366,12 @@ namespace Transleet.Grains
             // Remove old values
             if (newEmail != _data.State.User.NormalizedEmail)
             {
-                await GrainFactory.RemoveFromLookup(TransleetConstants.EmailLookup, _data.State.User.NormalizedEmail);
+                await lookup.DeleteIfMatchAsync(_data.State.User.NormalizedEmail, GrainKey);
             }
 
             if (newUsername != _data.State.User.NormalizedUserName)
             {
-                await GrainFactory.RemoveFromLookup(TransleetConstants.UsernameLookup, _data.State.User.NormalizedUserName);
+                await lookup1.DeleteIfMatchAsync(_data.State.User.NormalizedUserName, GrainKey);
             }
 
             _data.State.User = user;
@@ -387,10 +386,10 @@ namespace Transleet.Grains
             where TUser : IdentityUser<Guid>, new()
         where TRole : IdentityRole<Guid>, new()
     {
-        public List<IdentityUserClaim<Guid>> Claims { get; set; } = new List<IdentityUserClaim<Guid>>();
-        public List<IdentityUserLogin<Guid>> Logins { get; set; } = new List<IdentityUserLogin<Guid>>();
+        public List<IdentityUserClaim<Guid>> Claims { get; set; } = new();
+        public List<IdentityUserLogin<Guid>> Logins { get; set; } = new();
         public HashSet<Guid> Roles { get; set; } = new HashSet<Guid>();
-        public List<IdentityUserToken<Guid>> Tokens { get; set; } = new List<IdentityUserToken<Guid>>();
+        public List<IdentityUserToken<Guid>> Tokens { get; set; } = new();
         public TUser User { get; set; }
     }
 }

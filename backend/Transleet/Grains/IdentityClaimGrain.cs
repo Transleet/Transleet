@@ -1,4 +1,6 @@
-﻿using Orleans;
+﻿using System.Security.Cryptography;
+using System.Text;
+using Orleans;
 using Orleans.Concurrency;
 using Orleans.Runtime;
 
@@ -20,6 +22,7 @@ namespace Transleet.Grains
     internal class IdentityClaimGrain : Grain, IIdentityClaimGrainInternal
     {
         private readonly IPersistentState<HashSet<Guid>> _data;
+        
 
         public IdentityClaimGrain(
                     [PersistentState("IdentityClaim", "Default")] IPersistentState<HashSet<Guid>> data)

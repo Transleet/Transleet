@@ -5,7 +5,7 @@ using Orleans.Runtime;
 
 namespace Transleet.Grains
 {
-    interface IKeySetGrain : IGrainWithGuidKey
+    public interface IKeySetGrain : IGrainWithGuidKey
     {
         Task<bool> AddAsync(Guid key);
 

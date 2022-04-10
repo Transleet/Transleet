@@ -1,4 +1,6 @@
 ﻿using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Orleans;
 using Orleans.Concurrency;
@@ -11,26 +13,26 @@ namespace Transleet.Grains
         where TRole : IdentityRole<Guid>
     {
         Task AddClaim(IdentityRoleClaim<Guid> claim);
-        
+
         Task AddUser(Guid id);
-        
+
         Task<IdentityResult> Create(TRole role);
-        
+
         Task<IdentityResult> Delete();
-        
+
         [AlwaysInterleave]
         Task<TRole> Get();
-        
+
         [AlwaysInterleave]
         Task<IList<IdentityRoleClaim<Guid>>> GetClaims();
-        
+
         [AlwaysInterleave]
         Task<IList<Guid>> GetUsers();
-        
+
         Task RemoveClaim(Claim claim);
-        
+
         Task RemoveUser(Guid id);
-        
+
         Task<IdentityResult> Update(TRole role);
     }
 
@@ -40,7 +42,6 @@ namespace Transleet.Grains
     {
         private readonly IPersistentState<RoleGrainState<TRole>> _data;
         private readonly ILookupNormalizer _normalizer;
-        private Guid _id;
 
         public IdentityRoleGrain(
             ILookupNormalizer normalizer,
@@ -51,6 +52,18 @@ namespace Transleet.Grains
         }
 
         private bool Exists => _data.State?.Role != null;
+
+        private static string GrainType => typeof(IIdentityRoleGrain<TUser, TRole>).FullName;
+        private Guid GrainKey => this.GetPrimaryKey();
+        public Task<Guid> GetIndexIdForProperty(string propertyName)
+        {
+            return Task.FromResult(propertyName switch
+            {
+                "Roles" => new Guid(
+                    MD5.HashData(Encoding.UTF8.GetBytes(GrainType + "Roles"))),
+                _ => new Guid()
+            });
+        }
 
         public Task AddClaim(IdentityRoleClaim<Guid> claim)
         {
@@ -81,8 +94,8 @@ namespace Transleet.Grains
             // Normalize name
             role.NormalizedName = _normalizer.NormalizeName(role.Name);
 
-            var lookup = GrainFactory.GetGrain<ILookupGrain>(TransleetConstants.RoleLookup);
-            if (!await lookup.AddOrUpdateAsync(role.NormalizedName, _id))
+            var lookup = GrainFactory.GetLookup(GrainType, "Roles");
+            if (!await lookup.AddOrUpdateAsync(role.NormalizedName, GrainKey))
                 return IdentityResult.Failed();
 
             _data.State.Role = role;
@@ -95,9 +108,9 @@ namespace Transleet.Grains
         {
             if (_data.State.Role == null)
                 return IdentityResult.Failed();
-
-            await GrainFactory.RemoveFromLookup(TransleetConstants.RoleLookup, _data.State.Role.NormalizedName);
-            await Task.WhenAll(_data.State.Users.Select(u => GrainFactory.GetGrain<IIdentityUserGrain<TUser, TRole>>(u).RemoveRole(_id, false)));
+            var lookup = GrainFactory.GetLookup(GrainType,"Roles");
+            await lookup.DeleteAsync(_data.State.Role.NormalizedName);
+            await Task.WhenAll(_data.State.Users.Select(u => GrainFactory.GetGrain<IIdentityUserGrain<TUser, TRole>>(u).RemoveRole(GrainKey, false)));
             await _data.ClearStateAsync();
 
             return IdentityResult.Success;
@@ -121,12 +134,6 @@ namespace Transleet.Grains
         public Task<IList<Guid>> GetUsers()
         {
             return Task.FromResult<IList<Guid>>(_data.State.Users.ToList());
-        }
-
-        public override Task OnActivateAsync()
-        {
-            _id = this.GetPrimaryKey();
-            return Task.CompletedTask;
         }
 
         public Task RemoveClaim(Claim claim)
@@ -163,8 +170,8 @@ namespace Transleet.Grains
             // Normalize name
             var newRoleName = _normalizer.NormalizeName(role.Name);
 
-            var lookup = GrainFactory.GetGrain<ILookupGrain>(TransleetConstants.RoleLookup);
-            if (newRoleName != _data.State.Role.NormalizedName && !await lookup.AddOrUpdateAsync(newRoleName, _id))
+            var lookup = GrainFactory.GetLookup<IdentityRoleGrain<TUser,TRole>>("Roles");
+            if (newRoleName != _data.State.Role.NormalizedName && !await lookup.AddOrUpdateAsync(newRoleName, GrainKey))
             {
                 return IdentityResult.Failed();
             }

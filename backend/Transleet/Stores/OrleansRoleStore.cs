@@ -83,7 +83,7 @@ namespace Transleet.Stores
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
 
-            var grain = await _client.Find<IIdentityRoleGrain<TUser, TRole>>(TransleetConstants.RoleLookup, normalizedRoleName);
+            var grain = await _client.FindAsync<IIdentityRoleGrain<TUser, TRole>>("Roles", normalizedRoleName);
 
             if (grain != null)
             {
