@@ -1,9 +1,12 @@
-﻿using Orleans;
+﻿using System.Security.Cryptography;
+using System.Text;
+using Orleans;
+using Orleans.Runtime;
 using Transleet.Models;
 
 namespace Transleet.Grains
 {
-    public interface ITranslationGrain : IGrainWithGuidKey
+    public interface ITranslationGrain : IGrainWithGuidKey,IGrainWithStreamId
     {
         Task SetAsync(Translation item);
 
@@ -13,20 +16,22 @@ namespace Transleet.Grains
     }
     public class TranslationGrain:Grain,ITranslationGrain
     {
-        private readonly ILogger<ProjectGrain> _logger;
-        private readonly IPersistentState<ProjectGrainState> _state;
+        private readonly ILogger<TranslationGrain> _logger;
+        private readonly IPersistentState<TranslationGrainState> _state;
+        private static readonly Guid s_streamId = new(MD5.HashData(Encoding.UTF8.GetBytes(nameof(ITranslationGrain))));
 
-        public ProjectGrain(ILogger<ProjectGrain> logger, [PersistentState(nameof(ProjectGrainState), "Default")] IPersistentState<ProjectGrainState> state)
+        public TranslationGrain(ILogger<TranslationGrain> logger, [PersistentState(nameof(TranslationGrainState), "Default")] IPersistentState<TranslationGrainState> state)
         {
             _logger = logger;
             _state = state;
         }
 
-        private static string GrainType => nameof(ProjectGrain);
+        private static string GrainType => nameof(TranslationGrain);
         private Guid GrainKey => this.GetPrimaryKey();
 
+        public Task<Guid> GetStreamId() => Task.FromResult(s_streamId);
 
-        public async Task SetAsync(Project item)
+        public async Task SetAsync(Translation item)
         {
             // ensure the key is consistent
             if (item.Key != GrainKey)
@@ -36,11 +41,10 @@ namespace Transleet.Grains
 
             _state.State.Item = item;
             await _state.WriteStateAsync();
-            await GrainFactory.GetGrain<IKeySetGrain>(TransleetConstants.ProjectKeySet).AddAsync(item.Key);
 
             GetStreamProvider("SMS")
-                .GetStream<ProjectNotification>(TransleetConstants.ProjectKeySet, nameof(IProjectGrain))
-                .OnNextAsync(new ProjectNotification(item.Key, item))
+                .GetStream<TranslationNotification,ITranslationGrain>(this)
+                .OnNextAsync(new TranslationNotification(item.Key, item))
                 .Ignore();
         }
 
@@ -51,14 +55,14 @@ namespace Transleet.Grains
 
             // hold on to the keys
             var itemKey = _state.State.Item.Key;
-            await GrainFactory.GetGrain<IKeySetGrain>(TransleetConstants.ProjectKeySet).DeleteAsync(itemKey);
+
             // clear the state
             await _state.ClearStateAsync();
 
             // notify listeners - best effort only
             GetStreamProvider("SMS")
-                .GetStream<ProjectNotification>(TransleetConstants.ProjectKeySet, nameof(IProjectGrain))
-                .OnNextAsync(new ProjectNotification(itemKey, null))
+                .GetStream<TranslationNotification,ITranslationGrain>(this)
+                .OnNextAsync(new TranslationNotification(itemKey, null))
                 .Ignore();
 
             // no need to stay alive anymore

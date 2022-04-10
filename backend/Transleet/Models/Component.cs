@@ -5,8 +5,7 @@ namespace Transleet.Models;
 
 public class Component
 {
-    [Key]
-    public string? Id { get; set; }
+    public Guid Key { get; set; }
     public string? Name { get; set; }
     public string Type { get; set; } = null!;
     public string Path { get; set; } = null!;

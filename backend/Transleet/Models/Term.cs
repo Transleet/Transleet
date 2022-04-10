@@ -5,10 +5,9 @@ using Orleans;
 
 namespace Transleet.Models;
 
-public class Term : IGrainWithStringKey
+public class Term
 {
-    [Key]
-    public string? Id { get; set; }
+    public string? Key { get; set; }
 
     public string Type { get; set; } = null!;
     public Entry From { get; set; } = null!;

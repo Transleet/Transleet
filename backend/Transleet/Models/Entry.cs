@@ -7,8 +7,7 @@ namespace Transleet.Models;
 
 public class Entry : IGrainWithStringKey
 {
-    [Key]
-    public string? Id { get; set; }
+    public Guid Key { get; set; }
 
     public string Text { get; set; } = null!;
     public Locale Locale { get; set; } = null!;
