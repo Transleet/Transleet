@@ -10,6 +10,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'register', component: () => import('pages/Register.vue') },
       { path: 'search/:query', component: () => import('pages/Index.vue') },
       { path: 'search', component: () => import('pages/Index.vue') },
+      { path: 'project/:id', component: () => import('pages/Project.vue') },
     ],
     redirect: '/home',
   },

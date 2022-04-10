@@ -4,8 +4,8 @@ export interface Project {
   name?: string;
   avatar?: string;
   description?: string;
-  terms?: null;
-  translationCollections?: null;
+  terms?: string[];
+  translationCollections?: string[];
   status?: number;
   accessLevel?: number;
   hide?: boolean;

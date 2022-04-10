@@ -4,7 +4,9 @@ import {
   LogLevel,
 } from '@microsoft/signalr';
 import { useSettingStore } from '../store/setting';
+import { useCacheStore } from '../store/cache';
 
+const cache = useCacheStore();
 const setting = useSettingStore();
 
 class SignalrHubs {
@@ -18,14 +20,17 @@ class SignalrHubs {
 
   private constructor() {
     this.projectHub = new HubConnectionBuilder()
-      .withUrl('https://localhost:7000/hubs/project', {
+      .withUrl('https://localhost:7000/hubs/projects', {
         accessTokenFactory: () => setting.token,
       })
       .configureLogging(LogLevel.Information)
       .build();
     this.projectHub
       .start()
-      .then(() => (setting.signalr.projectHub = 'connected'))
+      .then(() => {
+        setting.signalr.projectHub = 'connected';
+        cache.$reset();
+      })
       .catch((err) => console.log(err));
     this.projectHub.onclose(
       () => (setting.signalr.projectHub = 'disconnected')

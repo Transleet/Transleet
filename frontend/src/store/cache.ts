@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { defineStore } from 'pinia';
 import { Project } from '../models/Project';
 export const useCacheStore = defineStore('cache', {
@@ -7,4 +11,5 @@ export const useCacheStore = defineStore('cache', {
       show: false,
     },
   }),
+  actions: {},
 });

@@ -20,11 +20,6 @@
         />
         <div
           class="q-ml-xs"
-          @click.prevent="()=>{
-          if(setting.getAllSignalrState() === 'connected'){
-            return;
-           }
-          SignalrHubs.instance.ProjectHub.start().then(() => (setting.signalr.projectHub = 'connected')).catch((err) => console.log(err));}"
         >
           {{ $t('general.signalrState.' + setting.getAllSignalrState()) }}
         </div>

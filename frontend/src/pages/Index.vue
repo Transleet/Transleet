@@ -20,20 +20,9 @@
           </q-card-section>
           <q-card-section>
             <div class="row q-gutter-md">
-              <q-card v-for="p in cache.home.projects" :key="p.key">
-                <q-card-section>
-                  <q-img
-                    width="160px"
-                    :src="p.avatar"
-                    :alt="p.displayName"
-                    ratio="1"
-                  ></q-img>
-                </q-card-section>
-                <q-card-section>
-                  <div class="text-h6">{{ p.displayName }}</div>
-                  <div class="text-subtitle2">{{ p.description }}</div>
-                </q-card-section>
-              </q-card>
+            <template v-for="p in cache.home.projects" :key="p.key">
+              <project-card :project="p"></project-card>
+            </template>
             </div>
           </q-card-section>
         </q-card>
@@ -52,12 +41,13 @@
 
 <script setup lang="ts">
 import { Project } from 'src/models/Project';
-import { onMounted } from 'vue';
+import { onMounted, watch } from 'vue';
 import SignalrHubs from 'src/signalr';
 import NewProject from 'src/components/NewProject.vue';
 import { useCacheStore } from '../store/cache';
 import QGrid from 'src/components/quasar-extend/QGrid.vue';
 import QGridItem from 'src/components/quasar-extend/QGridItem.vue';
+import ProjectCard from '../components/ProjectCard.vue';
 
 const cache = useCacheStore();
 
@@ -67,8 +57,10 @@ onMounted(async () => {
   }
   SignalrHubs.instance.ProjectHub.stream('GetTopTen').subscribe({
     next: (p) => {
-      console.log(p);
-      cache.home.projects.push(<Project>p);
+      if (p !== null) {
+        console.log(p);
+        cache.home.projects.push(<Project>p);
+      }
     },
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     complete: () => {},
@@ -76,10 +68,10 @@ onMounted(async () => {
       console.log(err);
     },
   });
-  SignalrHubs.instance.ProjectHub.on('Create', (p) => {
-    console.log(p);
-    cache.home.projects.push(<Project>p);
-  });
+});
+
+watch(cache.home.projects, () => {
+  console.log(cache.home.projects);
 });
 
 async function remove() {

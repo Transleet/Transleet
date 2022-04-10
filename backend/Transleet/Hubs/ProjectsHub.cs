@@ -35,7 +35,6 @@ public class ProjectsHub : Hub
         }
     }
 
-
     public async IAsyncEnumerable<Project?> GetTopTen()
     {
         var keys = (await _grainFactory.GetGrain<IKeySetGrain>(TransleetConstants.ProjectKeySet).GetAllAsync()).TakeLast(10);
@@ -45,6 +44,7 @@ public class ProjectsHub : Hub
             yield return await grain.GetAsync();
         }
     }
+
     [Authorize]
     public async Task<Project> Create(Project project)
     {
