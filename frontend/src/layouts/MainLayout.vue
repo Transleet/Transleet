@@ -31,6 +31,9 @@
         <q-btn round class="q-ml-md" style="background-color: white">
           <q-avatar>
             <img src="https://cdn.quasar.dev/logo-v2/svg/logo.svg" alt="" />
+            <q-popup-proxy>
+              <avatar-helper></avatar-helper>
+            </q-popup-proxy>
           </q-avatar>
         </q-btn>
       </q-toolbar>
@@ -73,6 +76,7 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useSettingStore } from '../store/setting';
 import SignalrHubs from '../signalr/index';
+import AvatarHelper from '../components/AvatarHelper.vue';
 // eslint-disable-next-line @typescript-eslint/unbound-method
 const { t } = useI18n();
 const setting = useSettingStore();
@@ -98,18 +102,6 @@ const menu: Array<MenuOption> = [
     name: t('general.drawer.home'),
     path: '/home',
     icon: 'home',
-    class: 'item',
-  },
-  {
-    name: 'Login',
-    path: '/login',
-    icon: 'mail',
-    class: 'item',
-  },
-  {
-    name: 'Register',
-    path: '/register',
-    icon: 'mail',
     class: 'item',
   },
 ];

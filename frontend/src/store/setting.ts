@@ -4,6 +4,7 @@ export const useSettingStore = defineStore('setting', {
   state: () => ({
     dark: 'auto' as boolean | 'auto',
     token: '',
+    logined: false,
     signalr: {
       projectHub: 'disconnected' as 'disconnected' | 'connected',
     },
