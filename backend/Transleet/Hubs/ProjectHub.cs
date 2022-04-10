@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+
 using Orleans;
+
 using Transleet.Grains;
 using Transleet.Models;
 
@@ -22,10 +24,20 @@ public class ProjectHub : Hub
         var grain = _grainFactory.GetGrain<IProjectGrain>(key);
         return grain.GetAsync();
     }
-    
+
     public async IAsyncEnumerable<Project?> GetAll()
     {
         var keys = await _grainFactory.GetGrain<IKeySetGrain>(TransleetConstants.ProjectKeySet).GetAllAsync();
+        foreach (var key in keys)
+        {
+            var grain = _grainFactory.GetGrain<IProjectGrain>(key);
+            yield return await grain.GetAsync();
+        }
+    }
+
+    public async IAsyncEnumerable<Project?> GetTopTen()
+    {
+        var keys = (await _grainFactory.GetGrain<IKeySetGrain>(TransleetConstants.ProjectKeySet).GetAllAsync()).TakeLast(10);
         foreach (var key in keys)
         {
             var grain = _grainFactory.GetGrain<IProjectGrain>(key);
