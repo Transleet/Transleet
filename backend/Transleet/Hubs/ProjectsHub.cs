@@ -10,11 +10,11 @@ using Transleet.Models;
 namespace Transleet.Hubs;
 
 [AllowAnonymous]
-public class ProjectHub : Hub
+public class ProjectsHub : Hub
 {
     private readonly IGrainFactory _grainFactory;
 
-    public ProjectHub(IGrainFactory grainFactory)
+    public ProjectsHub(IGrainFactory grainFactory)
     {
         _grainFactory = grainFactory;
     }
@@ -35,6 +35,7 @@ public class ProjectHub : Hub
         }
     }
 
+
     public async IAsyncEnumerable<Project?> GetTopTen()
     {
         var keys = (await _grainFactory.GetGrain<IKeySetGrain>(TransleetConstants.ProjectKeySet).GetAllAsync()).TakeLast(10);
@@ -52,12 +53,14 @@ public class ProjectHub : Hub
         await grain.SetAsync(project);
         return project;
     }
+
     [Authorize]
     public async Task Update(Project project)
     {
         var grain = _grainFactory.GetGrain<IProjectGrain>(project.Key);
         await grain.SetAsync(project);
     }
+
     [Authorize]
     public async Task Delete(Guid key)
     {

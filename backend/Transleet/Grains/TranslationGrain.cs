@@ -1,19 +1,17 @@
 ﻿using Orleans;
-using Orleans.Runtime;
 using Transleet.Models;
 
 namespace Transleet.Grains
 {
-    public interface IProjectGrain : IGrainWithGuidKey
+    public interface ITranslationGrain : IGrainWithGuidKey
     {
-        Task SetAsync(Project item);
+        Task SetAsync(Translation item);
 
         Task ClearAsync();
 
-        Task<Project?> GetAsync();
+        Task<Translation?> GetAsync();
     }
-
-    public class ProjectGrain : Grain, IProjectGrain
+    public class TranslationGrain:Grain,ITranslationGrain
     {
         private readonly ILogger<ProjectGrain> _logger;
         private readonly IPersistentState<ProjectGrainState> _state;
@@ -67,14 +65,14 @@ namespace Transleet.Grains
             DeactivateOnIdle();
         }
 
-        public Task<Project?> GetAsync()
+        public Task<Translation?> GetAsync()
         {
             return Task.FromResult(_state.State.Item);
         }
 
-        public class ProjectGrainState
+        public class TranslationGrainState
         {
-            public Project? Item { get; set; }
+            public Translation? Item { get; set; }
         }
     }
 }

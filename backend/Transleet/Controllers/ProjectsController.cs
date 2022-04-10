@@ -8,11 +8,11 @@ namespace Transleet.Controllers;
 
 [ApiController]
 [Route("projects")]
-public class ProjectController : ControllerBase
+public class ProjectsController : ControllerBase
 {
     private readonly IGrainFactory _factory;
 
-    public ProjectController(IGrainFactory factory)
+    public ProjectsController(IGrainFactory factory)
     {
         _factory = factory;
     }

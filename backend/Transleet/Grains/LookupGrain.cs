@@ -1,6 +1,7 @@
 ﻿using Orleans;
 using Orleans.Concurrency;
 using Orleans.Runtime;
+using Orleans.Transactions;
 
 namespace Transleet.Grains
 {

@@ -1,21 +1,10 @@
 ﻿using Orleans;
 
-using Transleet.Models;
-
-namespace Transleet.Grains;
-
-public interface IComponentGrain : IGrainWithGuidKey
+namespace Transleet.Grains
 {
     Task SetAsync(Component component);
 
-    Task ClearAsync();
-
-    Task<Component?> GetAsync();
-}
-
-public class ComponentGrain : IComponentGrain, IGrain
-{
-    public Task SetAsync(Component component)
+    public interface IComponentGrain : IGrainWithGuidKey
     {
         throw new NotImplementedException();
     }
@@ -24,8 +13,7 @@ public class ComponentGrain : IComponentGrain, IGrain
     {
         throw new NotImplementedException();
     }
-
-    public Task<Component?> GetAsync()
+    public class ComponentGrain : Grain, IComponentGrain
     {
         throw new NotImplementedException();
     }

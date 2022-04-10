@@ -19,7 +19,7 @@ internal static class HostingExtensions
             {
                 options.SuppressAsyncSuffixInActionNames = false;
             })
-            .AddApplicationPart(typeof(ProjectController).Assembly);
+            .AddApplicationPart(typeof(ProjectsController).Assembly);
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.AddDataProtection();
@@ -131,7 +131,7 @@ internal static class HostingExtensions
         }
         app.UseEndpoints(endpoints =>
         {
-            endpoints.MapHub<ProjectHub>("/hubs/project");
+            endpoints.MapHub<ProjectsHub>("/hubs/projects");
             endpoints.MapControllers();
         });
         return app;
