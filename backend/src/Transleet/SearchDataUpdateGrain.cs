@@ -40,7 +40,6 @@ namespace Transleet
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             
-            RequestContext.Set("SearchStream",Guid.NewGuid());
             var grain = _grainFactory.GetGrain<ISearchDataUpdateGrain>(Guid.Empty);
             return grain.ExecuteAsync(stoppingToken);
         }
