@@ -46,7 +46,7 @@ namespace Transleet.Grains
             await _state.WriteStateAsync();
 
             GetStreamProvider("SMS")
-                .GetStream<ComponentNotification>(GrainType)
+                .GetStream<ComponentNotification>()
                 .OnNextAsync(new ComponentNotification(item.Key, item))
                 .Ignore();
         }
@@ -64,7 +64,7 @@ namespace Transleet.Grains
 
             // notify listeners - best effort only
             GetStreamProvider("SMS")
-                .GetStream<ComponentNotification>(GrainType)
+                .GetStream<ComponentNotification>()
                 .OnNextAsync(new ComponentNotification(itemKey, null))
                 .Ignore();
 

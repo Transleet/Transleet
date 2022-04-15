@@ -41,10 +41,10 @@ namespace Transleet.Grains
             await _state.WriteStateAsync();
             await GrainFactory.GetKeySet(GrainType).AddAsync(item.Key);
 
-            GetStreamProvider("SMS")
-                .GetStream<ProjectNotification>(GrainType)
+            GetStreamProvider("SMS").GetStream<ProjectNotification>()
                 .OnNextAsync(new ProjectNotification(item.Key, item))
                 .Ignore();
+
         }
 
         public async Task ClearAsync()
@@ -60,7 +60,7 @@ namespace Transleet.Grains
 
             // notify listeners - best effort only
             GetStreamProvider("SMS")
-                .GetStream<ProjectNotification>(GrainType)
+                .GetStream<ProjectNotification>()
                 .OnNextAsync(new ProjectNotification(itemKey, null))
                 .Ignore();
 

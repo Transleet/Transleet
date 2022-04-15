@@ -108,7 +108,7 @@ internal static class HostingExtensions
                         .AllowCredentials();
                 });
         });
-
+        builder.Services.AddHostedService<SearchDataUpdateService>();
         return builder.Build();
     }
 

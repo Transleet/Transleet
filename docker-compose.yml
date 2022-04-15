@@ -1,13 +1,13 @@
 version: '3.9'
 services:
   backend:
-    tty: true
     build: ./backend
     env_file:
       - ./.env.user
     depends_on:
       db-init:
         condition: service_completed_successfully
+
   frontend:
     build: ./frontend-svelte
     depends_on:
@@ -22,6 +22,8 @@ services:
       - ./.env.user
     environment:
       - ACCEPT_EULA=Y
+    volumes:
+      - app-data:/var/opt/mssql
   envoy:
     image: envoyproxy/envoy-alpine-dev
     ports:
@@ -30,6 +32,16 @@ services:
     depends_on:
       - backend
       - frontend
+      - search
     volumes:
       - ./envoy.yaml:/etc/envoy/envoy.yaml
+  search:
+    image: getmeili/meilisearch:latest
+    volumes:
+      - search-data:/data.ms
+
+volumes:
+  search-data: {}
+  app-data: {}
+    
     

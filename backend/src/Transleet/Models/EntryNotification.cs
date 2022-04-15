@@ -6,5 +6,5 @@ using Orleans.Concurrency;
 namespace Transleet.Models
 {
     [Immutable]
-    public record EntryNotification(Guid Key, Entry? Item);
+    public record EntryNotification(Guid Id, Entry? Item);
 }

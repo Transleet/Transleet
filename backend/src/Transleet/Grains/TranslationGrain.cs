@@ -43,7 +43,7 @@ namespace Transleet.Grains
             await _state.WriteStateAsync();
 
             GetStreamProvider("SMS")
-                .GetStream<TranslationNotification>(GrainType)
+                .GetStream<TranslationNotification>()
                 .OnNextAsync(new TranslationNotification(item.Key, item))
                 .Ignore();
         }
@@ -61,7 +61,7 @@ namespace Transleet.Grains
 
             // notify listeners - best effort only
             GetStreamProvider("SMS")
-                .GetStream<TranslationNotification>(GrainType)
+                .GetStream<TranslationNotification>()
                 .OnNextAsync(new TranslationNotification(itemKey, null))
                 .Ignore();
 
