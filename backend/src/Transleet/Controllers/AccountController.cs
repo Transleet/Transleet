@@ -12,7 +12,7 @@ using Transleet.Models;
 namespace Transleet.Controllers
 {
     [ApiController]
-    [Route("account")]
+    [Route("api/account")]
     public class AccountController : ControllerBase
     {
         

@@ -6,7 +6,7 @@ using Transleet.Models;
 namespace Transleet.Controllers;
 
 [ApiController]
-[Route("components")]
+[Route("api/components")]
 public class ComponentsController : ControllerBase
 {
     private readonly IGrainFactory _factory;

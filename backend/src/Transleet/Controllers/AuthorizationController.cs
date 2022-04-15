@@ -13,7 +13,7 @@ namespace Transleet.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("authorize")]
+    [Route("api/authorize")]
     public class AuthorizationController : ControllerBase
     {
         private readonly IConfiguration _configuration;

@@ -47,6 +47,10 @@ internal static class HostingExtensions
             options.User.RequireUniqueEmail = false;
 
         });
+
+        builder.Services
+            .Configure<GithubOAuthOptions>(builder.Configuration.GetSection("Authentication:GitHub"));
+
         builder.Services
             .AddTransient<IRoleClaimStore<Role>, OrleansRoleStore<User, Role>>()
             .AddSingleton<ILookupNormalizer, UpperInvariantLookupNormalizer>()
@@ -69,7 +73,9 @@ internal static class HostingExtensions
                     ValidateAudience = true,
                     ValidAudience = builder.Configuration["Authentication:JwtBearer:Audience"],
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Authentication:JwtBearer:Key"])),
+                    IssuerSigningKey =
+                        new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(builder.Configuration["Authentication:JwtBearer:Key"])),
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
                 };
@@ -82,31 +88,21 @@ internal static class HostingExtensions
                         // If the request is for our hub...
                         var path = context.HttpContext.Request.Path;
                         if (!string.IsNullOrEmpty(accessToken) &&
-                            (path.StartsWithSegments("/hubs")))
+                            (path.StartsWithSegments("/api/hubs")))
                         {
                             // Read the token out of the query string
                             context.Token = accessToken;
                         }
+
                         return Task.CompletedTask;
                     }
                 };
-            })
-            .AddOAuth("Github", options =>
-            {
-                options.AuthorizationEndpoint = "https://github.com/login/oauth/authorize";
-                options.TokenEndpoint = "https://github.com/login/oauth/access_token";
-                options.CallbackPath = "/oauth/github_callback";
-                options.ClientId = builder.Configuration["Authentication:GitHub:ClientId"]!;
-                options.ClientSecret = builder.Configuration["Authentication:GitHub:ClientSecret"]!;
-                options.SaveTokens = true;
-                options.Scope.Add("user");
             });
         builder.Services.AddCors(options =>
         {
             options.AddPolicy("myCorsPolicy", corsPolicyBuilder =>
                 {
                     corsPolicyBuilder
-                        .WithOrigins("https://github.com", "http://localhost:3000")
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials();
@@ -131,10 +127,10 @@ internal static class HostingExtensions
         }
         app.UseEndpoints(endpoints =>
         {
-            endpoints.MapHub<ProjectsHub>("/hubs/projects");
-            endpoints.MapHub<ComponentsHub>("/hubs/components");
-            endpoints.MapHub<TranslationsHub>("/hubs/translations");
-            endpoints.MapHub<EntriesHub>("/hubs/entries");
+            endpoints.MapHub<ProjectsHub>("/api/hubs/projects");
+            endpoints.MapHub<ComponentsHub>("/api/hubs/components");
+            endpoints.MapHub<TranslationsHub>("/api/hubs/translations");
+            endpoints.MapHub<EntriesHub>("/api/hubs/entries");
             endpoints.MapControllers();
         });
         return app;

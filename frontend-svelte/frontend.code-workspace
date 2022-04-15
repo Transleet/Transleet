@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {},
+	"extensions": {
+		"recommendations": [
+			"esbenp.prettier-vscode",
+			"svelte.svelte-vscode",
+			"voorjaar.windicss-intellisense"
+		]
+	}
+}
