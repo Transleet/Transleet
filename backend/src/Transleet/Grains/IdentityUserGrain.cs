@@ -58,7 +58,7 @@ namespace Transleet.Grains
         Task<IdentityResult> Update(TUser user);
     }
 
-    internal class IdentityUserGrain<TUser, TRole> :
+    public class IdentityUserGrain<TUser, TRole> :
             Grain, IIdentityUserGrain<TUser, TRole>
         where TUser : IdentityUser<Guid>, new()
         where TRole : IdentityRole<Guid>, new()
@@ -382,7 +382,7 @@ namespace Transleet.Grains
         }
     }
 
-    internal class IdentityUserGrainState<TUser, TRole>
+    public class IdentityUserGrainState<TUser, TRole>
             where TUser : IdentityUser<Guid>, new()
         where TRole : IdentityRole<Guid>, new()
     {

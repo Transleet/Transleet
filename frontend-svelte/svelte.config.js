@@ -7,8 +7,8 @@ const config = {
 	preprocess: preprocess(),
 
 	kit: {
-		prerender:{
-			default:true
+		prerender: {
+			default: true
 		},
 		adapter: adapter(),
 		vite: {

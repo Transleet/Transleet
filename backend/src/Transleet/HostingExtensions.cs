@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using Transleet.Controllers;
@@ -51,6 +52,43 @@ internal static class HostingExtensions
         builder.Services
             .Configure<GithubOAuthOptions>(builder.Configuration.GetSection("Authentication:GitHub"));
 
+        builder.Services.Configure<JwtBearerOptions>(options =>
+        {
+            options.RequireHttpsMetadata = false;
+            options.SaveToken = true;
+            options.TokenValidationParameters = new TokenValidationParameters()
+            {
+                ValidateIssuer = true,
+                ValidIssuer = builder.Configuration["Authentication:JwtBearer:Issuer"],
+                ValidateAudience = true,
+                ValidAudience = builder.Configuration["Authentication:JwtBearer:Audience"],
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey =
+                    new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(builder.Configuration["Authentication:JwtBearer:Key"])),
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            };
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    var accessToken = context.Request.Query["access_token"];
+
+                    // If the request is for our hub...
+                    var path = context.HttpContext.Request.Path;
+                    if (!string.IsNullOrEmpty(accessToken) &&
+                        (path.StartsWithSegments("/api/hubs")))
+                    {
+                        // Read the token out of the query string
+                        context.Token = accessToken;
+                    }
+
+                    return Task.CompletedTask;
+                }
+            };
+        });
+
         builder.Services
             .AddTransient<IRoleClaimStore<Role>, OrleansRoleStore<User, Role>>()
             .AddSingleton<ILookupNormalizer, UpperInvariantLookupNormalizer>()
@@ -62,47 +100,14 @@ internal static class HostingExtensions
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-            .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
-            {
-                options.RequireHttpsMetadata = false;
-                options.SaveToken = true;
-                options.TokenValidationParameters = new TokenValidationParameters()
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = builder.Configuration["Authentication:JwtBearer:Issuer"],
-                    ValidateAudience = true,
-                    ValidAudience = builder.Configuration["Authentication:JwtBearer:Audience"],
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey =
-                        new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(builder.Configuration["Authentication:JwtBearer:Key"])),
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero
-                };
-                options.Events = new JwtBearerEvents
-                {
-                    OnMessageReceived = context =>
-                    {
-                        var accessToken = context.Request.Query["access_token"];
+            .AddJwtBearer();
 
-                        // If the request is for our hub...
-                        var path = context.HttpContext.Request.Path;
-                        if (!string.IsNullOrEmpty(accessToken) &&
-                            (path.StartsWithSegments("/api/hubs")))
-                        {
-                            // Read the token out of the query string
-                            context.Token = accessToken;
-                        }
-
-                        return Task.CompletedTask;
-                    }
-                };
-            });
         builder.Services.AddCors(options =>
         {
-            options.AddPolicy("myCorsPolicy", corsPolicyBuilder =>
+            options.AddPolicy("DevelopmentCorsPolicy", corsPolicyBuilder =>
                 {
                     corsPolicyBuilder
+                        .WithOrigins("http://localhost:3000")
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials();
@@ -117,20 +122,25 @@ internal static class HostingExtensions
         app.UseHttpsRedirection();
         app.UseRouting();
         app.UseSerilogRequestLogging();
-        app.UseCors("myCorsPolicy");
-        app.UseAuthentication();
-        app.UseAuthorization();
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
             app.UseSwaggerUI();
+            app.UseCors("DevelopmentCorsPolicy");
         }
+        app.UseForwardedHeaders(new ForwardedHeadersOptions
+        {
+            ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+        });
+        app.UseAuthentication();
+        app.UseAuthorization();
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapHub<ProjectsHub>("/api/hubs/projects");
             endpoints.MapHub<ComponentsHub>("/api/hubs/components");
             endpoints.MapHub<TranslationsHub>("/api/hubs/translations");
             endpoints.MapHub<EntriesHub>("/api/hubs/entries");
+            endpoints.MapHub<UsersHub>("/api/hubs/users");
             endpoints.MapControllers();
         });
         return app;

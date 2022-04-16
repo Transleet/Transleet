@@ -3,8 +3,10 @@
 	import axios from 'axios';
 	let inputText: string;
 	let password: string;
+	let backend_base_url = import.meta.env.VITE_BACKEND_BASE_URL;
+	let frontend_base_url = import.meta.env.VITE_FRONTEND_BASE_URL;
 	async function login() {
-		let loginResponse = await axios.post('/api/authorize/token', {
+		let loginResponse = await axios.post(backend_base_url + '/api/authorize/token', {
 			inputText: inputText,
 			password: password
 		});
@@ -12,7 +14,12 @@
 		localStorage.setItem('token', loginResponse.data.token);
 	}
 	async function githubLogin() {
-		goto('/api/oauth/github_login?returnUrl=/github_login_callback');
+		goto(
+			backend_base_url +
+				'/api/oauth/github_login?returnUrl=' +
+				frontend_base_url +
+				'/github_login_callback'
+		);
 	}
 </script>
 

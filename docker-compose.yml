@@ -8,8 +8,12 @@ services:
       db-init:
         condition: service_completed_successfully
 
-  frontend:
+  frontend-svelte:
     build: ./frontend-svelte
+    depends_on:
+      - backend
+  frontend-vue:
+    build: ./frontend-vue
     depends_on:
       - backend
   db-init:
@@ -28,10 +32,10 @@ services:
     image: envoyproxy/envoy-alpine-dev
     ports:
       - "10000:10000"
-      - "9901:9901"
     depends_on:
       - backend
-      - frontend
+      - frontend-svelte
+      - frontend-vue
       - search
     volumes:
       - ./envoy.yaml:/etc/envoy/envoy.yaml

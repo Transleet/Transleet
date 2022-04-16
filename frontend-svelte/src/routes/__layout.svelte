@@ -5,8 +5,6 @@
 	import { goto } from '$app/navigation';
 	let avatarUrl;
 	let islogin: boolean;
-	
-	
 </script>
 
 <header>
