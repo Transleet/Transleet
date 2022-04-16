@@ -1,5 +1,5 @@
 <template>
-  <div class="row q-gutter-sm">
+  <div class="row q-gutter-sm q-pa-xs">
     <q-btn color="primary" to="/login">Login</q-btn>
     <q-btn color="primary" to="/register">Register</q-btn>
   </div>

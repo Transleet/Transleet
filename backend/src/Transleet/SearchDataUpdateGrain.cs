@@ -1,8 +1,10 @@
 ﻿using Meilisearch;
+
 using Orleans;
 using Orleans.Concurrency;
 using Orleans.Runtime;
 using Orleans.Streams;
+
 using Transleet.Grains;
 using Transleet.Models;
 
@@ -23,7 +25,7 @@ namespace Transleet
             await stream.SubscribeAsync(onNextAsync: async list =>
             {
                 var index = client.Index("projects");
-                await index.AddDocumentsAsync(list.Select(_ => _.Item));
+                await index.AddDocumentsAsync(list.Select(_ => _.Item), cancellationToken: stoppingToken);
             });
         }
     }
@@ -39,8 +41,8 @@ namespace Transleet
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            
-            RequestContext.Set("SearchStream",Guid.NewGuid());
+
+            RequestContext.Set("SearchStream", Guid.NewGuid());
             var grain = _grainFactory.GetGrain<ISearchDataUpdateGrain>(Guid.Empty);
             return grain.ExecuteAsync(stoppingToken);
         }

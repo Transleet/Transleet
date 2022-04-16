@@ -20,7 +20,7 @@ class SignalrHubs {
 
   private constructor() {
     this.projectHub = new HubConnectionBuilder()
-      .withUrl('https://localhost:7000/hubs/projects', {
+      .withUrl('https://localhost:7000/api/hubs/projects', {
         accessTokenFactory: () => setting.token,
       })
       .configureLogging(LogLevel.Information)
