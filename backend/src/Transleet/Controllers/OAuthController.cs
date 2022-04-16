@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -22,6 +23,7 @@ namespace Transleet.Controllers
     public class OAuthController : ControllerBase
     {
         private readonly IConfiguration _configuration;
+        private readonly IOptions<JwtBearerOptions> _jwtBearerOptions;
         private readonly IOptionsMonitor<GithubOAuthOptions> _githubOAuthOptions;
         private readonly ILogger<OAuthController> _logger;
         private readonly UserManager<User> _userManager;
@@ -32,6 +34,7 @@ namespace Transleet.Controllers
         public OAuthController(
             IConfiguration configuration,
             IOptionsMonitor<GithubOAuthOptions> githubOAuthOptions,
+            IOptions<JwtBearerOptions> jwtBearerOptions,
             ILogger<OAuthController> logger,
             UserManager<User> userManager,
             SignInManager<User> signInManager,
@@ -40,6 +43,7 @@ namespace Transleet.Controllers
         {
             _configuration = configuration;
             _githubOAuthOptions = githubOAuthOptions;
+            _jwtBearerOptions = jwtBearerOptions;
             _logger = logger;
             _userManager = userManager;
             _signInManager = signInManager;
@@ -52,7 +56,7 @@ namespace Transleet.Controllers
         {
             var request = HttpContext.Request;
             var url =
-                $"https://github.com/login/oauth/authorize?client_id={_githubOAuthOptions.CurrentValue.ClientId}&redirect_uri={request.Scheme}://{ request.Host}/api/oauth/github_callback&scope=user&state=114514";
+                $"https://github.com/login/oauth/authorize?client_id={_githubOAuthOptions.CurrentValue.ClientId}&redirect_uri={request.Scheme}://{ request.Host}/api/oauth/github_callback&scope=user&state={_dataProtector.Protect(returnUrl)}";
             return Redirect(url);
         }
 
@@ -68,10 +72,10 @@ namespace Transleet.Controllers
             });
             var body = await res.Content.ReadAsStringAsync();
             var accessToken = body.Split('&')[0].Split('=')[1];
-            return Redirect($"/github_login_callback?state={_dataProtector.Protect(accessToken)}");
+            return Redirect(_dataProtector.Unprotect(state)+$"?state={_dataProtector.Protect(accessToken)}");
         }
 
-        [HttpPost("github_callback1")]
+        [HttpGet("github_callback1")]
         public async Task<IActionResult> GithubCallback1([FromQuery]string state)
         {
             var accessToken = _dataProtector.Unprotect(state);
@@ -107,15 +111,14 @@ namespace Transleet.Controllers
             }
             await _signInManager.SignInAsync(user, true);
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_configuration["Authentication:JwtBearer:Key"]);
             var tokenDescriptor = new SecurityTokenDescriptor()
             {
-                Issuer = _configuration["Authentication:JwtBearer:Issuer"],
-                Audience = _configuration["Authentication:JwtBearer:Audience"],
+                Issuer = _jwtBearerOptions.Value.TokenValidationParameters.ValidIssuer,
+                Audience = _jwtBearerOptions.Value.TokenValidationParameters.ValidAudience,
                 Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, user.UserName) }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials =
-                    new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256)
+                    new SigningCredentials(_jwtBearerOptions.Value.TokenValidationParameters.IssuerSigningKey, SecurityAlgorithms.HmacSha256)
             };
             await _signInManager.SignInAsync(user, true);
             var token = tokenHandler.CreateToken(tokenDescriptor);

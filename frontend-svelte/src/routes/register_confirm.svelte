@@ -1,8 +1,12 @@
 <script>
 	import { goto } from '$app/navigation';
 	import axios from 'axios';
+	let backend_base_url = import.meta.env.VITE_BACKEND_BASE_URL;
+	let frontend_base_url = import.meta.env.VITE_FRONTEND_BASE_URL;
 	async function githubLogin() {
-		goto('/api/oauth/github_login?returnUrl=/github_login_callback');
+		goto(
+			backend_base_url + '/api/oauth/github_login?returnUrl=' + frontend_base_url +'/github_login_callback'
+		);
 	}
 </script>
 

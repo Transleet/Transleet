@@ -1,16 +1,14 @@
 <script lang="ts">
 	import * as signalR from '@microsoft/signalr';
-	import { assets } from '$app/paths';
 	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
-
+	let backend_base_url = import.meta.env.VITE_BACKEND_BASE_URL;
+	let frontend_base_url = import.meta.env.VITE_FRONTEND_BASE_URL;
 	let projects: Array<any> = [];
-
 	let connection: signalR.HubConnection;
 
 	onMount(async () => {
 		connection = new signalR.HubConnectionBuilder()
-			.withUrl('/api/hubs/projects', {
+			.withUrl(backend_base_url+'/api/hubs/projects', {
 				accessTokenFactory: () => localStorage.getItem('token')
 			})
 			.configureLogging(signalR.LogLevel.Information)

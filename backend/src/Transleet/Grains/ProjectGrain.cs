@@ -13,17 +13,29 @@ namespace Transleet.Grains
         Task ClearAsync();
 
         Task<Project?> GetAsync();
+
+        Task AddComponentAsync(ComponentGrain component);
+
+        Task<bool> RemoveComponentAsync(ComponentGrain component);
+
+        Task<bool> UpdateComponentAsync(ComponentGrain component);
     }
 
     public class ProjectGrain : Grain, IProjectGrain
     {
         private readonly ILogger<ProjectGrain> _logger;
-        private readonly IPersistentState<ProjectGrainState> _state;
+        private readonly IPersistentState<ProjectGrainState> _itemState;
+        private readonly IPersistentState<ProjectStatisticsState> _statisticsState;
 
-        public ProjectGrain(ILogger<ProjectGrain> logger, [PersistentState(nameof(ProjectGrainState), "Default")] IPersistentState<ProjectGrainState> state)
+        public ProjectGrain(
+            ILogger<ProjectGrain> logger,
+            [PersistentState(nameof(ProjectGrainState), "Default")] IPersistentState<ProjectGrainState> itemState,
+            [PersistentState(nameof(ProjectStatisticsState), "Default")] IPersistentState<ProjectStatisticsState> statisticsState
+            )
         {
             _logger = logger;
-            _state = state;
+            _itemState = itemState;
+            _statisticsState = statisticsState;
         }
 
         private static string GrainType => typeof(IProjectGrain).FullName;
@@ -37,8 +49,8 @@ namespace Transleet.Grains
                 throw new InvalidOperationException();
             }
 
-            _state.State.Item = item;
-            await _state.WriteStateAsync();
+            _itemState.State.Item = item;
+            await _itemState.WriteStateAsync();
             await GrainFactory.GetKeySet(GrainType).AddAsync(item.Key);
 
             GetStreamProvider("SMS").GetStream<ProjectNotification>()
@@ -50,13 +62,13 @@ namespace Transleet.Grains
         public async Task ClearAsync()
         {
             // fast path for already cleared state
-            if (_state.State.Item is null) return;
+            if (_itemState.State.Item is null) return;
 
             // hold on to the keys
-            var itemKey = _state.State.Item.Key;
+            var itemKey = _itemState.State.Item.Key;
             await GrainFactory.GetKeySet(GrainType).DeleteAsync(itemKey);
             // clear the state
-            await _state.ClearStateAsync();
+            await _itemState.ClearStateAsync();
 
             // notify listeners - best effort only
             GetStreamProvider("SMS")
@@ -70,12 +82,49 @@ namespace Transleet.Grains
 
         public Task<Project?> GetAsync()
         {
-            return Task.FromResult(_state.State.Item);
+            return Task.FromResult(_itemState.State.Item);
+        }
+
+        public async Task AddComponentAsync(ComponentGrain component)
+        {
+            _itemState.State.Components.Add(component);
+            _statisticsState.State.ComponentCount++;
+            await _itemState.WriteStateAsync();
+            await _statisticsState.WriteStateAsync();
+        }
+
+        public async Task<bool> RemoveComponentAsync(ComponentGrain component)
+        {
+            bool isSuccessful = _itemState.State.Components.Remove(component);
+            if (isSuccessful)
+            {
+                _statisticsState.State.ComponentCount--;
+                await _itemState.WriteStateAsync();
+                await _statisticsState.WriteStateAsync();
+            }
+            return isSuccessful;
+        }
+
+        public async Task<bool> UpdateComponentAsync(ComponentGrain component)
+        {
+            bool isSuccessful = _itemState.State.Components.Remove(component);
+            if (isSuccessful)
+            {
+                _itemState.State.Components.Add(component);
+                await _itemState.WriteStateAsync();
+            }
+            return isSuccessful;
         }
 
         public class ProjectGrainState
         {
+            public HashSet<ComponentGrain> Components { get; set; } = new();
             public Project? Item { get; set; }
+        }
+
+        public class ProjectStatisticsState
+        {
+            public int ComponentCount { get; set; }
         }
     }
 }

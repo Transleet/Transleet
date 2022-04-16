@@ -4,5 +4,6 @@
 	"trailingComma": "none",
 	"printWidth": 100,
 	"bracketSameLine": true,
-	"svelteBracketNewLine": false
+	"svelteBracketNewLine": false,
+	"svelteIndentScriptAndStyle": true
 }

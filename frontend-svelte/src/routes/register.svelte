@@ -1,23 +1,25 @@
 <script lang="ts">
-import { goto } from '$app/navigation';
+	import { goto } from '$app/navigation';
 
 	import axios from 'axios';
 	let username: string;
 	let email: string;
 	let password: string;
+	let backend_base_url = import.meta.env.VITE_BACKEND_BASE_URL;
+	let frontend_base_url = import.meta.env.VITE_FRONTEND_BASE_URL;
 	async function register() {
-		let registerResponse = await axios.post('/api/account/register', {
+		let registerResponse = await axios.post(backend_base_url + '/api/account/register', {
 			username: username,
 			email: email,
 			password: password
 		});
-		let loginResponse = await axios.post('/api/authorize/token',{
+		let loginResponse = await axios.post(backend_base_url + '/api/authorize/token', {
 			inputText: registerResponse.data.email,
 			password: password
 		});
 		console.log(loginResponse);
-		localStorage.setItem('token',loginResponse.data.token);
-        goto("/api/register_confirm")
+		localStorage.setItem('token', loginResponse.data.token);
+		goto(frontend_base_url+'/register_confirm');
 	}
 </script>
 
