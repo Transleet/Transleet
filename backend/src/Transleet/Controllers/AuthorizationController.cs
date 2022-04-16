@@ -19,7 +19,7 @@ namespace Transleet.Controllers
     public class AuthorizationController : ControllerBase
     {
         private readonly IConfiguration _configuration;
-        private readonly IOptions<JwtBearerOptions> _jwtBearerOptions;
+        private readonly IOptionsMonitor<JwtOptions> _jwtBearerOptions;
         private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
         private readonly ILogger<AuthorizationController> _logger;
@@ -29,7 +29,7 @@ namespace Transleet.Controllers
             UserManager<User> userManager,
             ILogger<AuthorizationController> logger,
             IConfiguration configuration,
-            IOptions<JwtBearerOptions> jwtBearerOptions)
+            IOptionsMonitor<JwtOptions> jwtBearerOptions)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -66,12 +66,12 @@ namespace Transleet.Controllers
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var tokenDescriptor = new SecurityTokenDescriptor()
                 {
-                    Issuer = _jwtBearerOptions.Value.TokenValidationParameters.ValidIssuer,
-                    Audience = _jwtBearerOptions.Value.TokenValidationParameters.ValidAudience,
+                    Issuer = _jwtBearerOptions.CurrentValue.Issuer,
+                    Audience = _jwtBearerOptions.CurrentValue.Audience,
                     Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, user.UserName) }),
                     Expires = DateTime.UtcNow.AddDays(7),
                     SigningCredentials =
-                        new SigningCredentials(_jwtBearerOptions.Value.TokenValidationParameters.IssuerSigningKey, SecurityAlgorithms.HmacSha256)
+                        new SigningCredentials(_jwtBearerOptions.CurrentValue.Key, SecurityAlgorithms.HmacSha256)
                 };
                 await _signInManager.SignInAsync(user,true);
                 var token = tokenHandler.CreateToken(tokenDescriptor);

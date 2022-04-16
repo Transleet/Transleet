@@ -3,8 +3,13 @@
 	import { page } from '$app/stores';
 	import { base, assets } from '$app/paths';
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 	let avatarUrl;
 	let islogin: boolean;
+	let backend_base_url = import.meta.env.VITE_BACKEND_BASE_URL;
+	let frontend_base_url = import.meta.env.VITE_FRONTEND_BASE_URL;
+	
+		
 </script>
 
 <header>

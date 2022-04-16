@@ -23,7 +23,7 @@ namespace Transleet.Controllers
     public class OAuthController : ControllerBase
     {
         private readonly IConfiguration _configuration;
-        private readonly IOptions<JwtBearerOptions> _jwtBearerOptions;
+        private readonly IOptionsMonitor<JwtOptions> _jwtBearerOptions;
         private readonly IOptionsMonitor<GithubOAuthOptions> _githubOAuthOptions;
         private readonly ILogger<OAuthController> _logger;
         private readonly UserManager<User> _userManager;
@@ -34,7 +34,7 @@ namespace Transleet.Controllers
         public OAuthController(
             IConfiguration configuration,
             IOptionsMonitor<GithubOAuthOptions> githubOAuthOptions,
-            IOptions<JwtBearerOptions> jwtBearerOptions,
+            IOptionsMonitor<JwtOptions> jwtBearerOptions,
             ILogger<OAuthController> logger,
             UserManager<User> userManager,
             SignInManager<User> signInManager,
@@ -113,12 +113,12 @@ namespace Transleet.Controllers
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor()
             {
-                Issuer = _jwtBearerOptions.Value.TokenValidationParameters.ValidIssuer,
-                Audience = _jwtBearerOptions.Value.TokenValidationParameters.ValidAudience,
+                Issuer = _jwtBearerOptions.CurrentValue.Issuer,
+                Audience = _jwtBearerOptions.CurrentValue.Audience,
                 Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, user.UserName) }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials =
-                    new SigningCredentials(_jwtBearerOptions.Value.TokenValidationParameters.IssuerSigningKey, SecurityAlgorithms.HmacSha256)
+                    new SigningCredentials(_jwtBearerOptions.CurrentValue.Key, SecurityAlgorithms.HmacSha256)
             };
             await _signInManager.SignInAsync(user, true);
             var token = tokenHandler.CreateToken(tokenDescriptor);
