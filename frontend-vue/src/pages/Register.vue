@@ -79,7 +79,8 @@ async function submit() {
   }
   await axios
     .post(
-      'https://localhost:7000/account/register',
+      // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+      'https://localhost:7000/api' + '/account/register',
       {
         username: username.value,
         email: email.value,
@@ -94,7 +95,7 @@ async function submit() {
     .then((res) => {
       axios
         .post(
-          'https://localhost:7000/authorize/token',
+          'https://localhost:7000/api/authorize/token',
           {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             inputText: res.data.email,

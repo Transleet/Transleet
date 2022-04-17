@@ -20,7 +20,8 @@ class SignalrHubs {
 
   private constructor() {
     this.projectHub = new HubConnectionBuilder()
-      .withUrl('https://localhost:7000/api/hubs/projects', {
+      // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+      .withUrl('https://localhost:7000/api' + '/hubs/projects', {
         accessTokenFactory: () => setting.token,
       })
       .configureLogging(LogLevel.Information)

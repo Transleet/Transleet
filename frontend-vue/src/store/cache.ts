@@ -10,6 +10,10 @@ export const useCacheStore = defineStore('cache', {
       projects: [] as Project[],
       show: false,
     },
+    project: {
+      main: null as Project | null,
+      edit: false,
+    },
   }),
   actions: {},
 });

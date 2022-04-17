@@ -8,8 +8,7 @@ import { Project } from '../models/Project';
         :alt="props.project.displayName"
         ratio="1"
       ></q-img>
-      <div style="font-size: 14px; font-weight: bold;overflow: hidden;">{{ props.project.displayName }}</div>
-      <div style="font-size: 13px; overflow: hidden;">{{ props.project.description }}</div>
+      <div style="font-size: 16px; overflow: hidden;" class="q-mt-xs">{{ props.project.displayName }}</div>
     </q-card-section>
   </q-card>
 </template>

@@ -74,7 +74,8 @@ function submit() {
   }
   axios
     .post(
-      'https://localhost:7000/authorize/token',
+      // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+      'https://localhost:7000/api' + '/authorize/token',
       {
         inputText: email.value,
         password: password.value,
