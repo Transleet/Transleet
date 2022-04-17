@@ -94,7 +94,7 @@ namespace Transleet.Grains
             // Normalize name
             role.NormalizedName = _normalizer.NormalizeName(role.Name);
 
-            var lookup = GrainFactory.GetLookup(GrainType, "Roles");
+            var lookup = GrainFactory.GetLookup<string>(GrainType, "Roles");
             if (!await lookup.AddOrUpdateAsync(role.NormalizedName, GrainKey))
                 return IdentityResult.Failed();
 
@@ -108,7 +108,7 @@ namespace Transleet.Grains
         {
             if (_data.State.Role == null)
                 return IdentityResult.Failed();
-            var lookup = GrainFactory.GetLookup(GrainType,"Roles");
+            var lookup = GrainFactory.GetLookup<string>(GrainType,"Roles");
             await lookup.DeleteAsync(_data.State.Role.NormalizedName);
             await Task.WhenAll(_data.State.Users.Select(u => GrainFactory.GetGrain<IIdentityUserGrain<TUser, TRole>>(u).RemoveRole(GrainKey, false)));
             await _data.ClearStateAsync();
@@ -170,7 +170,7 @@ namespace Transleet.Grains
             // Normalize name
             var newRoleName = _normalizer.NormalizeName(role.Name);
 
-            var lookup = GrainFactory.GetLookup<IdentityRoleGrain<TUser,TRole>>("Roles");
+            var lookup = GrainFactory.GetLookup<string>(GrainType,"Roles");
             if (newRoleName != _data.State.Role.NormalizedName && !await lookup.AddOrUpdateAsync(newRoleName, GrainKey))
             {
                 return IdentityResult.Failed();

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
 using Orleans;
 using Orleans.Configuration;
@@ -20,7 +21,8 @@ builder.Host
         });
         siloBuilder.ConfigureApplicationParts(parts =>
         {
-            parts.AddApplicationPart(typeof(LookupGrain).Assembly).WithReferences();
+            parts.AddApplicationPart(typeof(LookupGrain<>).Assembly).WithReferences();
+            parts.AddApplicationPart(typeof(IdentityUser<>).Assembly).WithReferences();
         });
 
         var invariant = "System.Data.SqlClient";
@@ -31,11 +33,6 @@ builder.Host
             options.ConnectionString = connectionString;
         });
         siloBuilder.UseAdoNetReminderService(options =>
-        {
-            options.Invariant = invariant;
-            options.ConnectionString = connectionString;
-        });
-        siloBuilder.AddAdoNetGrainStorageAsDefault(options =>
         {
             options.Invariant = invariant;
             options.ConnectionString = connectionString;

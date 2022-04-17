@@ -106,7 +106,7 @@ namespace Transleet.Grains
             if (Exists && login != null)
             {
                 _data.State.Logins.Add(login);
-                var lookup = GrainFactory.GetLookup(GrainType, "Logins");
+                var lookup = GrainFactory.GetLookup<string>(GrainType, "Logins");
                 await lookup.AddOrUpdateAsync(login.ProviderKey, GrainKey);
                 await _data.WriteStateAsync();
             }
@@ -153,13 +153,13 @@ namespace Transleet.Grains
             user.NormalizedEmail = _normalizer.NormalizeEmail(user.Email);
             user.NormalizedUserName = _normalizer.NormalizeName(user.UserName);
 
-            var lookup = GrainFactory.GetLookup<IIdentityUserGrain<TUser,TRole>>( "Emails");
+            var lookup = GrainFactory.GetLookup<string>( GrainType,"Emails");
             if (!await lookup.AddOrUpdateAsync(user.NormalizedEmail, GrainKey))
             {
                 return IdentityResult.Failed(_errorDescriber.DuplicateEmail(user.Email));
             }
 
-            var lookup1 = GrainFactory.GetLookup(GrainType, "Usernames");
+            var lookup1 = GrainFactory.GetLookup<string>(GrainType, "Usernames");
             if (!await lookup1.AddOrUpdateAsync(user.NormalizedUserName, GrainKey))
             {
                 await lookup.DeleteIfMatchAsync(user.NormalizedEmail, GrainKey);
@@ -177,8 +177,8 @@ namespace Transleet.Grains
         {
             if (_data.State.User == null)
                 return IdentityResult.Failed(_errorDescriber.DefaultError());
-            var lookup = GrainFactory.GetLookup(GrainType, "Emails");
-            var lookup1 = GrainFactory.GetLookup(GrainType, "Usernames");
+            var lookup = GrainFactory.GetLookup<string>(GrainType, "Emails");
+            var lookup1 = GrainFactory.GetLookup<string>(GrainType, "Usernames");
             await lookup.DeleteAsync(_data.State.User.NormalizedEmail);
             await lookup1.DeleteAsync(_data.State.User.NormalizedUserName);
             await Task.WhenAll(_data.State.Roles.Select(r => GrainFactory.GetGrain<IIdentityRoleGrain<TUser, TRole>>(r).RemoveUser(GrainKey)));
@@ -273,7 +273,7 @@ namespace Transleet.Grains
                 if (loginToRemove != null)
                 {
                     _data.State.Logins.Remove(loginToRemove);
-                    var lookup = GrainFactory.GetLookup(GrainType, "Logins");
+                    var lookup = GrainFactory.GetLookup<string>(GrainType, "Logins");
                     await lookup.DeleteAsync(providerKey);
                     await _data.WriteStateAsync();
                 }
@@ -345,13 +345,13 @@ namespace Transleet.Grains
             var newEmail = _normalizer.NormalizeEmail(user.Email);
             var newUsername = _normalizer.NormalizeName(user.UserName);
 
-            var lookup = GrainFactory.GetLookup(GrainType, "Emails");
+            var lookup = GrainFactory.GetLookup<string>(GrainType, "Emails");
             if (newEmail != _data.State.User.NormalizedEmail && !await lookup.AddOrUpdateAsync(newEmail, GrainKey))
             {
                 return IdentityResult.Failed(_errorDescriber.DuplicateEmail(newEmail));
             }
 
-            var lookup1 = GrainFactory.GetLookup(GrainType, "Usernames");
+            var lookup1 = GrainFactory.GetLookup<string>(GrainType, "Usernames");
             if (newUsername != _data.State.User.NormalizedUserName && !await lookup1.AddOrUpdateAsync(newUsername, GrainKey))
             {
                 // if email changed, then undo that change

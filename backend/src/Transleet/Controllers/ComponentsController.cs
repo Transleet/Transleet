@@ -29,7 +29,6 @@ public class ComponentsController : ControllerBase
     {
         item.Key = Guid.NewGuid();
         await _factory.GetGrain<IComponentGrain>(item.Key).SetAsync(item);
-        // ReSharper disable once Mvc.ActionNotResolved
         return CreatedAtAction(nameof(GetAsync), new { id = item.Key }, item);
     }
 

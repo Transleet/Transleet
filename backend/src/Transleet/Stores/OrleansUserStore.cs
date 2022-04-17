@@ -114,7 +114,7 @@ namespace Transleet.Stores
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
 
-            var grain = await _client.FindAsync<IIdentityUserGrain<TUser, TRole>>("Emails", normalizedEmail);
+            var grain = await _client.FindAsync<string,IIdentityUserGrain<TUser, TRole>>("Emails", normalizedEmail);
             if (grain != null)
             {
                 return await grain.Get();
@@ -135,7 +135,7 @@ namespace Transleet.Stores
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
 
-            var grain = await _client.FindAsync<IIdentityUserGrain<TUser, TRole>>("Usernames", normalizedUserName);
+            var grain = await _client.FindAsync<string,IIdentityUserGrain<TUser, TRole>>("Usernames", normalizedUserName);
             if (grain != null)
             {
                 return await grain.Get();
@@ -355,7 +355,7 @@ namespace Transleet.Stores
 
         protected override async Task<IdentityUserLogin<Guid>> FindUserLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
-            var grain = await _client.FindAsync<IIdentityUserGrain<TUser, TRole>>("Logins", providerKey);
+            var grain = await _client.FindAsync<string,IIdentityUserGrain<TUser, TRole>>("Logins", providerKey);
             if (grain != null)
             {
                 return await grain.GetLogin(loginProvider, providerKey);

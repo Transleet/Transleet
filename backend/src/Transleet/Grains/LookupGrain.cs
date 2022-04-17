@@ -5,22 +5,22 @@ using Orleans.Transactions;
 
 namespace Transleet.Grains
 {
-    public interface ILookupGrain : IGrainWithGuidKey
+    public interface ILookupGrain<TKey> : IGrainWithGuidKey where TKey : notnull
     {
-        Task<bool> AddOrUpdateAsync(string value, Guid grainKey);
+        Task<bool> AddOrUpdateAsync(TKey value, Guid grainKey);
 
-        Task DeleteAsync(string value);
+        Task DeleteAsync(TKey value);
 
-        Task DeleteIfMatchAsync(string value, Guid grainKey);
-
-        [AlwaysInterleave]
-        Task<Guid?> FindAsync(string value);
+        Task DeleteIfMatchAsync(TKey value, Guid grainKey);
 
         [AlwaysInterleave]
-        Task<IReadOnlyDictionary<string, Guid>> GetAllAsync();
+        Task<Guid?> FindAsync(TKey value);
+
+        [AlwaysInterleave]
+        Task<IReadOnlyDictionary<TKey, Guid>> GetAllAsync();
     }
 
-    public class LookupGrain : Grain, ILookupGrain
+    public class LookupGrain<TKey> : Grain, ILookupGrain<TKey> where TKey : notnull
     {
         private readonly IPersistentState<LookupGrainState> _state;
 
@@ -30,7 +30,7 @@ namespace Transleet.Grains
             _state = state;
         }
 
-        public async Task<bool> AddOrUpdateAsync(string value, Guid grainKey)
+        public async Task<bool> AddOrUpdateAsync(TKey value, Guid grainKey)
         {
             if (_state.State.Index.ContainsKey(value))
                 return false;
@@ -40,7 +40,7 @@ namespace Transleet.Grains
             return true;
         }
 
-        public Task DeleteAsync(string value)
+        public Task DeleteAsync(TKey value)
         {
             if (_state.State.Index.Remove(value))
                 return _state.WriteStateAsync();
@@ -48,7 +48,7 @@ namespace Transleet.Grains
             return Task.CompletedTask;
         }
 
-        public Task DeleteIfMatchAsync(string value, Guid grainKey)
+        public Task DeleteIfMatchAsync(TKey value, Guid grainKey)
         {
             if (_state.State.Index.ContainsKey(value) && _state.State.Index[value] == grainKey)
             {
@@ -58,7 +58,7 @@ namespace Transleet.Grains
             return Task.CompletedTask;
         }
 
-        public Task<Guid?> FindAsync(string value)
+        public Task<Guid?> FindAsync(TKey value)
         {
             if (_state.State.Index.ContainsKey(value))
                 return Task.FromResult<Guid?>(_state.State.Index[value]);
@@ -66,14 +66,16 @@ namespace Transleet.Grains
             return Task.FromResult<Guid?>(default);
         }
 
-        public Task<IReadOnlyDictionary<string, Guid>> GetAllAsync()
+        public Task<IReadOnlyDictionary<TKey, Guid>> GetAllAsync()
         {
-            return Task.FromResult<IReadOnlyDictionary<string, Guid>>(_state.State.Index);
+            return Task.FromResult<IReadOnlyDictionary<TKey, Guid>>(_state.State.Index);
+        }
+
+        public class LookupGrainState
+        {
+            public Dictionary<TKey, Guid> Index { get; set; } = new();
         }
     }
 
-    public class LookupGrainState
-    {
-        public Dictionary<string, Guid> Index { get; set; } = new();
-    }
+    
 }
