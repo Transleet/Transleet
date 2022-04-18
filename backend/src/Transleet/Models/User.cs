@@ -1,12 +1,17 @@
 ﻿#nullable enable
+using System.Security.Claims;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Identity;
+using Orleans.CodeGeneration;
+using Orleans.Serialization;
 
 namespace Transleet.Models
 {
-    public class User:IdentityUser<Guid>
+
+    public class User : IdentityUser<Guid>
     {
         public GithubUserInfo? GithubUserInfo { get; set; }
+
     }
     public class GithubUserInfo
     {
@@ -128,5 +133,89 @@ namespace Transleet.Models
         [JsonPropertyName("verified")] public bool Verified { get; set; }
 
         [JsonPropertyName("visibility")] public string? Visibility { get; set; }
+    }
+
+    [Serializer(typeof(User))]
+    internal class UserSerializer
+    {
+        [CopierMethod]
+        public static object DeepCopier(object original, ICopyContext context)
+        {
+            var input = (User)original;
+            var result = new User();
+            context.RecordCopy(original, result);
+            result.Id = input.Id;
+            result.UserName = input.UserName;
+            result.Email = input.Email;
+            result.EmailConfirmed = input.EmailConfirmed;
+            result.NormalizedEmail = input.NormalizedEmail;
+            result.NormalizedUserName = input.NormalizedUserName;
+            result.ConcurrencyStamp = input.ConcurrencyStamp;
+            result.PhoneNumber = input.PhoneNumber;
+            result.PhoneNumberConfirmed = input.PhoneNumberConfirmed;
+            result.TwoFactorEnabled = input.TwoFactorEnabled;
+            result.LockoutEnd = input.LockoutEnd;
+            result.LockoutEnabled = input.LockoutEnabled;
+            result.PasswordHash = input.PasswordHash;
+            result.SecurityStamp = input.SecurityStamp;
+            result.AccessFailedCount = input.AccessFailedCount;
+            result.GithubUserInfo = (GithubUserInfo)context.DeepCopyInner(input.GithubUserInfo);
+            return result;
+        }
+
+
+        [SerializerMethod]
+        public static void Serializer(
+            object untypedInput, ISerializationContext context, Type expected)
+        {
+            var input = (User)untypedInput;
+
+            // Serialize each field.
+            SerializationManager.SerializeInner(input.UserName, context);
+            SerializationManager.SerializeInner(input.Email, context);
+            SerializationManager.SerializeInner(input.EmailConfirmed, context);
+            SerializationManager.SerializeInner(input.NormalizedEmail, context);
+            SerializationManager.SerializeInner(input.NormalizedUserName, context);
+            SerializationManager.SerializeInner(input.ConcurrencyStamp, context);
+            SerializationManager.SerializeInner(input.PhoneNumber, context);
+            SerializationManager.SerializeInner(input.PhoneNumberConfirmed, context);
+            SerializationManager.SerializeInner(input.TwoFactorEnabled, context);
+            SerializationManager.SerializeInner(input.LockoutEnd, context);
+            SerializationManager.SerializeInner(input.LockoutEnabled, context);
+            SerializationManager.SerializeInner(input.PasswordHash, context);
+            SerializationManager.SerializeInner(input.SecurityStamp, context);
+            SerializationManager.SerializeInner(input.AccessFailedCount, context);
+            SerializationManager.SerializeInner(input.GithubUserInfo, context);
+        }
+
+        [DeserializerMethod]
+        public static object Deserializer(
+            Type expected, IDeserializationContext context)
+        {
+            var result = new User();
+
+            // Record 'result' immediately after constructing it.
+            // As with the deep copier, this
+            // allows for cyclic references and de-duplication.
+            context.RecordObject(result);
+
+            // Deserialize each field in the order that they were serialized.
+            result.UserName = SerializationManager.DeserializeInner<string>(context);
+            result.Email = SerializationManager.DeserializeInner<string>(context);
+            result.EmailConfirmed = SerializationManager.DeserializeInner<bool>(context);
+            result.NormalizedEmail = SerializationManager.DeserializeInner<string>(context);
+            result.NormalizedUserName = SerializationManager.DeserializeInner<string>(context);
+            result.ConcurrencyStamp = SerializationManager.DeserializeInner<string>(context);
+            result.PhoneNumber = SerializationManager.DeserializeInner<string>(context);
+            result.PhoneNumberConfirmed = SerializationManager.DeserializeInner<bool>(context);
+            result.TwoFactorEnabled = SerializationManager.DeserializeInner<bool>(context);
+            result.LockoutEnd = SerializationManager.DeserializeInner<DateTimeOffset>(context);
+            result.LockoutEnabled = SerializationManager.DeserializeInner<bool>(context);
+            result.PasswordHash = SerializationManager.DeserializeInner<string>(context);
+            result.SecurityStamp = SerializationManager.DeserializeInner<string>(context);
+            result.AccessFailedCount = SerializationManager.DeserializeInner<int>(context);
+            result.GithubUserInfo = SerializationManager.DeserializeInner<GithubUserInfo>(context);
+            return result;
+        }
     }
 }

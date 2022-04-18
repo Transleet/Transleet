@@ -37,14 +37,14 @@ namespace Transleet
 
             return default;
         }
-        internal static IIdentityClaimGrainInternal GetGrain(this IGrainFactory factory, Claim claim)
+        internal static IClaimGrainInternal GetGrain(this IGrainFactory factory, Claim claim)
         {
-            return factory.GetGrain<IIdentityClaimGrainInternal>($"{claim.Type}-{claim.Value}");
+            return factory.GetGrain<IClaimGrainInternal>($"{claim.Type}-{claim.Value}");
         }
 
-        internal static IIdentityClaimGrainInternal GetGrain(this IGrainFactory factory, IdentityUserClaim<Guid> claim)
+        internal static IClaimGrainInternal GetGrain(this IGrainFactory factory, IdentityUserClaim<Guid> claim)
         {
-            return factory.GetGrain<IIdentityClaimGrainInternal>($"{claim.ClaimType}-{claim.ClaimValue}");
+            return factory.GetGrain<IClaimGrainInternal>($"{claim.ClaimType}-{claim.ClaimValue}");
         }
     }
 }

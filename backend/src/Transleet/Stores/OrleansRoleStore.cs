@@ -2,12 +2,11 @@
 using Microsoft.AspNetCore.Identity;
 using Orleans;
 using Transleet.Grains;
+using Transleet.Models;
 
 namespace Transleet.Stores
 {
-    public class OrleansRoleStore<TUser, TRole> : IRoleClaimStore<TRole>
-        where TUser : IdentityUser<Guid>
-        where TRole : IdentityRole<Guid>
+    public class OrleansRoleStore : IRoleClaimStore<Role>
     {
         private readonly IClusterClient _client;
         private bool _disposed;
@@ -17,7 +16,7 @@ namespace Transleet.Stores
             _client = client;
         }
 
-        public Task AddClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default)
+        public Task AddClaimAsync(Role role, Claim claim, CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             if (role == null)
@@ -29,7 +28,7 @@ namespace Transleet.Stores
                 throw new ArgumentNullException(nameof(claim));
             }
 
-            return _client.GetGrain<IIdentityRoleGrain<TUser, TRole>>(role.Id).AddClaim(new IdentityRoleClaim<Guid>
+            return _client.GetGrain<IRoleGrain<User, Role>>(role.Id).AddClaim(new IdentityRoleClaim<Guid>
             {
                 RoleId = role.Id,
                 ClaimType = claim.Type,
@@ -37,7 +36,7 @@ namespace Transleet.Stores
             });
         }
 
-        public Task<IdentityResult> CreateAsync(TRole role, CancellationToken cancellationToken)
+        public Task<IdentityResult> CreateAsync(Role role, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -51,10 +50,10 @@ namespace Transleet.Stores
                 role.Id = Guid.NewGuid();
             }
 
-            return _client.GetGrain<IIdentityRoleGrain<TUser, TRole>>(role.Id).Create(role);
+            return _client.GetGrain<IRoleGrain<User, Role>>(role.Id).Create(role);
         }
 
-        public Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken)
+        public Task<IdentityResult> DeleteAsync(Role role, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -63,27 +62,27 @@ namespace Transleet.Stores
                 throw new ArgumentNullException(nameof(role));
             }
 
-            return _client.GetGrain<IIdentityRoleGrain<TUser, TRole>>(role.Id).Delete();
+            return _client.GetGrain<IRoleGrain<User, Role>>(role.Id).Delete();
         }
         public void Dispose()
         {
             _disposed = true;
         }
 
-        public Task<TRole> FindByIdAsync(string roleId, CancellationToken cancellationToken)
+        public Task<Role> FindByIdAsync(string roleId, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
 
-            return _client.GetGrain<IIdentityRoleGrain<TUser, TRole>>(Guid.Parse(roleId)).Get();
+            return _client.GetGrain<IRoleGrain<User, Role>>(Guid.Parse(roleId)).Get();
         }
 
-        public async Task<TRole> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
+        public async Task<Role> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
 
-            var grain = await _client.FindAsync<string,IIdentityRoleGrain<TUser, TRole>>("Roles", normalizedRoleName);
+            var grain = await _client.FindAsync<string,IRoleGrain<User, Role>>("Roles", normalizedRoleName);
 
             if (grain != null)
             {
@@ -92,16 +91,16 @@ namespace Transleet.Stores
 
             return null;
         }
-        public async Task<IList<Claim>> GetClaimsAsync(TRole role, CancellationToken cancellationToken = default)
+        public async Task<IList<Claim>> GetClaimsAsync(Role role, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            return (await _client.GetGrain<IIdentityRoleGrain<TUser, TRole>>(role.Id).GetClaims())
+            return (await _client.GetGrain<IRoleGrain<User, Role>>(role.Id).GetClaims())
                 .Select(c => new Claim(c.ClaimType, c.ClaimValue))
                 .ToList();
         }
 
-        public Task<string?> GetNormalizedRoleNameAsync(TRole role, CancellationToken cancellationToken)
+        public Task<string?> GetNormalizedRoleNameAsync(Role role, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -112,7 +111,7 @@ namespace Transleet.Stores
             return Task.FromResult(role.NormalizedName);
         }
 
-        public Task<string> GetRoleIdAsync(TRole role, CancellationToken cancellationToken)
+        public Task<string> GetRoleIdAsync(Role role, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -123,7 +122,7 @@ namespace Transleet.Stores
             return Task.FromResult(role.Id.ToString());
         }
         
-        public Task<string> GetRoleNameAsync(TRole role, CancellationToken cancellationToken)
+        public Task<string> GetRoleNameAsync(Role role, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -134,7 +133,7 @@ namespace Transleet.Stores
             return Task.FromResult(role.Name);
         }
         
-        public Task RemoveClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default)
+        public Task RemoveClaimAsync(Role role, Claim claim, CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             if (role == null)
@@ -146,10 +145,10 @@ namespace Transleet.Stores
                 throw new ArgumentNullException(nameof(claim));
             }
 
-            return _client.GetGrain<IIdentityRoleGrain<TUser, TRole>>(role.Id).RemoveClaim(claim);
+            return _client.GetGrain<IRoleGrain<User, Role>>(role.Id).RemoveClaim(claim);
         }
         
-        public Task SetNormalizedRoleNameAsync(TRole role, string normalizedName, CancellationToken cancellationToken)
+        public Task SetNormalizedRoleNameAsync(Role role, string normalizedName, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -161,7 +160,7 @@ namespace Transleet.Stores
             return Task.CompletedTask;
         }
         
-        public Task SetRoleNameAsync(TRole role, string roleName, CancellationToken cancellationToken)
+        public Task SetRoleNameAsync(Role role, string roleName, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -173,7 +172,7 @@ namespace Transleet.Stores
             return Task.CompletedTask;
         }
         
-        public Task<IdentityResult> UpdateAsync(TRole role, CancellationToken cancellationToken)
+        public Task<IdentityResult> UpdateAsync(Role role, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -182,7 +181,7 @@ namespace Transleet.Stores
                 throw new ArgumentNullException(nameof(role));
             }
 
-            return _client.GetGrain<IIdentityRoleGrain<TUser, TRole>>(role.Id).Update(role);
+            return _client.GetGrain<IRoleGrain<User, Role>>(role.Id).Update(role);
         }
         
         protected virtual void ThrowIfDisposed()

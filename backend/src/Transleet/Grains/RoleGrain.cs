@@ -8,7 +8,7 @@ using Orleans.Runtime;
 
 namespace Transleet.Grains
 {
-    public interface IIdentityRoleGrain<TUser, TRole> : IGrainWithGuidKey
+    public interface IRoleGrain<TUser, TRole> : IGrainWithGuidKey
         where TUser : IdentityUser<Guid>
         where TRole : IdentityRole<Guid>
     {
@@ -36,14 +36,14 @@ namespace Transleet.Grains
         Task<IdentityResult> Update(TRole role);
     }
 
-    internal class IdentityRoleGrain<TUser, TRole> : Grain, IIdentityRoleGrain<TUser, TRole>
+    internal class RoleGrain<TUser, TRole> : Grain, IRoleGrain<TUser, TRole>
         where TUser : IdentityUser<Guid>
         where TRole : IdentityRole<Guid>
     {
         private readonly IPersistentState<RoleGrainState<TRole>> _data;
         private readonly ILookupNormalizer _normalizer;
 
-        public IdentityRoleGrain(
+        public RoleGrain(
             ILookupNormalizer normalizer,
             [PersistentState("IdentityRole", "Default")] IPersistentState<RoleGrainState<TRole>> data)
         {
@@ -53,7 +53,7 @@ namespace Transleet.Grains
 
         private bool Exists => _data.State?.Role != null;
 
-        private static string GrainType => typeof(IIdentityRoleGrain<TUser, TRole>).FullName;
+        private static string GrainType => typeof(IRoleGrain<TUser, TRole>).FullName;
         private Guid GrainKey => this.GetPrimaryKey();
         public Task<Guid> GetIndexIdForProperty(string propertyName)
         {
@@ -110,7 +110,7 @@ namespace Transleet.Grains
                 return IdentityResult.Failed();
             var lookup = GrainFactory.GetLookup<string>(GrainType,"Roles");
             await lookup.DeleteAsync(_data.State.Role.NormalizedName);
-            await Task.WhenAll(_data.State.Users.Select(u => GrainFactory.GetGrain<IIdentityUserGrain<TUser, TRole>>(u).RemoveRole(GrainKey, false)));
+            await Task.WhenAll(_data.State.Users.Select(u => GrainFactory.GetGrain<IUserGrain>(u).RemoveRole(GrainKey, false)));
             await _data.ClearStateAsync();
 
             return IdentityResult.Success;

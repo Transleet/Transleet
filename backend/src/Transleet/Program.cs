@@ -41,6 +41,7 @@ builder.Host
         {
             options.Invariant = invariant;
             options.ConnectionString = connectionString;
+            options.UseJsonFormat = true;
         });
         siloBuilder.AddAdoNetGrainStorage("PubSubStore", options =>
         {

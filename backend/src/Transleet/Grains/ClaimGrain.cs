@@ -6,33 +6,33 @@ using Orleans.Runtime;
 
 namespace Transleet.Grains
 {
-    public interface IIdentityClaimGrain : IGrainWithStringKey
+    public interface IClaimGrain : IGrainWithStringKey
     {
         [AlwaysInterleave]
         Task<IList<Guid>> GetUserIds();
     }
 
-    internal interface IIdentityClaimGrainInternal : IIdentityClaimGrain
+    internal interface IClaimGrainInternal : IClaimGrain
     {
         Task AddUserId(Guid id);
 
         Task RemoveUserId(Guid id);
     }
 
-    internal class IdentityClaimGrain : Grain, IIdentityClaimGrainInternal
+    internal class ClaimGrain : Grain, IClaimGrainInternal
     {
-        private readonly IPersistentState<HashSet<Guid>> _data;
-        
+        private readonly IPersistentState<ClaimGrainState> _data;
 
-        public IdentityClaimGrain(
-                    [PersistentState("IdentityClaim", "Default")] IPersistentState<HashSet<Guid>> data)
+
+        public ClaimGrain(
+                    [PersistentState(nameof(ClaimGrainState), "Default")] IPersistentState<ClaimGrainState> data)
         {
             _data = data;
         }
 
         public Task AddUserId(Guid id)
         {
-            if (_data.State.Add(id))
+            if (_data.State.Users.Add(id))
                 return _data.WriteStateAsync();
 
             return Task.CompletedTask;
@@ -40,15 +40,20 @@ namespace Transleet.Grains
 
         public Task<IList<Guid>> GetUserIds()
         {
-            return Task.FromResult<IList<Guid>>(_data.State.ToList());
+            return Task.FromResult<IList<Guid>>(_data.State.Users.ToList());
         }
 
         public Task RemoveUserId(Guid id)
         {
-            if (_data.State.Remove(id))
+            if (_data.State.Users.Remove(id))
                 return _data.WriteStateAsync();
 
             return Task.CompletedTask;
+        }
+
+        public class ClaimGrainState
+        {
+            public HashSet<Guid> Users { get; set; } = new();
         }
     }
 }

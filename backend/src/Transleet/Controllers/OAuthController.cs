@@ -56,15 +56,15 @@ namespace Transleet.Controllers
         {
             var request = HttpContext.Request;
             var url =
-                $"https://github.com/login/oauth/authorize?client_id={_githubOAuthOptions.CurrentValue.ClientId}&redirect_uri={request.Scheme}://{ request.Host}/api/oauth/github_callback&scope=user&state={_dataProtector.Protect(returnUrl)}";
+                $"https://github.com/login/oauth/authorize?client_id={_githubOAuthOptions.CurrentValue.ClientId}&redirect_uri={request.Scheme}://{request.Host}/api/oauth/github_callback&scope=user&state={_dataProtector.Protect(returnUrl)}";
             return Redirect(url);
         }
 
         [HttpGet("github_callback")]
-        public async Task<IActionResult> GithubCallback([FromQuery]string code, [FromQuery] string state)
+        public async Task<IActionResult> GithubCallback([FromQuery] string code, [FromQuery] string state)
         {
             var httpClient = _httpClientFactory.CreateClient();
-            var res = await httpClient.PostAsJsonAsync("https://github.com/login/oauth/access_token",new
+            var res = await httpClient.PostAsJsonAsync("https://github.com/login/oauth/access_token", new
             {
                 client_id = _githubOAuthOptions.CurrentValue.ClientId,
                 client_secret = _githubOAuthOptions.CurrentValue.ClientSecret,
@@ -72,11 +72,11 @@ namespace Transleet.Controllers
             });
             var body = await res.Content.ReadAsStringAsync();
             var accessToken = body.Split('&')[0].Split('=')[1];
-            return Redirect(_dataProtector.Unprotect(state)+$"?state={_dataProtector.Protect(accessToken)}");
+            return Redirect(_dataProtector.Unprotect(state) + $"?state={_dataProtector.Protect(accessToken)}");
         }
 
         [HttpGet("github_callback1")]
-        public async Task<IActionResult> GithubCallback1([FromQuery]string state)
+        public async Task<IActionResult> GithubCallback1([FromQuery] string state)
         {
             var accessToken = _dataProtector.Unprotect(state);
             using var httpClient = _httpClientFactory.CreateClient();
@@ -115,7 +115,7 @@ namespace Transleet.Controllers
             {
                 Issuer = _jwtBearerOptions.CurrentValue.Issuer,
                 Audience = _jwtBearerOptions.CurrentValue.Audience,
-                Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, user.UserName) }),
+                Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, user.UserName), new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), new Claim(ClaimTypes.Email, user.Email) }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials =
                     new SigningCredentials(_jwtBearerOptions.CurrentValue.Key, SecurityAlgorithms.HmacSha256)

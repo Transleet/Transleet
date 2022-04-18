@@ -68,7 +68,7 @@ namespace Transleet.Controllers
                 {
                     Issuer = _jwtBearerOptions.CurrentValue.Issuer,
                     Audience = _jwtBearerOptions.CurrentValue.Audience,
-                    Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, user.UserName) }),
+                    Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, user.UserName), new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), new Claim(ClaimTypes.Email, user.Email) }),
                     Expires = DateTime.UtcNow.AddDays(7),
                     SigningCredentials =
                         new SigningCredentials(_jwtBearerOptions.CurrentValue.Key, SecurityAlgorithms.HmacSha256)

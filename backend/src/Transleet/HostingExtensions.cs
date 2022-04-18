@@ -62,11 +62,11 @@ internal static class HostingExtensions
         });
 
         builder.Services
-            .AddTransient<IRoleClaimStore<Role>, OrleansRoleStore<User, Role>>()
+            .AddTransient<IRoleClaimStore<Role>, OrleansRoleStore>()
             .AddSingleton<ILookupNormalizer, UpperInvariantLookupNormalizer>()
             .AddIdentity<User, Role>()
-            .AddRoleStore<OrleansRoleStore<User, Role>>()
-            .AddUserStore<OrleansUserStore<User, Role>>();
+            .AddRoleStore<OrleansRoleStore>()   
+            .AddUserStore<OrleansUserStore>();
 
         builder.Services.AddAuthentication(options =>
             {

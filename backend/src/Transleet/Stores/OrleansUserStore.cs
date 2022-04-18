@@ -2,27 +2,26 @@
 using Microsoft.AspNetCore.Identity;
 using Orleans;
 using Transleet.Grains;
+using Transleet.Models;
 
 namespace Transleet.Stores
 {
-    public class OrleansUserStore<TUser, TRole> :
-        UserStoreBase<TUser, TRole, Guid, IdentityUserClaim<Guid>, IdentityUserRole<Guid>, IdentityUserLogin<Guid>, IdentityUserToken<Guid>, IdentityRoleClaim<Guid>>
-        where TUser : IdentityUser<Guid>
-        where TRole : IdentityRole<Guid>
+    public class OrleansUserStore:
+        UserStoreBase<User, Role, Guid, IdentityUserClaim<Guid>, IdentityUserRole<Guid>, IdentityUserLogin<Guid>, IdentityUserToken<Guid>, IdentityRoleClaim<Guid>>
     {
         private const string ValueCannotBeNullOrEmpty = "Value cannot be null or empty";
         private readonly IClusterClient _client;
-        private readonly IRoleClaimStore<TRole> _roleStore;
+        private readonly IRoleClaimStore<Role> _roleStore;
         
-        public OrleansUserStore(IClusterClient client, IRoleClaimStore<TRole> roleStore) : base(new IdentityErrorDescriber())
+        public OrleansUserStore(IClusterClient client, IRoleClaimStore<Role> roleStore) : base(new IdentityErrorDescriber())
         {
             _client = client;
             _roleStore = roleStore;
         }
         
-        public override IQueryable<TUser> Users => throw new NotSupportedException();
+        public override IQueryable<User> Users => throw new NotSupportedException();
         
-        public override Task AddClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken = default)
+        public override Task AddClaimsAsync(User user, IEnumerable<Claim> claims, CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
@@ -43,7 +42,7 @@ namespace Transleet.Stores
             return Task.CompletedTask;
         }
         
-        public override Task AddLoginAsync(TUser user, UserLoginInfo login, CancellationToken cancellationToken = default)
+        public override Task AddLoginAsync(User user, UserLoginInfo login, CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
@@ -59,7 +58,7 @@ namespace Transleet.Stores
             return UserGrain(user.Id).AddLogin(CreateUserLogin(user, login));
         }
         
-        public override async Task AddToRoleAsync(TUser user, string normalizedRoleName, CancellationToken cancellationToken = default)
+        public override async Task AddToRoleAsync(User user, string normalizedRoleName, CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
@@ -79,7 +78,7 @@ namespace Transleet.Stores
             }
         }
         
-        public override Task<IdentityResult> CreateAsync(TUser user, CancellationToken cancellationToken = default)
+        public override Task<IdentityResult> CreateAsync(User user, CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
@@ -96,7 +95,7 @@ namespace Transleet.Stores
             return UserGrain(user.Id).Create(user);
         }
 
-        public override Task<IdentityResult> DeleteAsync(TUser user, CancellationToken cancellationToken = default)
+        public override Task<IdentityResult> DeleteAsync(User user, CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
@@ -109,12 +108,12 @@ namespace Transleet.Stores
         }
 
         
-        public override async Task<TUser> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken = default)
+        public override async Task<User> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
 
-            var grain = await _client.FindAsync<string,IIdentityUserGrain<TUser, TRole>>("Emails", normalizedEmail);
+            var grain = await _client.FindAsync<string,IUserGrain>("Emails", normalizedEmail);
             if (grain != null)
             {
                 return await grain.Get();
@@ -123,19 +122,19 @@ namespace Transleet.Stores
             return null;
         }
 
-        public override Task<TUser> FindByIdAsync(string userId, CancellationToken cancellationToken = default)
+        public override Task<User> FindByIdAsync(string userId, CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
 
             return UserGrain(ConvertIdFromString(userId)).Get();
         }
-        public override async Task<TUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken = default)
+        public override async Task<User> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
 
-            var grain = await _client.FindAsync<string,IIdentityUserGrain<TUser, TRole>>("Usernames", normalizedUserName);
+            var grain = await _client.FindAsync<string,IUserGrain>("Usernames", normalizedUserName);
             if (grain != null)
             {
                 return await grain.Get();
@@ -144,7 +143,7 @@ namespace Transleet.Stores
             return null;
         }
         
-        public override async Task<IList<Claim>> GetClaimsAsync(TUser user, CancellationToken cancellationToken = default)
+        public override async Task<IList<Claim>> GetClaimsAsync(User user, CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
@@ -158,7 +157,7 @@ namespace Transleet.Stores
                 .ToList() ?? new List<Claim>();
         }
 
-        public override async Task<IList<UserLoginInfo>> GetLoginsAsync(TUser user, CancellationToken cancellationToken = default)
+        public override async Task<IList<UserLoginInfo>> GetLoginsAsync(User user, CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
@@ -172,7 +171,7 @@ namespace Transleet.Stores
                 .ToList() ?? new List<UserLoginInfo>();
         }
 
-        public override async Task<IList<string>> GetRolesAsync(TUser user, CancellationToken cancellationToken = default)
+        public override async Task<IList<string>> GetRolesAsync(User user, CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
@@ -184,7 +183,7 @@ namespace Transleet.Stores
             return (await UserGrain(user.Id).GetRoles())?.ToList() ?? new List<string>();
         }
 
-        public override async Task<IList<TUser>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken = default)
+        public override async Task<IList<User>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
@@ -194,7 +193,7 @@ namespace Transleet.Stores
             return (await Task.WhenAll(ids.Select(i => UserGrain(i).Get()))).ToList();
         }
 
-        public override async Task<IList<TUser>> GetUsersInRoleAsync(string normalizedRoleName, CancellationToken cancellationToken = default)
+        public override async Task<IList<User>> GetUsersInRoleAsync(string normalizedRoleName, CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
@@ -207,14 +206,14 @@ namespace Transleet.Stores
             var role = await FindRoleAsync(normalizedRoleName, cancellationToken);
             if (role != null)
             {
-                var users = await _client.GetGrain<IIdentityRoleGrain<TUser, TRole>>(role.Id).GetUsers();
+                var users = await _client.GetGrain<IRoleGrain<User, Role>>(role.Id).GetUsers();
                 return (await Task.WhenAll(users.Select(u => UserGrain(u).Get()))).ToList();
             }
 
-            return new List<TUser>();
+            return new List<User>();
         }
         
-        public override async Task<bool> IsInRoleAsync(TUser user, string normalizedRoleName, CancellationToken cancellationToken = default)
+        public override async Task<bool> IsInRoleAsync(User user, string normalizedRoleName, CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
@@ -235,7 +234,7 @@ namespace Transleet.Stores
             return false;
         }
 
-        public override Task RemoveClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken = default)
+        public override Task RemoveClaimsAsync(User user, IEnumerable<Claim> claims, CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
@@ -256,7 +255,7 @@ namespace Transleet.Stores
             return Task.CompletedTask;
         }
 
-        public override async Task RemoveFromRoleAsync(TUser user, string normalizedRoleName, CancellationToken cancellationToken = default)
+        public override async Task RemoveFromRoleAsync(User user, string normalizedRoleName, CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
@@ -276,7 +275,7 @@ namespace Transleet.Stores
             }
         }
 
-        public override Task RemoveLoginAsync(TUser user, string loginProvider, string providerKey, CancellationToken cancellationToken = default)
+        public override Task RemoveLoginAsync(User user, string loginProvider, string providerKey, CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
@@ -288,7 +287,7 @@ namespace Transleet.Stores
             return UserGrain(user.Id).RemoveLogin(loginProvider, providerKey);
         }
 
-        public override Task ReplaceClaimAsync(TUser user, Claim claim, Claim newClaim, CancellationToken cancellationToken = default)
+        public override Task ReplaceClaimAsync(User user, Claim claim, Claim newClaim, CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
@@ -308,7 +307,7 @@ namespace Transleet.Stores
             return UserGrain(user.Id).ReplaceClaims(claim, newClaim);
         }
 
-        public override Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken = default)
+        public override Task<IdentityResult> UpdateAsync(User user, CancellationToken cancellationToken = default)
         {
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
@@ -336,26 +335,26 @@ namespace Transleet.Stores
             return UserGrain(token.UserId).AddToken(token);
         }
 
-        protected override Task<TRole> FindRoleAsync(string normalizedRoleName, CancellationToken cancellationToken)
+        protected override Task<Role> FindRoleAsync(string normalizedRoleName, CancellationToken cancellationToken)
         {
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
             return _roleStore.FindByNameAsync(normalizedRoleName, cancellationToken);
         }
 
-        protected override Task<IdentityUserToken<Guid>> FindTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken)
+        protected override Task<IdentityUserToken<Guid>> FindTokenAsync(User user, string loginProvider, string name, CancellationToken cancellationToken)
         {
             return UserGrain(user.Id).GetToken(loginProvider, name);
         }
 
-        protected override Task<TUser> FindUserAsync(Guid userId, CancellationToken cancellationToken)
+        protected override Task<User> FindUserAsync(Guid userId, CancellationToken cancellationToken)
         {
             return UserGrain(userId).Get();
         }
 
         protected override async Task<IdentityUserLogin<Guid>> FindUserLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
-            var grain = await _client.FindAsync<string,IIdentityUserGrain<TUser, TRole>>("Logins", providerKey);
+            var grain = await _client.FindAsync<string,IUserGrain>("Logins", providerKey);
             if (grain != null)
             {
                 return await grain.GetLogin(loginProvider, providerKey);
@@ -387,9 +386,9 @@ namespace Transleet.Stores
             return UserGrain(token.UserId).RemoveToken(token);
         }
 
-        private IIdentityUserGrain<TUser, TRole> UserGrain(Guid id)
+        private IUserGrain UserGrain(Guid id)
         {
-            return _client.GetGrain<IIdentityUserGrain<TUser, TRole>>(id);
+            return _client.GetGrain<IUserGrain>(id);
         }
     }
 }
