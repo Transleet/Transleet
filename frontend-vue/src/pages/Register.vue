@@ -58,6 +58,7 @@ import { useQuasar } from 'quasar';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useSettingStore } from '../store/setting';
+import SignalrHubs from '../signalr/index';
 
 const $q = useQuasar();
 const setting = useSettingStore();
@@ -115,6 +116,9 @@ async function submit() {
           });
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           setting.token = JSON.parse(JSON.stringify(res.data)).token;
+          SignalrHubs.instance.RefreshLoginState().catch((err) => {
+            console.log(err);
+          });
         })
         .catch((err) => {
           console.log(err);

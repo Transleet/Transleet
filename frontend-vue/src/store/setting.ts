@@ -5,13 +5,11 @@ export const useSettingStore = defineStore('setting', {
     dark: 'auto' as boolean | 'auto',
     token: '',
     logined: false,
-    signalr: {
-      projectHub: 'disconnected' as 'disconnected' | 'connected',
-    },
+    signalr: 'disconnected' as 'disconnected' | 'connected',
   }),
   actions: {
     getAllSignalrState(): 'disconnected' | 'connected' {
-      return this.signalr.projectHub;
+      return this.signalr;
     },
   },
   persist: {

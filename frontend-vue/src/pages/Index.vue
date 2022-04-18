@@ -51,6 +51,8 @@ import ProjectCard from '../components/ProjectCard.vue';
 
 const cache = useCacheStore();
 
+SignalrHubs.instance.ProjectHub.state;
+
 onMounted(async () => {
   while (SignalrHubs.instance.ProjectHub.state !== 'Connected') {
     await new Promise((resolve) => setTimeout(resolve, 100));

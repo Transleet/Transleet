@@ -63,12 +63,10 @@ export default defineComponent({
     const desc = ref('');
     desc.value = cache.project.main.description;
     cache.$subscribe((m,s) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (s.project.edit === false) {
-        if(s.project.main.description !== desc.value) {
+        if(s.project.main.description === desc.value) {
           return;
         }
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         s.project.main.description = desc.value;
         SignalrHubs.instance.ProjectHub.invoke('Update', cache.project.main).catch((e) => {
           console.error(e);

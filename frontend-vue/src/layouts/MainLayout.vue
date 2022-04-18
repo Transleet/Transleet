@@ -18,9 +18,7 @@
             setting.getAllSignalrState() === 'connected' ? 'green' : 'red'
           "
         />
-        <div
-          class="q-ml-xs"
-        >
+        <div class="q-ml-xs">
           {{ $t('general.signalrState.' + setting.getAllSignalrState()) }}
         </div>
         <q-btn round class="q-ml-md" style="background-color: white">
@@ -67,17 +65,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useSettingStore } from '../store/setting';
 import SignalrHubs from '../signalr/index';
 import AvatarHelper from '../components/AvatarHelper.vue';
+import { useCacheStore } from '../store/cache';
 // eslint-disable-next-line @typescript-eslint/unbound-method
 const { t } = useI18n();
 const setting = useSettingStore();
+var cache = useCacheStore();
 const leftDrawerOpen = ref(false);
 
-SignalrHubs.instance.ProjectHub.state;
+SignalrHubs.instance.UserHub.state;
 
 interface MenuOption {
   name: string;
@@ -104,4 +104,22 @@ const menu: Array<MenuOption> = [
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 }
+
+onMounted(async () => {
+  while (SignalrHubs.instance.UserHub.state !== 'Connected') {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  SignalrHubs.instance.UserHub.stream('GetAllOnlineUsers').subscribe({
+    next: (u) => {
+      if (u !== null) {
+        cache.users.allUser.push(<string>u);
+      }
+    },
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    complete: () => {},
+    error: (err) => {
+      console.log(err);
+    },
+  });
+});
 </script>

@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
+
 using Orleans;
+
 using Transleet.Grains;
 using Transleet.Models;
 
@@ -19,12 +21,12 @@ namespace Transleet.Hubs
             _userManager = userManager;
         }
 
-        public async IAsyncEnumerable<Guid> GetAllOnlineUsers()
+        public async IAsyncEnumerable<string> GetAllOnlineUsers()
         {
             var keySet = _grainFactory.GetKeySet<UserGrain>();
             foreach (var key in await keySet.GetAllAsync())
             {
-                yield return key;
+                yield return key.ToString("D");
             }
         }
 
@@ -35,6 +37,7 @@ namespace Transleet.Hubs
             if (user is not null)
             {
                 await keySet.AddAsync(user.Id);
+                await Clients.Others.SendAsync("OnUserConnected", user.Id.ToString("D"));
             }
         }
 
@@ -45,6 +48,7 @@ namespace Transleet.Hubs
             if (user is not null)
             {
                 await keySet.DeleteAsync(user.Id);
+                await Clients.Others.SendAsync("OnUserDisconnected", user.Id.ToString("D"));
             }
         }
     }
