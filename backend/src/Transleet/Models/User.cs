@@ -171,6 +171,7 @@ namespace Transleet.Models
             var input = (User)untypedInput;
 
             // Serialize each field.
+            SerializationManager.SerializeInner(input.Id, context);
             SerializationManager.SerializeInner(input.UserName, context);
             SerializationManager.SerializeInner(input.Email, context);
             SerializationManager.SerializeInner(input.EmailConfirmed, context);
@@ -200,6 +201,7 @@ namespace Transleet.Models
             context.RecordObject(result);
 
             // Deserialize each field in the order that they were serialized.
+            result.Id = SerializationManager.DeserializeInner<Guid>(context);
             result.UserName = SerializationManager.DeserializeInner<string>(context);
             result.Email = SerializationManager.DeserializeInner<string>(context);
             result.EmailConfirmed = SerializationManager.DeserializeInner<bool>(context);
