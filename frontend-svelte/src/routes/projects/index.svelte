@@ -1,10 +1,11 @@
 <script lang="ts">
 	import * as signalR from '@microsoft/signalr';
-	import { ProjectsService } from 'src/api/index';
+	import { ProjectsService } from '$lib/api';
 	import { onMount } from 'svelte';
+	import type { Project } from '$lib/api';
 	let backend_base_url = import.meta.env.VITE_BACKEND_BASE_URL;
 	let frontend_base_url = import.meta.env.VITE_FRONTEND_BASE_URL;
-	let projects: Array<any> = [];
+	let projects: Array<Project> = [];
 	let connection: signalR.HubConnection;
 
 	onMount(async () => {
@@ -27,7 +28,7 @@
 	});
 
 	async function createProject() {
-		let project = await connection.invoke('Create', {
+		let project = await ProjectsService.createProject({
 			name: 'Test',
 			description: 'You mother fucker.'
 		});

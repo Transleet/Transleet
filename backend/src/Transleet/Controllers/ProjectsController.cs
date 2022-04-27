@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Orleans;
 using Swashbuckle.AspNetCore.Annotations;
 using Transleet.Grains;
@@ -7,6 +8,7 @@ using Transleet.Models;
 namespace Transleet.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/projects")]
 public class ProjectsController : ControllerBase
 {
@@ -16,7 +18,8 @@ public class ProjectsController : ControllerBase
     {
         _factory = factory;
     }
-    
+
+    [AllowAnonymous]
     [HttpGet("{id:guid}")]
     [SwaggerOperation(
         Summary = "Get a project by its id.",
@@ -29,7 +32,9 @@ public class ProjectsController : ControllerBase
         return project;
     }
 
+
     [HttpGet]
+    [AllowAnonymous]
     [SwaggerOperation(
         Summary = "Get all projects.",
         OperationId = "GetProjects"
