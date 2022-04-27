@@ -21,9 +21,12 @@ internal static class HostingExtensions
             {
                 options.SuppressAsyncSuffixInActionNames = false;
             })
-            .AddApplicationPart(typeof(ProjectsController).Assembly);
+            .AddApplicationPart(typeof(OAuthController).Assembly);
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        builder.Services.AddSwaggerGen(options =>
+        {
+            options.EnableAnnotations();
+        });
         builder.Services.AddDataProtection();
         builder.Services.AddHttpClient();
         builder.Services.AddSignalR();

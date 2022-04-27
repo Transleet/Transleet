@@ -169,8 +169,6 @@ namespace Transleet.Models
             object untypedInput, ISerializationContext context, Type expected)
         {
             var input = (User)untypedInput;
-
-            // Serialize each field.
             SerializationManager.SerializeInner(input.Id, context);
             SerializationManager.SerializeInner(input.UserName, context);
             SerializationManager.SerializeInner(input.Email, context);
@@ -194,13 +192,7 @@ namespace Transleet.Models
             Type expected, IDeserializationContext context)
         {
             var result = new User();
-
-            // Record 'result' immediately after constructing it.
-            // As with the deep copier, this
-            // allows for cyclic references and de-duplication.
             context.RecordObject(result);
-
-            // Deserialize each field in the order that they were serialized.
             result.Id = SerializationManager.DeserializeInner<Guid>(context);
             result.UserName = SerializationManager.DeserializeInner<string>(context);
             result.Email = SerializationManager.DeserializeInner<string>(context);

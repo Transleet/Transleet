@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-
+using Swashbuckle.AspNetCore.Annotations;
 using Transleet.Models;
 
 namespace Transleet.Controllers
@@ -33,8 +33,12 @@ namespace Transleet.Controllers
             _logger = logger;
         }
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterResource model)
+        [HttpPost]
+        [SwaggerOperation(
+            Summary = "Register a new account",
+            OperationId = "Register"
+        )]
+        public async Task<IActionResult> RegisterAsync([FromBody] RegisterResource model)
         {
             var user = await _userManager.FindByNameAsync(model.Email);
             if (user != null)

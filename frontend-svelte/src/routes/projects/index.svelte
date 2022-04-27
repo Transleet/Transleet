@@ -1,5 +1,6 @@
 <script lang="ts">
 	import * as signalR from '@microsoft/signalr';
+	import { ProjectsService } from 'src/api/index';
 	import { onMount } from 'svelte';
 	let backend_base_url = import.meta.env.VITE_BACKEND_BASE_URL;
 	let frontend_base_url = import.meta.env.VITE_FRONTEND_BASE_URL;
@@ -8,7 +9,7 @@
 
 	onMount(async () => {
 		connection = new signalR.HubConnectionBuilder()
-			.withUrl(backend_base_url+'/api/hubs/projects', {
+			.withUrl(backend_base_url + '/api/hubs/projects', {
 				accessTokenFactory: () => localStorage.getItem('token')
 			})
 			.configureLogging(signalR.LogLevel.Information)
@@ -19,15 +20,7 @@
 			console.log(err);
 		}
 		try {
-			connection.stream('GetAll').subscribe({
-				next: (p) => {
-					projects = [p, ...projects];
-				},
-				complete: () => {},
-				error: (err) => {
-					console.log(err);
-				}
-			});
+			projects = await ProjectsService.getProjects();
 		} catch (err) {
 			console.log(err);
 		}

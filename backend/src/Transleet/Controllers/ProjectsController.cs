@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Orleans;
+using Swashbuckle.AspNetCore.Annotations;
 using Transleet.Grains;
 using Transleet.Models;
 
@@ -15,17 +16,25 @@ public class ProjectsController : ControllerBase
     {
         _factory = factory;
     }
-
+    
     [HttpGet("{id:guid}")]
-    public async Task<Project?> GetAsync(Guid id)
+    [SwaggerOperation(
+        Summary = "Get a project by its id.",
+        OperationId = "GetProject"
+    )]
+    public async Task<Project?> GetProjectAsync(Guid id)
     {
         var grain = _factory.GetGrain<IProjectGrain>(id);
         var project = await grain.GetAsync();
         return project;
     }
 
-    [HttpGet()]
-    public async IAsyncEnumerable<Project?> GetAllAsync()
+    [HttpGet]
+    [SwaggerOperation(
+        Summary = "Get all projects.",
+        OperationId = "GetProjects"
+    )]
+    public async IAsyncEnumerable<Project?> GetProjectsAsync()
     {
         var keys = await _factory.GetKeySet<IProjectGrain>().GetAllAsync();
         foreach (var key in keys)
@@ -35,15 +44,23 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpPost]
+    [SwaggerOperation(
+        Summary = "Create a new project.",
+        OperationId = "CreateProject"
+    )]
     public async Task<IActionResult> PostAsync(Project item)
     {
         item.Key = Guid.NewGuid();
         await _factory.GetGrain<IProjectGrain>(item.Key).SetAsync(item);
         // ReSharper disable once Mvc.ActionNotResolved
-        return CreatedAtAction(nameof(GetAsync), new { id = item.Key }, item);
+        return CreatedAtAction(nameof(GetProjectAsync), new { id = item.Key }, item);
     }
 
-    [HttpPut("{id}")]
+    [HttpPut]
+    [SwaggerOperation(
+        Summary = "Update a project.",
+        OperationId = "UpdateProject"
+    )]
     public async Task<IActionResult> UpdateAsync(Project item)
     {
         await _factory.GetGrain<IProjectGrain>(item.Key).SetAsync(item);
@@ -51,6 +68,10 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [SwaggerOperation(
+        Summary = "Delete a project by its id.",
+        OperationId = "DeleteProject"
+    )]
     public Task DeleteAsync(Guid id) =>
         _factory.GetGrain<IProjectGrain>(id).ClearAsync();
 }
