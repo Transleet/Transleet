@@ -86,9 +86,9 @@
 				<div class="card w-60 p-2" on:click={() => navigateToProjectDetials(project.id)}>
 					<button
 						class="btn btn-sm btn-circle absolute right-2 top-2"
-						on:click={() => removeProject(project.id)}>
+						on:click|stopPropagation={() => removeProject(project.id)}>
 						<svg
-							width="24px"
+							width="24px"	
 							height="24px"
 							viewBox="0 0 24 24"
 							fill="none"
