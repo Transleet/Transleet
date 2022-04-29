@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -12,8 +13,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
+
 using Orleans.Concurrency;
 using Orleans.Providers.Streams.Common;
+
 using Transleet.Models;
 
 namespace Transleet.Controllers
@@ -115,7 +118,7 @@ namespace Transleet.Controllers
             {
                 Issuer = _jwtBearerOptions.CurrentValue.Issuer,
                 Audience = _jwtBearerOptions.CurrentValue.Audience,
-                Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, user.UserName), new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), new Claim(ClaimTypes.Email, user.Email) }),
+                Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, user.UserName!), new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), new Claim(ClaimTypes.Email, user.Email!) }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials =
                     new SigningCredentials(_jwtBearerOptions.CurrentValue.Key, SecurityAlgorithms.HmacSha256)

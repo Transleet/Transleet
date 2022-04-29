@@ -6,6 +6,23 @@ namespace Transleet.Models;
 
 public class Locale : IGrainWithStringKey
 {
-    [Key]
-    public string? Id { get; set; }
+    public Locale(string? id)
+    {
+        Id = id;
+    }
+
+    [Key] private string? Id { get; }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is not Locale l)
+        {
+            return false;
+        }
+        return l.Id == Id;
+    }
+
+    protected bool Equals(Locale other) => Id == other.Id;
+
+    public override int GetHashCode() => (Id != null ? Id.GetHashCode() : 0);
 }

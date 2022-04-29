@@ -1,6 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+
 using Transleet.Models;
 
 namespace Transleet.Controllers
@@ -44,7 +46,7 @@ namespace Transleet.Controllers
         {
             var resource = await HttpContext.Request.ReadFromJsonAsync<LoginResource>();
             User? user;
-            if (resource.InputText.Contains('@'))
+            if (resource!.InputText.Contains('@'))
             {
                 user = await _userManager.FindByEmailAsync(resource.InputText);
                 if (user is null)
@@ -60,7 +62,7 @@ namespace Transleet.Controllers
                     return BadRequest($"Can't find a user whose name is {resource.InputText}");
                 }
             }
-            
+
             if (await _userManager.CheckPasswordAsync(user, resource.Password))
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
@@ -73,7 +75,7 @@ namespace Transleet.Controllers
                     SigningCredentials =
                         new SigningCredentials(_jwtBearerOptions.CurrentValue.Key, SecurityAlgorithms.HmacSha256)
                 };
-                await _signInManager.SignInAsync(user,true);
+                await _signInManager.SignInAsync(user, true);
                 var token = tokenHandler.CreateToken(tokenDescriptor);
                 return Ok(new { token = tokenHandler.WriteToken(token) });
             }

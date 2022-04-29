@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 using Orleans;
+
+using Swashbuckle.AspNetCore.Annotations;
 
 using Transleet.Grains;
 using Transleet.Models;
@@ -18,6 +21,8 @@ public class ComponentsController : ControllerBase
         _factory = factory;
     }
 
+    [AllowAnonymous]
+    [SwaggerOperation(Summary = "Get component.", OperationId = "GetComponent")]
     [HttpGet("{id:guid}")]
     public async Task<Component?> GetAsync(Guid id)
     {
@@ -26,6 +31,7 @@ public class ComponentsController : ControllerBase
         return component;
     }
 
+    [SwaggerOperation(Summary = "Create component.", OperationId = "CreateComponent")]
     [HttpPost]
     public async Task<IActionResult> PostAsync(Component item)
     {
@@ -35,6 +41,7 @@ public class ComponentsController : ControllerBase
         return CreatedAtAction(nameof(GetAsync), new { id = item.Key }, item);
     }
 
+    [SwaggerOperation(Summary = "Update component.", OperationId = "UpdateComponent")]
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateAsync(Component item)
     {
@@ -42,6 +49,7 @@ public class ComponentsController : ControllerBase
         return Ok();
     }
 
+    [SwaggerOperation(Summary = "Delete component.", OperationId = "DeleteComponent")]
     [HttpDelete("{id}")]
     public Task DeleteAsync(Guid id) =>
         _factory.GetGrain<IComponentGrain>(id).ClearAsync();

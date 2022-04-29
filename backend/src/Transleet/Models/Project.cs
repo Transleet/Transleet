@@ -8,7 +8,7 @@ public record Project : IGrainWithStringKey
 {
     public Guid Id { get; set; }
     public string? DisplayName { get; set; }
-    public string Name { get; set; }
+    public string? Name { get; set; }
     public string? Avatar { get; set; }
     public string? Description { get; set; }
     public DateTimeOffset CreatedAt { get; set; }

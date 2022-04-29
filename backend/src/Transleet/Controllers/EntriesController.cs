@@ -1,5 +1,10 @@
-﻿ using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
 using Orleans;
+
+using Swashbuckle.AspNetCore.Annotations;
+
 using Transleet.Grains;
 using Transleet.Models;
 
@@ -16,6 +21,8 @@ public class EntriesController : ControllerBase
         _factory = factory;
     }
 
+    [AllowAnonymous]
+    [SwaggerOperation(Summary = "Get entry.", OperationId = "GetEntry")]
     [HttpGet("{id:guid}")]
     public async Task<Entry?> GetAsync(Guid id)
     {
@@ -24,6 +31,7 @@ public class EntriesController : ControllerBase
         return entry;
     }
 
+    [SwaggerOperation(Summary = "Create entry.", OperationId = "CreateEntry")]
     [HttpPost]
     public async Task<IActionResult> PostAsync(Entry item)
     {
@@ -33,6 +41,7 @@ public class EntriesController : ControllerBase
         return CreatedAtAction(nameof(GetAsync), new { id = item.Key }, item);
     }
 
+    [SwaggerOperation(Summary = "Update entry.", OperationId = "UpdateEntry")]
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateAsync(Entry item)
     {
@@ -40,6 +49,7 @@ public class EntriesController : ControllerBase
         return Ok();
     }
 
+    [SwaggerOperation(Summary = "Delete entry.", OperationId = "DeleteEntry")]
     [HttpDelete("{id}")]
     public Task DeleteAsync(Guid id) =>
         _factory.GetGrain<IEntryGrain>(id).ClearAsync();

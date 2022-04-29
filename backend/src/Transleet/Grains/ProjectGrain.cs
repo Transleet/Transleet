@@ -1,7 +1,9 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+
 using Orleans;
 using Orleans.Runtime;
+
 using Transleet.Models;
 
 namespace Transleet.Grains
@@ -37,7 +39,7 @@ namespace Transleet.Grains
             ComponentsState = componentsState;
         }
 
-        private static string GrainType => typeof(IProjectGrain).FullName;
+        private static string GrainType => typeof(IProjectGrain).FullName!;
         private Guid GrainKey => this.GetPrimaryKey();
 
         public async Task SetAsync(Project item)
@@ -60,16 +62,16 @@ namespace Transleet.Grains
         public async Task ClearAsync()
         {
             if (ItemState.State.Item is null) return;
-            
+
             var itemKey = ItemState.State.Item.Id;
             await GrainFactory.GetKeySet(GrainType).DeleteAsync(itemKey);
             await ItemState.ClearStateAsync();
-            
+
             GetStreamProvider("SMS")
                 .GetStream<ProjectNotification>()
                 .OnNextAsync(new ProjectNotification(itemKey, NotificationOperation.Removed))
                 .Ignore();
-            
+
             DeactivateOnIdle();
         }
 
@@ -80,7 +82,7 @@ namespace Transleet.Grains
 
         public async Task AddComponentAsync(Guid component)
         {
-            ItemState.State.Item.Components.Add(component);
+            ItemState.State.Item!.Components!.Add(component);
             ComponentsState.State.ComponentCount++;
             await ComponentsState.WriteStateAsync();
             await ItemState.WriteStateAsync();
@@ -88,7 +90,7 @@ namespace Transleet.Grains
 
         public async Task<bool> RemoveComponentAsync(Guid component)
         {
-            bool isSuccessful = ItemState.State.Item.Components.Remove(component);
+            bool isSuccessful = ItemState.State.Item!.Components!.Remove(component);
             if (isSuccessful)
             {
                 ComponentsState.State.ComponentCount--;
