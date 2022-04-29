@@ -20,9 +20,9 @@
           </q-card-section>
           <q-card-section>
             <div class="row q-gutter-md">
-            <template v-for="p in cache.home.projects" :key="p.key">
-              <project-card :project="p"></project-card>
-            </template>
+              <template v-for="p in cache.getHomeProjects()" :key="p.key">
+                <project-card :project="p"></project-card>
+              </template>
             </div>
           </q-card-section>
         </q-card>
@@ -40,28 +40,44 @@
 </template>
 
 <script setup lang="ts">
-import { Project } from 'src/models/Project';
-import { onMounted, watch } from 'vue';
+import { onMounted } from 'vue';
 import SignalrHubs from 'src/signalr';
 import NewProject from 'src/components/NewProject.vue';
 import { useCacheStore } from '../store/cache';
 import QGrid from 'src/components/quasar-extend/QGrid.vue';
 import QGridItem from 'src/components/quasar-extend/QGridItem.vue';
 import ProjectCard from '../components/ProjectCard.vue';
+import { ProjectsService } from '../lib/api/services/ProjectsService';
 
 const cache = useCacheStore();
 
 SignalrHubs.instance.ProjectHub.state;
 
 onMounted(async () => {
+  let projects = await ProjectsService.getProjects();
+  setTimeout(() => {
+    cache.setHomeProjects(projects);
+    console.log(projects);
+  }, 50);
+
   while (SignalrHubs.instance.ProjectHub.state !== 'Connected') {
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
-  SignalrHubs.instance.ProjectHub.stream('GetTopTen').subscribe({
-    next: (p) => {
-      if (p !== null) {
-        console.log(p);
-        cache.home.projects.push(<Project>p);
+  SignalrHubs.instance.ProjectHub.stream(
+    'SubscribeProjectNotification'
+  ).subscribe({
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    next: async (notification) => {
+      console.log(notification);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (notification.operation === 0) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        let proj = await ProjectsService.getProject(<string>notification.id);
+        if(proj.id === undefined) return;
+        cache.home.projects.set(proj.id, proj);
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        cache.home.projects.delete(<string>notification.id);
       }
     },
     // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -72,16 +88,10 @@ onMounted(async () => {
   });
 });
 
-watch(cache.home.projects, () => {
-  console.log(cache.home.projects);
-});
-
 async function remove() {
-  let projectToBeRemoved = cache.home.projects.shift();
-  if (projectToBeRemoved === undefined) return;
-  await SignalrHubs.instance.ProjectHub.invoke(
-    'Delete',
-    projectToBeRemoved.key
-  );
+  while (SignalrHubs.instance.ProjectHub.state !== 'Connected') {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  console.log('123');
 }
 </script>

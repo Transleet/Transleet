@@ -3,11 +3,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { defineStore } from 'pinia';
-import { Project } from '../models/Project';
+import { Project } from 'src/lib/api';
 export const useCacheStore = defineStore('cache', {
   state: () => ({
     home: {
-      projects: [] as Project[],
+      projects: new Map<string, Project>(),
       show: false,
     },
     project: {
@@ -18,5 +18,19 @@ export const useCacheStore = defineStore('cache', {
       allUser: [] as string[],
     },
   }),
-  actions: {},
+  actions: {
+    getHomeProjects(): Project[] {
+      return [...this.home.projects.values()];
+    },
+    setHomeProjects(projects: Project[]): void {
+      this.home.projects = new Map(
+        projects.map((project) => {
+          if (project.id === undefined) {
+            project.id = '';
+          }
+          return [project.id, project];
+        })
+      );
+    },
+  },
 });

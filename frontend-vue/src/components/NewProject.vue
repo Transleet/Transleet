@@ -62,20 +62,22 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import SignalrHubs from 'src/signalr';
 import { useCacheStore } from '../store/cache';
-import { Project } from '../models/Project';
+import { Project } from 'src/lib/api';
+import { ProjectsService } from '../lib/api/services/ProjectsService';
 const cache = useCacheStore();
 let step = ref(1);
 
 async function create() {
-  const p: Project = await SignalrHubs.instance.ProjectHub.invoke('Create', {
-    displayName: 'test' + (Math.random() * 10).toString(),
-    description: (Math.random() * 10).toString() + 'test',
-    avatar:
-      'https://images.unsplash.com/photo-1649453366204-2481ecd8225b?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2487&q=80',
-  });
-  cache.home.projects.push(p);
+  console.log('create')
+  const pt: Project = {
+    name:'TestProject',
+    description:'114514'
+  };
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  let p:Project = await ProjectsService.createProject(pt);
+  if(p.id === undefined) return;
+  cache.home.projects.set(p.id,p);
   cache.home.show = false;
 }
 </script>

@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 using Orleans;
+
 using Swashbuckle.AspNetCore.Annotations;
+
 using Transleet.Grains;
 using Transleet.Models;
 
@@ -53,11 +56,12 @@ public class ProjectsController : ControllerBase
         OperationId = "CreateProject"
     )]
     public async Task<IActionResult> PostAsync(Project item)
-    {   
+    {
         item.Id = Guid.NewGuid();
         item.CreatedAt = DateTimeOffset.Now;
         item.UpdatedAt = DateTimeOffset.Now;
         await _factory.GetGrain<IProjectGrain>(item.Id).SetAsync(item);
+        // ReSharper disable once Mvc.ActionNotResolved
         return CreatedAtAction(nameof(GetProjectAsync), new { id = item.Id }, item);
     }
 

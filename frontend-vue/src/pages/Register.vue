@@ -58,7 +58,6 @@ import { useQuasar } from 'quasar';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useSettingStore } from '../store/setting';
-import SignalrHubs from '../signalr/index';
 
 const $q = useQuasar();
 const setting = useSettingStore();
@@ -81,7 +80,7 @@ async function submit() {
   await axios
     .post(
       // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-      'https://localhost:7000/api' + '/account/register',
+      'https://localhost:7000/api' + '/account',
       {
         username: username.value,
         email: email.value,
@@ -116,9 +115,6 @@ async function submit() {
           });
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           setting.token = JSON.parse(JSON.stringify(res.data)).token;
-          SignalrHubs.instance.RefreshLoginState().catch((err) => {
-            console.log(err);
-          });
         })
         .catch((err) => {
           console.log(err);

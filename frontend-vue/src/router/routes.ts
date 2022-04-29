@@ -29,6 +29,16 @@ const routes: RouteRecordRaw[] = [
     ],
     redirect: '/home',
   },
+  {
+    path: '/editor',
+    component: () => import('layouts/EditorLayout.vue'),
+    children: [
+      {
+        path: 'component/:project/:component',
+        component: () => import('pages/editor/ComponentEditor.vue'),
+      },
+    ],
+  },
 
   // Always leave this as last one,
   // but you can also remove it

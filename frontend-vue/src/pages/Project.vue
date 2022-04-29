@@ -162,7 +162,7 @@
                   track-color="grey-3"
                 >
                   <q-avatar size="100px">
-                    <img :src="cache.project.main.avatar" />
+                    <img :src="cache.project.main.avatar + ''" />
                   </q-avatar>
                 </q-circular-progress>
               </div>
@@ -213,34 +213,21 @@
 </template>
 
 <script setup lang="ts">
-import { LocationQueryValue, useRouter, useRoute } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { onMounted, ref } from 'vue';
-import { Project } from '../models/Project';
 import SignalrHubs from 'src/signalr';
 import { useCacheStore } from '../store/cache';
 
 const route = useRoute();
-const router = useRouter();
 const cache = useCacheStore();
 
 let isLoading = ref(true);
 
 onMounted(async () => {
-  const id = route.params.id;
   while (SignalrHubs.instance.ProjectHub.state !== 'Connected') {
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
-  async function getProjectInfo(
-    id: LocationQueryValue | LocationQueryValue[] | undefined
-  ) {
-    if (id === undefined || id === null) router.back();
-    let p: Project = await SignalrHubs.instance.ProjectHub.invoke('Get', id);
-    //if (p === undefined || p === null) router.back();
-    cache.project.main = p;
-    isLoading.value = false;
-  }
 
-  await Promise.all([getProjectInfo(id)]);
   isLoading.value = false;
 });
 </script>
