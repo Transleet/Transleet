@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using System.Threading.Channels;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
@@ -22,16 +23,15 @@ public class ProjectsHub : Hub
         _logger = logger;
     }
 
-    public async Task SubscribeProjectNotification()
+    public async Task<ChannelReader<ProjectNotification>> SubscribeProjectNotification()
     {
         var stream = _clusterClient.GetStreamProvider("SMS").GetStream<ProjectNotification>();
+        var channel = Channel.CreateUnbounded<ProjectNotification>();
         _logger.LogInformation("Projects Subscribed.");
         await stream.SubscribeAsync(onNextAsync: async (item, token) =>
         {
-            _logger.LogInformation("Project Changed. {ProjectId}",item.Id);
-            await Clients.All.SendAsync("ProjectUpdated", item);
+            await channel.Writer.WriteAsync(item);
         });
-
-
+        return channel.Reader;
     }
 }

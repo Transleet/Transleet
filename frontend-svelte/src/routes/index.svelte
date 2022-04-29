@@ -4,7 +4,7 @@
 	import { onMount } from 'svelte';
 	import type { Project } from '$lib/api';
 	import { goto } from '$app/navigation';
-	import GithubLoginCallback from './github_login_callback.svelte';
+	import Id from './project/[id].svelte';
 	let backend_base_url = import.meta.env.VITE_BACKEND_BASE_URL;
 	let frontend_base_url = import.meta.env.VITE_FRONTEND_BASE_URL;
 	let projects: Map<string, Project> = new Map();
@@ -19,24 +19,30 @@
 				.withUrl(backend_base_url + '/api/hubs/projects', {
 					accessTokenFactory: () => localStorage.getItem('token')
 				})
+				.configureLogging(signalR.LogLevel.Information)
 				.build();
 		} catch (err) {
 			console.log(err);
 		}
 
 		try {
-			projectsHubConnection.on('ProjectUpdated', async function  (notification) {
-				console.log('Project Changed');
-				if (notification.operation == 'CreatedOrUpdated') {
-					let project = await ProjectsService.getProject(notification.id);
-					projects.set(project.id, project);
-				} else {
-					projects.delete(notification.id);
-				}
-				projects = projects;
-			});
 			await projectsHubConnection.start();
-			await projectsHubConnection.invoke('SubscribeProjectNotification');
+			projectsHubConnection.stream('SubscribeProjectNotification').subscribe({
+				next: async (notification) => {
+					console.log(notification);
+					if (notification.operation == 0) {
+						let project = await ProjectsService.getProject(notification.id);
+						projects.set(project.id, project);
+					} else {
+						projects.delete(notification.id);
+					}
+					projects = projects;
+				},
+				complete: () => {},
+				error: (err) => {
+					console.log(err);
+				}
+			});
 		} catch (err) {
 			console.log(err);
 		}
@@ -46,7 +52,6 @@
 			console.log(err);
 		}
 	});
-
 	async function createProject() {
 		let project = await ProjectsService.createProject({
 			name: 'Test',
@@ -79,7 +84,9 @@
 		{#each [...projects.values()] as project}
 			<li>
 				<div class="card w-60 p-2" on:click={() => navigateToProjectDetials(project.id)}>
-					<button class="btn btn-sm btn-circle absolute right-2 top-2">
+					<button
+						class="btn btn-sm btn-circle absolute right-2 top-2"
+						on:click={() => removeProject(project.id)}>
 						<svg
 							width="24px"
 							height="24px"
