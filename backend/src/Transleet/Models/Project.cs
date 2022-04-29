@@ -6,7 +6,7 @@ namespace Transleet.Models;
 
 public record Project : IGrainWithStringKey
 {
-    public Guid Key { get; set; }
+    public Guid Id { get; set; }
     public string? DisplayName { get; set; }
     public string Name { get; set; }
     public string? Avatar { get; set; }
@@ -14,7 +14,7 @@ public record Project : IGrainWithStringKey
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
     public List<Guid>? Terms { get; set; }
-    public List<Guid>? TranslationCollections { get; set; } = null!;
+    public HashSet<Guid>? Components { get; set; }
     public short? Status { get; set; }
     public short? AccessLevel { get; set; }
     public bool? Hide { get; set; }

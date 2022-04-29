@@ -14,6 +14,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host
     .UseOrleans(siloBuilder =>
     {
+        siloBuilder.Configure<ClusterMembershipOptions>(options =>
+        {
+            options.ValidateInitialConnectivity = false;
+        });
         siloBuilder.Configure<ClusterOptions>(options =>
         {
             options.ClusterId = "dev";
@@ -41,7 +45,6 @@ builder.Host
         {
             options.Invariant = invariant;
             options.ConnectionString = connectionString;
-            options.UseJsonFormat = true;
         });
         siloBuilder.AddAdoNetGrainStorage("PubSubStore", options =>
         {

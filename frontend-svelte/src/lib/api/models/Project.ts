@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 export type Project = {
-    key?: string;
+    id?: string;
     displayName?: string | null;
     name?: string | null;
     avatar?: string | null;
@@ -11,7 +11,7 @@ export type Project = {
     createdAt?: string;
     updatedAt?: string;
     terms?: Array<string> | null;
-    translationCollections?: Array<string> | null;
+    components?: Array<string> | null;
     status?: number | null;
     accessLevel?: number | null;
     hide?: boolean | null;

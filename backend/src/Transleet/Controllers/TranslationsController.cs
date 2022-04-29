@@ -29,7 +29,6 @@ public class TranslationsController : ControllerBase
     {
         item.Key = Guid.NewGuid();
         await _factory.GetGrain<ITranslationGrain>(item.Key).SetAsync(item);
-        // ReSharper disable once Mvc.ActionNotResolved
         return CreatedAtAction(nameof(GetAsync), new { id = item.Key }, item);
     }
 

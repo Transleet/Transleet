@@ -18,9 +18,6 @@ namespace Transleet
     [StatelessWorker(1)]
     public class SearchDataUpdateGrain : Grain, ISearchDataUpdateGrain
     {
-        // quick sort
-
-
         public async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             var stream = GetStreamProvider("SMS").GetStream<ProjectNotification>();
@@ -36,16 +33,22 @@ namespace Transleet
     public class SearchDataUpdateService : BackgroundService
     {
         private readonly IGrainFactory _grainFactory;
+        private readonly IConfiguration _configuration;
 
-        public SearchDataUpdateService(IGrainFactory grainFactory)
+        public SearchDataUpdateService(IGrainFactory grainFactory, IConfiguration configuration)
         {
             _grainFactory = grainFactory;
+            _configuration = configuration;
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            var grain = _grainFactory.GetGrain<ISearchDataUpdateGrain>(Guid.Empty);
-            return grain.ExecuteAsync(stoppingToken);
+            if (_configuration.GetValue<bool>("EnableSearchService"))
+            {
+                var grain = _grainFactory.GetGrain<ISearchDataUpdateGrain>(Guid.Empty);
+                return grain.ExecuteAsync(stoppingToken);
+            }
+            return Task.CompletedTask;
         }
     }
 }

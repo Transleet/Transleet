@@ -32,7 +32,6 @@ public class ProjectsController : ControllerBase
         return project;
     }
 
-
     [HttpGet]
     [AllowAnonymous]
     [SwaggerOperation(
@@ -54,11 +53,12 @@ public class ProjectsController : ControllerBase
         OperationId = "CreateProject"
     )]
     public async Task<IActionResult> PostAsync(Project item)
-    {
-        item.Key = Guid.NewGuid();
-        await _factory.GetGrain<IProjectGrain>(item.Key).SetAsync(item);
-        // ReSharper disable once Mvc.ActionNotResolved
-        return CreatedAtAction(nameof(GetProjectAsync), new { id = item.Key }, item);
+    {   
+        item.Id = Guid.NewGuid();
+        item.CreatedAt = DateTimeOffset.Now;
+        item.UpdatedAt = DateTimeOffset.Now;
+        await _factory.GetGrain<IProjectGrain>(item.Id).SetAsync(item);
+        return CreatedAtAction(nameof(GetProjectAsync), new { id = item.Id }, item);
     }
 
     [HttpPut]
@@ -68,7 +68,7 @@ public class ProjectsController : ControllerBase
     )]
     public async Task<IActionResult> UpdateAsync(Project item)
     {
-        await _factory.GetGrain<IProjectGrain>(item.Key).SetAsync(item);
+        await _factory.GetGrain<IProjectGrain>(item.Id).SetAsync(item);
         return Ok();
     }
 

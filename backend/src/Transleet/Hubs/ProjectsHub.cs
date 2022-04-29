@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 using Orleans;
-
+using Orleans.Services;
+using Orleans.Streams;
 using Transleet.Grains;
 using Transleet.Models;
 
@@ -12,58 +13,25 @@ namespace Transleet.Hubs;
 [AllowAnonymous]
 public class ProjectsHub : Hub
 {
-    private readonly IGrainFactory _grainFactory;
+    private readonly IClusterClient _clusterClient;
+    private readonly ILogger<ProjectsHub> _logger;
 
-    public ProjectsHub(IGrainFactory grainFactory)
+    public ProjectsHub(IClusterClient clusterClient, ILogger<ProjectsHub> logger)
     {
-        _grainFactory = grainFactory;
+        _clusterClient = clusterClient;
+        _logger = logger;
     }
 
-    public Task<Project?> Get(Guid key)
+    public async Task SubscribeProjectNotification()
     {
-        var grain = _grainFactory.GetGrain<IProjectGrain>(key);
-        return grain.GetAsync();
-    }
-
-    public async IAsyncEnumerable<Project?> GetAll()
-    {
-        var keys = await _grainFactory.GetKeySet(typeof(IProjectGrain).FullName).GetAllAsync();
-        foreach (var key in keys)
+        var stream = _clusterClient.GetStreamProvider("SMS").GetStream<ProjectNotification>();
+        _logger.LogInformation("Projects Subscribed.");
+        await stream.SubscribeAsync(onNextAsync: async (item, token) =>
         {
-            var grain = _grainFactory.GetGrain<IProjectGrain>(key);
-            yield return await grain.GetAsync();
-        }
-    }
+            _logger.LogInformation("Project Changed. {ProjectId}",item.Id);
+            await Clients.All.SendAsync("ProjectUpdated", item);
+        });
 
-    public async IAsyncEnumerable<Project?> GetTopTen()
-    {
-        var keys = (await _grainFactory.GetKeySet(typeof(IProjectGrain).FullName).GetAllAsync()).TakeLast(10);
-        foreach (var key in keys)
-        {
-            var grain = _grainFactory.GetGrain<IProjectGrain>(key);
-            yield return await grain.GetAsync();
-        }
-    }
 
-    [Authorize]
-    public async Task<Project> Create(Project project)
-    {
-        project.Key = Guid.NewGuid();
-        var grain = _grainFactory.GetGrain<IProjectGrain>(project.Key);
-        await grain.SetAsync(project);
-        return project;
-    }
-
-    [Authorize]
-    public async Task Update(Project project)
-    {
-        var grain = _grainFactory.GetGrain<IProjectGrain>(project.Key);
-        await grain.SetAsync(project);
-    }
-
-    [Authorize]
-    public async Task Delete(Guid key)
-    {
-        await _grainFactory.GetGrain<IProjectGrain>(key).ClearAsync();
     }
 }
