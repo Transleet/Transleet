@@ -10,11 +10,12 @@ import { request as __request } from '../core/request';
 export class ComponentsService {
 
     /**
+     * Get a component by its id.
      * @param id 
      * @returns Component Success
      * @throws ApiError
      */
-    public static getApiComponents(
+    public static getComponent(
 id: string,
 ): CancelablePromise<Component> {
         return __request(OpenAPI, {
@@ -27,32 +28,12 @@ id: string,
     }
 
     /**
-     * @param id 
-     * @param requestBody 
-     * @returns any Success
-     * @throws ApiError
-     */
-    public static putApiComponents(
-id: string,
-requestBody?: Component,
-): CancelablePromise<any> {
-        return __request(OpenAPI, {
-            method: 'PUT',
-            url: '/api/components/{id}',
-            path: {
-                'id': id,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-
-    /**
+     * Delete a component by its id.
      * @param id 
      * @returns any Success
      * @throws ApiError
      */
-    public static deleteApiComponents(
+    public static deleteComponent(
 id: string,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
@@ -65,15 +46,45 @@ id: string,
     }
 
     /**
+     * Get all components.
+     * @returns Component Success
+     * @throws ApiError
+     */
+    public static getComponents(): CancelablePromise<Array<Component>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/components',
+        });
+    }
+
+    /**
+     * Create a new component.
      * @param requestBody 
      * @returns any Success
      * @throws ApiError
      */
-    public static postApiComponents(
+    public static createComponent(
 requestBody?: Component,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
+            url: '/api/components',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+
+    /**
+     * Update a component.
+     * @param requestBody 
+     * @returns any Success
+     * @throws ApiError
+     */
+    public static updateComponent(
+requestBody?: Component,
+): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'PUT',
             url: '/api/components',
             body: requestBody,
             mediaType: 'application/json',

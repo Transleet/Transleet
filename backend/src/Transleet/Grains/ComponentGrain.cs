@@ -37,7 +37,7 @@ namespace Transleet.Grains
         public async Task SetAsync(Component item)
         {
             // ensure the key is consistent
-            if (item.Key != GrainKey)
+            if (item.Id != GrainKey)
             {
                 throw new InvalidOperationException();
             }
@@ -47,7 +47,7 @@ namespace Transleet.Grains
 
             GetStreamProvider("SMS")
                 .GetStream<ComponentNotification>()
-                .OnNextAsync(new ComponentNotification(item.Key, item))
+                .OnNextAsync(new ComponentNotification(item.Id, item))
                 .Ignore();
         }
 
@@ -57,7 +57,7 @@ namespace Transleet.Grains
             if (_state.State.Item is null) return;
 
             // hold on to the keys
-            var itemKey = _state.State.Item.Key;
+            var itemKey = _state.State.Item.Id;
 
             // clear the state
             await _state.ClearStateAsync();

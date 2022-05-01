@@ -25,22 +25,27 @@ namespace Transleet.Grains
     public class ProjectGrain : Grain, IProjectGrain
     {
         private readonly ILogger<ProjectGrain> _logger;
-        public IPersistentState<ProjectItemState> ItemState { get; }
-        public IPersistentState<ProjectComponentsState> ComponentsState { get; }
+        private readonly IPersistentState<ProjectItemState> _itemState;
+        private int _componentCount;
+        private bool _isLocked;
 
         public ProjectGrain(
             ILogger<ProjectGrain> logger,
-            [PersistentState("ProjectItem", "Default")] IPersistentState<ProjectItemState> itemState,
-            [PersistentState("ProjectComponents", "Default")] IPersistentState<ProjectComponentsState> componentsState
+            [PersistentState("ProjectItem", "Default")] IPersistentState<ProjectItemState> itemState
             )
         {
             _logger = logger;
-            ItemState = itemState;
-            ComponentsState = componentsState;
+            _itemState = itemState;
         }
 
         private static string GrainType => typeof(IProjectGrain).FullName!;
         private Guid GrainKey => this.GetPrimaryKey();
+
+        public override Task OnActivateAsync()
+        {
+            _componentCount = _itemState.State.Item.Components.Count;
+            return Task.CompletedTask;
+        }
 
         public async Task SetAsync(Project item)
         {
@@ -49,8 +54,8 @@ namespace Transleet.Grains
                 throw new InvalidOperationException();
             }
 
-            ItemState.State.Item = item;
-            await ItemState.WriteStateAsync();
+            _itemState.State.Item = item;
+            await _itemState.WriteStateAsync();
             await GrainFactory.GetKeySet(GrainType).AddAsync(item.Id);
 
             GetStreamProvider("SMS").GetStream<ProjectNotification>()
@@ -61,11 +66,11 @@ namespace Transleet.Grains
 
         public async Task ClearAsync()
         {
-            if (ItemState.State.Item is null) return;
+            if (_itemState.State.Item is null) return;
 
-            var itemKey = ItemState.State.Item.Id;
+            var itemKey = _itemState.State.Item.Id;
             await GrainFactory.GetKeySet(GrainType).DeleteAsync(itemKey);
-            await ItemState.ClearStateAsync();
+            await _itemState.ClearStateAsync();
 
             GetStreamProvider("SMS")
                 .GetStream<ProjectNotification>()
@@ -77,25 +82,23 @@ namespace Transleet.Grains
 
         public Task<Project?> GetAsync()
         {
-            return Task.FromResult(ItemState.State.Item);
+            return Task.FromResult(_itemState.State.Item);
         }
 
         public async Task AddComponentAsync(Guid component)
         {
-            ItemState.State.Item!.Components!.Add(component);
-            ComponentsState.State.ComponentCount++;
-            await ComponentsState.WriteStateAsync();
-            await ItemState.WriteStateAsync();
+            _itemState.State.Item.Components.Add(component);
+            _componentCount++;
+            await _itemState.WriteStateAsync();
         }
 
         public async Task<bool> RemoveComponentAsync(Guid component)
         {
-            bool isSuccessful = ItemState.State.Item!.Components!.Remove(component);
+            bool isSuccessful = _itemState.State.Item.Components.Remove(component);
             if (isSuccessful)
             {
-                ComponentsState.State.ComponentCount--;
-                await ComponentsState.WriteStateAsync();
-                await ItemState.WriteStateAsync();
+                _componentCount--;
+                await _itemState.WriteStateAsync();
             }
             return isSuccessful;
         }
@@ -103,11 +106,6 @@ namespace Transleet.Grains
         public class ProjectItemState
         {
             public Project? Item { get; set; }
-        }
-
-        public class ProjectComponentsState
-        {
-            public int ComponentCount { get; set; }
         }
     }
 }

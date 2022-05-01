@@ -11,6 +11,7 @@ using Transleet.Models;
 namespace Transleet.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/components")]
 public class ComponentsController : ControllerBase
 {
@@ -22,35 +23,66 @@ public class ComponentsController : ControllerBase
     }
 
     [AllowAnonymous]
-    [SwaggerOperation(Summary = "Get component.", OperationId = "GetComponent")]
     [HttpGet("{id:guid}")]
-    public async Task<Component?> GetAsync(Guid id)
+    [SwaggerOperation(
+        Summary = "Get a component by its id.",
+        OperationId = "GetComponent"
+    )]
+    public async Task<Component?> GetComponentAsync(Guid id)
     {
         var grain = _factory.GetGrain<IComponentGrain>(id);
         var component = await grain.GetAsync();
         return component;
     }
 
-    [SwaggerOperation(Summary = "Create component.", OperationId = "CreateComponent")]
-    [HttpPost]
-    public async Task<IActionResult> PostAsync(Component item)
+    [HttpGet]
+    [AllowAnonymous]
+    [SwaggerOperation(
+        Summary = "Get all components.",
+        OperationId = "GetComponents"
+    )]
+    public async IAsyncEnumerable<Component?> GetComponentsAsync()
     {
-        item.Key = Guid.NewGuid();
-        await _factory.GetGrain<IComponentGrain>(item.Key).SetAsync(item);
-        // ReSharper disable once Mvc.ActionNotResolved
-        return CreatedAtAction(nameof(GetAsync), new { id = item.Key }, item);
+        var keys = await _factory.GetKeySet<IComponentGrain>().GetAllAsync();
+        foreach (var key in keys)
+        {
+            yield return await _factory.GetGrain<IComponentGrain>(key).GetAsync();
+        }
     }
 
-    [SwaggerOperation(Summary = "Update component.", OperationId = "UpdateComponent")]
-    [HttpPut("{id}")]
+    [SwaggerOperation(Summary = "Create component.", OperationId = "CreateComponent")]
+    [HttpPost]
+    [SwaggerOperation(
+        Summary = "Create a new component.",
+        OperationId = "CreateComponent"
+    )]
+    public async Task<IActionResult> PostAsync(Component item)
+    {
+        item.Id = Guid.NewGuid();
+        item.CreatedAt = DateTimeOffset.Now;
+        item.UpdatedAt = DateTimeOffset.Now;
+        await _factory.GetGrain<IComponentGrain>(item.Id).SetAsync(item);
+        // ReSharper disable once Mvc.ActionNotResolved
+        return CreatedAtAction(nameof(GetComponentAsync), new { id = item.Id }, item);
+    }
+
+    [HttpPut]
+    [SwaggerOperation(
+        Summary = "Update a component.",
+        OperationId = "UpdateComponent"
+    )]
     public async Task<IActionResult> UpdateAsync(Component item)
     {
-        await _factory.GetGrain<IComponentGrain>(item.Key).SetAsync(item);
+        await _factory.GetGrain<IComponentGrain>(item.Id).SetAsync(item);
         return Ok();
     }
 
     [SwaggerOperation(Summary = "Delete component.", OperationId = "DeleteComponent")]
     [HttpDelete("{id}")]
+    [SwaggerOperation(
+        Summary = "Delete a component by its id.",
+        OperationId = "DeleteComponent"
+    )]
     public Task DeleteAsync(Guid id) =>
         _factory.GetGrain<IComponentGrain>(id).ClearAsync();
 }

@@ -8,6 +8,7 @@ using Transleet.Controllers;
 using Transleet.Hubs;
 using Transleet.Models;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Transleet.Stores;
 
 namespace Transleet;
@@ -26,6 +27,7 @@ internal static class HostingExtensions
         builder.Services.AddSwaggerGen(options =>
         {
             options.EnableAnnotations();
+            options.SwaggerGeneratorOptions.Servers.Add(new OpenApiServer { Url = builder.Configuration["BackendServerUrl"] });
         });
         builder.Services.AddDataProtection();
         builder.Services.AddHttpClient();
@@ -68,7 +70,7 @@ internal static class HostingExtensions
             .AddTransient<IRoleClaimStore<Role>, OrleansRoleStore>()
             .AddSingleton<ILookupNormalizer, UpperInvariantLookupNormalizer>()
             .AddIdentity<User, Role>()
-            .AddRoleStore<OrleansRoleStore>()   
+            .AddRoleStore<OrleansRoleStore>()
             .AddUserStore<OrleansUserStore>();
 
         builder.Services.AddAuthentication(options =>

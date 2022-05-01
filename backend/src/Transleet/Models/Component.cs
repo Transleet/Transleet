@@ -5,10 +5,12 @@ namespace Transleet.Models;
 
 public class Component
 {
-    public Guid Key { get; set; }
+    public Guid Id { get; set; }
     public string? Name { get; set; }
-    public string Type { get; set; } = null!;
-    public string Path { get; set; } = null!;
-    public List<Guid> Labels { get; set; } = null!;
-    public List<Guid> Translations { get; set; } = null!;
+    public string Type { get; set; }
+    public string Path { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset UpdatedAt { get; set; }
+    public List<Guid> Labels { get; set; }
+    public List<Guid> Translations { get; set; }
 }

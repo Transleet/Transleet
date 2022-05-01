@@ -4,13 +4,11 @@
 	import { onMount } from 'svelte';
 	import type { Project } from '$lib/api';
 	import { goto } from '$app/navigation';
-	import Id from './project/[id].svelte';
 	let backend_base_url = import.meta.env.VITE_BACKEND_BASE_URL;
 	let frontend_base_url = import.meta.env.VITE_FRONTEND_BASE_URL;
 	let projects: Map<string, Project> = new Map();
 	let projectsHubConnection: signalR.HubConnection;
 	onMount(async () => {
-		OpenAPI.BASE = backend_base_url;
 		OpenAPI.TOKEN = async () => {
 			return localStorage.getItem('token');
 		};
@@ -29,7 +27,6 @@
 			await projectsHubConnection.start();
 			projectsHubConnection.stream('SubscribeProjectNotification').subscribe({
 				next: async (notification) => {
-					console.log(notification);
 					if (notification.operation == 0) {
 						let project = await ProjectsService.getProject(notification.id);
 						projects.set(project.id, project);

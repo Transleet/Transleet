@@ -7,10 +7,8 @@
 	import { OpenAPI } from '$lib/api';
 	let avatarUrl;
 	let islogin: boolean;
-	let backend_base_url = import.meta.env.VITE_BACKEND_BASE_URL;
 	let frontend_base_url = import.meta.env.VITE_FRONTEND_BASE_URL;
 	onMount(() => {
-		OpenAPI.BASE = backend_base_url;
 		OpenAPI.TOKEN = async () => {
 			return localStorage.getItem('token');
 		};

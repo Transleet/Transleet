@@ -21,8 +21,8 @@ namespace Transleet.Hubs
         [Authorize]
         public async Task<Component> Create(Component component)
         {
-            component.Key = Guid.NewGuid();
-            var grain = _grainFactory.GetGrain<IComponentGrain>(component.Key);
+            component.Id = Guid.NewGuid();
+            var grain = _grainFactory.GetGrain<IComponentGrain>(component.Id);
             await grain.SetAsync(component);
             return component;
         }
@@ -36,7 +36,7 @@ namespace Transleet.Hubs
         [Authorize]
         public async Task Update(Component component)
         {
-            var grain = _grainFactory.GetGrain<IComponentGrain>(component.Key);
+            var grain = _grainFactory.GetGrain<IComponentGrain>(component.Id);
             await grain.SetAsync(component);
         }
 
