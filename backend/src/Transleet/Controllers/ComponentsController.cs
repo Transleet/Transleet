@@ -49,8 +49,7 @@ public class ComponentsController : ControllerBase
             yield return await _factory.GetGrain<IComponentGrain>(key).GetAsync();
         }
     }
-
-    [SwaggerOperation(Summary = "Create component.", OperationId = "CreateComponent")]
+    
     [HttpPost]
     [SwaggerOperation(
         Summary = "Create a new component.",
@@ -77,7 +76,6 @@ public class ComponentsController : ControllerBase
         return Ok();
     }
 
-    [SwaggerOperation(Summary = "Delete component.", OperationId = "DeleteComponent")]
     [HttpDelete("{id}")]
     [SwaggerOperation(
         Summary = "Delete a component by its id.",
