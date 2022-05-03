@@ -1,9 +1,4 @@
-﻿#nullable enable
-using System.ComponentModel.DataAnnotations;
-
-using Orleans;
-
-namespace Transleet.Models;
+﻿namespace Transleet.Models;
 
 public class Translation
 {

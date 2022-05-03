@@ -1,49 +1,30 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
+﻿using System.Threading.Channels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using Orleans;
-using Transleet.Grains;
 using Transleet.Models;
+using Transleet.Services;
 
-namespace Transleet.Hubs
+namespace Transleet.Hubs;
+
+[AllowAnonymous]
+public class ComponentsHub : Hub
 {
-    public class ComponentsHub:Hub
+    private readonly ILogger<ComponentsHub> _logger;
+    private readonly IComponentService _service;
+
+    public ComponentsHub(ILogger<ComponentsHub> logger, IComponentService service)
     {
-        private readonly IGrainFactory _grainFactory;
+        _logger = logger;
+        _service = service;
+    }
 
-        public ComponentsHub(IGrainFactory grainFactory)
+    public ChannelReader<ComponentNotification> Subscribe()
+    {
+        var channel = Channel.CreateUnbounded<ComponentNotification>();
+        _service.Subscribe(async n =>
         {
-            _grainFactory = grainFactory;
-        }
-
-        [Authorize]
-        public async Task<Component> Create(Component component)
-        {
-            component.Id = Guid.NewGuid();
-            var grain = _grainFactory.GetGrain<IComponentGrain>(component.Id);
-            await grain.SetAsync(component);
-            return component;
-        }
-
-        public Task<Component?> Get(Guid key)
-        {
-            var grain = _grainFactory.GetGrain<IComponentGrain>(key);
-            return grain.GetAsync();
-        }
-
-        [Authorize]
-        public async Task Update(Component component)
-        {
-            var grain = _grainFactory.GetGrain<IComponentGrain>(component.Id);
-            await grain.SetAsync(component);
-        }
-
-        [Authorize]
-        public async Task Delete(Guid key)
-        {
-            await _grainFactory.GetGrain<IComponentGrain>(key).ClearAsync();
-        }
+            await channel.Writer.WriteAsync(n);
+        });
+        return channel.Reader;
     }
 }

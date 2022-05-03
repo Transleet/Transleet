@@ -2,11 +2,17 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import type { Label } from './Label';
+import type { ObjectId } from './ObjectId';
+import type { Translation } from './Translation';
+
 export type Component = {
-    id?: string;
+    id?: ObjectId;
+    version?: number;
+    projectId?: ObjectId;
     name?: string | null;
     createdAt?: string;
     updatedAt?: string;
-    labels?: Array<string> | null;
-    translations?: Array<string> | null;
+    labels?: Array<Label> | null;
+    translations?: Array<Translation> | null;
 };

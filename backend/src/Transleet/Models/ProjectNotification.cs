@@ -1,8 +1,6 @@
-﻿using Orleans;
-using Orleans.Concurrency;
+﻿
+using MongoDB.Bson;
 
-namespace Transleet.Models
-{
-    [Immutable]
-    public record ProjectNotification(Guid Id, NotificationOperation Operation);
-}
+namespace Transleet.Models;
+
+public record ProjectNotification(ObjectId Id, NotificationOperation Operation);

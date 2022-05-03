@@ -1,8 +1,7 @@
-﻿namespace Transleet.Models
+﻿namespace Transleet.Models;
+
+public enum NotificationOperation
 {
-    public enum NotificationOperation
-    {
-        CreatedOrUpdated,
-        Removed,
-    }
+    CreatedOrUpdated,
+    Removed,
 }

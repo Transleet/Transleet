@@ -1,15 +1,57 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { ComponentsService, ProjectsService, type Component, type Project } from '$lib/api';
+	import * as signalR from '@microsoft/signalr';
 	import { onMount } from 'svelte';
-	let project: Project;
+	let componentsHubConnnection: signalR.HubConnection;
+	let backend_base_url = import.meta.env.VITE_BACKEND_BASE_URL;
+	let frontend_base_url = import.meta.env.VITE_FRONTEND_BASE_URL;
+	let project:Project;
+	let components:Map<string,Component>;
 	let componentName;
 	onMount(async () => {
-		project = await ProjectsService.getProject($page.params.id);
+		project = await ProjectsService.getProjectById($page.params.id);
+		components = new Map(project.components.map((item) => [item.id, item]));
+		try {
+			componentsHubConnnection = new signalR.HubConnectionBuilder()
+				.withUrl(backend_base_url + '/api/hubs/components', {
+					accessTokenFactory: () => localStorage.getItem('token')
+				})
+				.configureLogging(signalR.LogLevel.Information)
+				.build();
+		} catch (err) {
+			console.log(err);
+		}
+		try {
+			await componentsHubConnnection.start();
+			componentsHubConnnection.stream('Subscribe').subscribe({
+				next: async (notification) => {
+					console.log(notification);
+					if (notification.operation == 'CreatedOrUpdated') {
+						let component = await ComponentsService.getComponentById(notification.id);
+						components.set(notification.id, component);
+					} else {
+						components.delete(notification.id);
+					}
+					components = components;
+				},
+				complete: () => {},
+				error: (err) => {
+					console.log(err);
+				}
+			});
+		} catch (err) {
+			console.log(err);
+		}
 	});
+
 	async function createComponent(name: string) {
-		let component = await ComponentsService.createComponent({ name });
-		project.components = [...project.components, component.id];
+		let component = await ComponentsService.createComponent({
+			name: name,
+			projectId: project.id
+		});
+		project.components = [...project.components, component];
+		components.set(component.id, component);
 		await ProjectsService.updateProject(project);
 	}
 </script>
@@ -29,14 +71,12 @@
 		</script>
 		<input bind:value={componentName} />
 		<button on:click={() => createComponent(componentName)}>New Component</button>
-		{#if project?.components}
+		{#if components}
 			<ul>
-				{#each project.components as componentId}
-					{#await ComponentsService.getComponent(componentId) then component}
-						<li>
-							<h4>{component.name}</h4>
-						</li>
-					{/await}
+				{#each [...components.values()] as component}
+					<li>
+						<h4>{component.name}</h4>
+					</li>
 				{/each}
 			</ul>
 		{/if}

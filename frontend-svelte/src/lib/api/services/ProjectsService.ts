@@ -1,6 +1,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { ObjectId } from '../models/ObjectId';
 import type { Project } from '../models/Project';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -10,13 +11,14 @@ import { request as __request } from '../core/request';
 export class ProjectsService {
 
     /**
-     * Get a project by its id.
      * @param id 
+     * @param requestBody 
      * @returns Project Success
      * @throws ApiError
      */
-    public static getProject(
+    public static getProjectById(
 id: string,
+requestBody?: ObjectId,
 ): CancelablePromise<Project> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -24,17 +26,20 @@ id: string,
             path: {
                 'id': id,
             },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
 
     /**
-     * Delete a project by its id.
      * @param id 
+     * @param requestBody 
      * @returns any Success
      * @throws ApiError
      */
-    public static deleteProject(
+    public static deleteProjectById(
 id: string,
+requestBody?: ObjectId,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'DELETE',
@@ -42,15 +47,16 @@ id: string,
             path: {
                 'id': id,
             },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
 
     /**
-     * Get projects.
      * @returns Project Success
      * @throws ApiError
      */
-    public static getProjects(): CancelablePromise<Array<Project>> {
+    public static getAllProjects(): CancelablePromise<Array<Project>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/projects',
@@ -58,7 +64,6 @@ id: string,
     }
 
     /**
-     * Create a new project.
      * @param requestBody 
      * @returns any Success
      * @throws ApiError
@@ -75,7 +80,6 @@ requestBody?: Project,
     }
 
     /**
-     * Update a project.
      * @param requestBody 
      * @returns any Success
      * @throws ApiError

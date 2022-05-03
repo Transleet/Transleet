@@ -1,7 +1,4 @@
-﻿using Orleans.Concurrency;
+﻿
+namespace Transleet.Models;
 
-namespace Transleet.Models
-{
-    [Immutable]
-    public record TranslationNotification(Guid Id, Translation? Item);
-}
+public record TranslationNotification(Guid Id, Translation? Item);

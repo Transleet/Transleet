@@ -2,6 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { Component } from '../models/Component';
+import type { ObjectId } from '../models/ObjectId';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -10,13 +11,14 @@ import { request as __request } from '../core/request';
 export class ComponentsService {
 
     /**
-     * Get a component by its id.
      * @param id 
+     * @param requestBody 
      * @returns Component Success
      * @throws ApiError
      */
-    public static getComponent(
+    public static getComponentById(
 id: string,
+requestBody?: ObjectId,
 ): CancelablePromise<Component> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -24,17 +26,20 @@ id: string,
             path: {
                 'id': id,
             },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
 
     /**
-     * Delete a component by its id.
      * @param id 
+     * @param requestBody 
      * @returns any Success
      * @throws ApiError
      */
-    public static deleteComponent(
+    public static deleteComponentById(
 id: string,
+requestBody?: ObjectId,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'DELETE',
@@ -42,11 +47,12 @@ id: string,
             path: {
                 'id': id,
             },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
 
     /**
-     * Create a new component.
      * @param requestBody 
      * @returns any Success
      * @throws ApiError
@@ -63,7 +69,6 @@ requestBody?: Component,
     }
 
     /**
-     * Update a component.
      * @param requestBody 
      * @returns any Success
      * @throws ApiError

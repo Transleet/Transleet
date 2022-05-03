@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Orleans;
+using MongoDB.Bson;
 using Swashbuckle.AspNetCore.Annotations;
-using Transleet.Grains;
 using Transleet.Models;
+using Transleet.Repositories;
+using Transleet.Services;
 
 namespace Transleet.Controllers;
 
@@ -12,57 +13,33 @@ namespace Transleet.Controllers;
 [Route("api/components")]
 public class ComponentsController : ControllerBase
 {
-    private readonly IGrainFactory _factory;
+    private readonly IComponentService _service;
 
-    public ComponentsController(IGrainFactory factory)
-    {
-        _factory = factory;
-    }
+    public ComponentsController(IComponentService service) => _service = service;
 
     [AllowAnonymous]
-    [HttpGet("{id:guid}")]
-    [SwaggerOperation(
-        Summary = "Get a component by its id.",
-        OperationId = "GetComponent"
-    )]
-    public async Task<Component?> GetComponentAsync(Guid id)
+    [HttpGet("{id:length(24)}",Name = "GetComponentById")]
+    public Task<Component> GetComponentAsync(ObjectId id)
     {
-        var grain = _factory.GetGrain<IComponentGrain>(id);
-        var component = await grain.GetAsync();
-        return component;
+        return _service.GetByIdAsync(id);
     }
 
-    [HttpPost]
-    [SwaggerOperation(
-        Summary = "Create a new component.",
-        OperationId = "CreateComponent"
-    )]
+    [HttpPost(Name = "CreateComponent")]
     public async Task<IActionResult> PostAsync(Component item)
     {
-        item.Id = Guid.NewGuid();
-        item.CreatedAt = DateTimeOffset.Now;
-        item.UpdatedAt = DateTimeOffset.Now;
-        await _factory.GetGrain<IComponentGrain>(item.Id).SetAsync(item);
-        // ReSharper disable once Mvc.ActionNotResolved
+        await _service.AddAsync(item);
         return CreatedAtAction(nameof(GetComponentAsync), new { id = item.Id }, item);
     }
 
-    [HttpPut]
-    [SwaggerOperation(
-        Summary = "Update a component.",
-        OperationId = "UpdateComponent"
-    )]
-    public async Task<IActionResult> UpdateAsync(Component item)
+    [HttpPut(Name = "UpdateComponent")]
+    public Task UpdateAsync(Component item)
     {
-        await _factory.GetGrain<IComponentGrain>(item.Id).SetAsync(item);
-        return Ok();
+        return _service.UpdateAsync(item);
     }
 
-    [HttpDelete("{id}")]
-    [SwaggerOperation(
-        Summary = "Delete a component by its id.",
-        OperationId = "DeleteComponent"
-    )]
-    public Task DeleteAsync(Guid id) =>
-        _factory.GetGrain<IComponentGrain>(id).ClearAsync();
+    [HttpDelete("{id:length(24)}",Name = "DeleteComponentById")]
+    public Task DeleteAsync(ObjectId id)
+    {
+        return _service.DeleteByIdAsync(id);
+    }
 }

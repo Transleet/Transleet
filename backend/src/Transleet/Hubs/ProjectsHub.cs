@@ -1,36 +1,29 @@
 ﻿using System.Threading.Channels;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-
-using Orleans;
-using Orleans.Services;
-using Orleans.Streams;
-using Transleet.Grains;
 using Transleet.Models;
+using Transleet.Services;
 
 namespace Transleet.Hubs;
 
 [AllowAnonymous]
 public class ProjectsHub : Hub
 {
-    private readonly IClusterClient _clusterClient;
     private readonly ILogger<ProjectsHub> _logger;
+    private readonly IProjectService _service;
 
-    public ProjectsHub(IClusterClient clusterClient, ILogger<ProjectsHub> logger)
+    public ProjectsHub(ILogger<ProjectsHub> logger, IProjectService service)
     {
-        _clusterClient = clusterClient;
         _logger = logger;
+        _service = service;
     }
 
-    public async Task<ChannelReader<ProjectNotification>> SubscribeProjectNotification()
+    public ChannelReader<ProjectNotification> Subscribe()
     {
-        var stream = _clusterClient.GetStreamProvider("SMS").GetStream<ProjectNotification>();
         var channel = Channel.CreateUnbounded<ProjectNotification>();
-        _logger.LogInformation("Projects Subscribed.");
-        await stream.SubscribeAsync(onNextAsync: async (item, token) =>
+        _service.Subscribe(async n =>
         {
-            await channel.Writer.WriteAsync(item);
+            await channel.Writer.WriteAsync(n);
         });
         return channel.Reader;
     }

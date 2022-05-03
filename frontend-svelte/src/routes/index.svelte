@@ -25,10 +25,11 @@
 
 		try {
 			await projectsHubConnection.start();
-			projectsHubConnection.stream('SubscribeProjectNotification').subscribe({
+			projectsHubConnection.stream('Subscribe').subscribe({
 				next: async (notification) => {
-					if (notification.operation == 0) {
-						let project = await ProjectsService.getProject(notification.id);
+					console.log(notification);
+					if (notification.operation == "CreatedOrUpdated") {
+						let project = await ProjectsService.getProjectById(notification.id);
 						projects.set(project.id, project);
 					} else {
 						projects.delete(notification.id);
@@ -44,7 +45,8 @@
 			console.log(err);
 		}
 		try {
-			projects = new Map((await ProjectsService.getProjects([])).map((item) => [item.id, item]));
+			projects = new Map((await ProjectsService.getAllProjects()).map((item) => [item.id, item]));
+			console.log(projects);
 		} catch (err) {
 			console.log(err);
 		}
@@ -53,7 +55,7 @@
 		let project = await ProjectsService.createProject({
 			name: 'Test',
 			description: 'You mother fucker.',
-			components: new Array()
+			components:[]
 		});
 		projects.set(project.id, project);
 		projects = projects;
@@ -62,7 +64,7 @@
 	async function removeProject(id: string) {
 		if (projects.size > 0) {
 			if (projects.delete(id)) {
-				await ProjectsService.deleteProject(id);
+				await ProjectsService.deleteProjectById(id);
 				projects = projects;
 			}
 		}

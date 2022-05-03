@@ -1,12 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Linq.Expressions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-using Orleans;
-
+using MongoDB.Bson;
 using Swashbuckle.AspNetCore.Annotations;
-
-using Transleet.Grains;
 using Transleet.Models;
+using Transleet.Repositories;
+using Transleet.Services;
 
 namespace Transleet.Controllers;
 
@@ -15,74 +14,48 @@ namespace Transleet.Controllers;
 [Route("api/projects")]
 public class ProjectsController : ControllerBase
 {
-    private readonly IGrainFactory _factory;
+    private readonly IProjectService _service;
+    private readonly ILogger<ProjectsController> _logger;
+    
 
-    public ProjectsController(IGrainFactory factory)
+    public ProjectsController(IProjectService service, ILogger<ProjectsController> logger)
     {
-        _factory = factory;
+        _service = service;
+        _logger = logger;
     }
 
     [AllowAnonymous]
-    [HttpGet("{id:guid}")]
-    [SwaggerOperation(
-        Summary = "Get a project by its id.",
-        OperationId = "GetProject"
-    )]
-    public async Task<Project?> GetProjectAsync(Guid id)
+    [HttpGet("{id:length(24)}",Name = "GetProjectById")]
+    public Task<Project> GetProjectAsync(ObjectId id)
     {
-        var grain = _factory.GetGrain<IProjectGrain>(id);
-        var project = await grain.GetAsync();
-        return project;
+        return _service.GetByIdAsync(id);
     }
 
-    [HttpGet]
+    [HttpGet(Name = "GetAllProjects")]
     [AllowAnonymous]
-    [SwaggerOperation(
-        Summary = "Get projects.",
-        OperationId = "GetProjects"
-    )]
-    public async IAsyncEnumerable<Project?> GetProjectsAsync()
+    public IAsyncEnumerable<Project> GetProjectsAsync()
     {
-        var keys = await _factory.GetKeySet<IProjectGrain>().GetAllAsync();
-        foreach (var key in keys)
-        {
-            yield return await _factory.GetGrain<IProjectGrain>(key).GetAsync();
-        }
-
-
+        return _service.GetAllAsync();
     }
 
-    [HttpPost]
-    [SwaggerOperation(
-        Summary = "Create a new project.",
-        OperationId = "CreateProject"
-    )]
+    [HttpPost(Name = "CreateProject")]
     public async Task<IActionResult> PostAsync(Project item)
     {
-        item.Id = Guid.NewGuid();
-        item.CreatedAt = DateTimeOffset.Now;
-        item.UpdatedAt = DateTimeOffset.Now;
-        await _factory.GetGrain<IProjectGrain>(item.Id).SetAsync(item);
-        // ReSharper disable once Mvc.ActionNotResolved
+        await _service.AddAsync(item);
         return CreatedAtAction(nameof(GetProjectAsync), new { id = item.Id }, item);
     }
 
-    [HttpPut]
-    [SwaggerOperation(
-        Summary = "Update a project.",
-        OperationId = "UpdateProject"
-    )]
+    [HttpPut(Name = "UpdateProject")]
     public async Task<IActionResult> UpdateAsync(Project item)
     {
-        await _factory.GetGrain<IProjectGrain>(item.Id).SetAsync(item);
+        await _service.UpdateAsync(item);
         return Ok();
     }
 
-    [HttpDelete("{id}")]
-    [SwaggerOperation(
-        Summary = "Delete a project by its id.",
-        OperationId = "DeleteProject"
-    )]
-    public Task DeleteAsync(Guid id) =>
-        _factory.GetGrain<IProjectGrain>(id).ClearAsync();
+    [HttpDelete("{id:length(24)}",Name = "DeleteProjectById")]
+    public Task DeleteAsync(ObjectId id)
+    {
+        return _service.DeleteByIdAsync(id);
+    }
+
 }

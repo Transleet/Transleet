@@ -1,14 +1,21 @@
 ﻿#nullable enable
 using System.ComponentModel.DataAnnotations;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using MongoDbGenericRepository.Models;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Transleet.Models;
 
-public class Component
+public class Component : IDocument<ObjectId>
 {
-    public Guid Id { get; set; }
+    [Key]
+    public ObjectId Id { get; set; }
+    public int Version { get; set; }
+    public ObjectId ProjectId { get; set; }
     public string? Name { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
-    public List<Guid>? Labels { get; set; }
-    public List<Guid>? Translations { get; set; }
+    public List<Label>? Labels { get; set; }
+    public List<Translation>? Translations { get; set; }
 }

@@ -1,15 +1,18 @@
 using System.Text;
-using Microsoft.AspNetCore.Authentication;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Serilog;
-using Transleet.Controllers;
 using Transleet.Hubs;
 using Transleet.Models;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Transleet.Stores;
+using MongoDB.Bson;
+using MongoDbGenericRepository;
+using Transleet.Repositories;
+using Transleet.Services;
 
 namespace Transleet;
 
@@ -19,19 +22,30 @@ internal static class HostingExtensions
     {
         // Add services to the container.
         builder.Services.AddControllers(options =>
+        {
+            options.SuppressAsyncSuffixInActionNames = false;
+            options.ModelBinderProviders.Insert(0,new ObjectIdModelBinderProvider());
+        })
+            .AddJsonOptions(options =>
             {
-                options.SuppressAsyncSuffixInActionNames = false;
-            })
-            .AddApplicationPart(typeof(OAuthController).Assembly);
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                options.JsonSerializerOptions.Converters.Add(new JsonObjectIdConverter());
+            });
+
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(options =>
         {
             options.EnableAnnotations();
             options.SwaggerGeneratorOptions.Servers.Add(new OpenApiServer { Url = builder.Configuration["BackendServerUrl"] });
+            options.SchemaFilter<ObjectIdSchemaFilter>();
         });
         builder.Services.AddDataProtection();
         builder.Services.AddHttpClient();
-        builder.Services.AddSignalR();
+        builder.Services.AddSignalR().AddJsonProtocol(options =>
+        {
+            options.PayloadSerializerOptions.Converters.Add(new JsonObjectIdConverter());
+            options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        });
 
         builder.Services.Configure<IdentityOptions>(options =>
         {
@@ -65,13 +79,9 @@ internal static class HostingExtensions
             options.Key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(builder.Configuration["Authentication:JwtBearer:Key"]));
         });
-
-        builder.Services
-            .AddTransient<IRoleClaimStore<Role>, OrleansRoleStore>()
-            .AddSingleton<ILookupNormalizer, UpperInvariantLookupNormalizer>()
-            .AddIdentity<User, Role>()
-            .AddRoleStore<OrleansRoleStore>()
-            .AddUserStore<OrleansUserStore>();
+        var mongoDbContext = new MongoDbContext(builder.Configuration["Database:ConnectionString"], builder.Configuration["Database:Name"]);
+        builder.Services.AddIdentity<User, Role>()
+            .AddMongoDbStores<User, Role, ObjectId>(mongoDbContext);
 
         builder.Services.AddAuthentication(options =>
             {
@@ -125,6 +135,11 @@ internal static class HostingExtensions
                         .AllowCredentials();
                 });
         });
+        
+        builder.Services.AddSingleton<IProjectRepository, ProjectRepository>();
+        builder.Services.AddSingleton<IComponentRepository, ComponentRepository>();
+        builder.Services.AddSingleton<IProjectService, ProjectService>();
+        builder.Services.AddSingleton<IComponentService, ComponentService>();
         builder.Services.AddHostedService<SearchDataUpdateService>();
         return builder.Build();
     }
@@ -150,9 +165,6 @@ internal static class HostingExtensions
         {
             endpoints.MapHub<ProjectsHub>("/api/hubs/projects");
             endpoints.MapHub<ComponentsHub>("/api/hubs/components");
-            endpoints.MapHub<TranslationsHub>("/api/hubs/translations");
-            endpoints.MapHub<EntriesHub>("/api/hubs/entries");
-            endpoints.MapHub<UsersHub>("/api/hubs/users");
             endpoints.MapControllers();
         });
         return app;

@@ -1,6 +1,5 @@
-﻿namespace Transleet.Models
+﻿namespace Transleet.Models;
+
+public class Organization
 {
-    public class Organization
-    {
-    }
 }

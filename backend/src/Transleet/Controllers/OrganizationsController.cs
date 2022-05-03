@@ -1,6 +1,5 @@
-﻿namespace Transleet.Controllers
+﻿namespace Transleet.Controllers;
+
+public class OrganizationsController
 {
-    public class OrganizationsController
-    {
-    }
 }

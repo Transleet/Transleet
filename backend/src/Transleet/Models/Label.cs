@@ -1,10 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
-
-using Orleans;
-
 namespace Transleet.Models;
 
-public class Label : IGrainWithStringKey
+public class Label
 {
     [Key]
     public string? Id { get; set; }
