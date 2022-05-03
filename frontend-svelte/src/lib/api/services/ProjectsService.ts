@@ -46,7 +46,7 @@ id: string,
     }
 
     /**
-     * Get all projects.
+     * Get projects.
      * @returns Project Success
      * @throws ApiError
      */

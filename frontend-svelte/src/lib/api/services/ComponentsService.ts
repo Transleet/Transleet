@@ -46,18 +46,6 @@ id: string,
     }
 
     /**
-     * Get all components.
-     * @returns Component Success
-     * @throws ApiError
-     */
-    public static getComponents(): CancelablePromise<Array<Component>> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/components',
-        });
-    }
-
-    /**
      * Create a new component.
      * @param requestBody 
      * @returns any Success

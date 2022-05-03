@@ -31,24 +31,6 @@ public class TranslationsController : ControllerBase
         return translation;
     }
 
-    [AllowAnonymous]
-    [SwaggerOperation(Summary = "Filter translations with locale.", OperationId = "FilterTranslationsWithLocale")]
-    [HttpGet("{id:guid}")]
-    public async IAsyncEnumerable<Translation?> GetAllWithLocaleAsync(Guid[] guids, Locale locale)
-    {
-        foreach (Guid guid in guids)
-        {
-            var grains = _factory.GetGrain<ITranslationGrain>(guid);
-            var translation = await grains.GetAsync();
-            if (!Equals(translation!.To.Locale, locale))
-            {
-                continue;
-            }
-
-            yield return translation;
-        }
-    }
-
     [SwaggerOperation(Summary = "Create translation.", OperationId = "CreateTranslation")]
     [HttpPost]
     public async Task<IActionResult> PostAsync(Translation item)

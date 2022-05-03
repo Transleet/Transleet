@@ -26,7 +26,6 @@ namespace Transleet.Grains
     {
         private readonly ILogger<ProjectGrain> _logger;
         private readonly IPersistentState<ProjectItemState> _itemState;
-        private int _componentCount;
         private bool _isLocked;
 
         public ProjectGrain(
@@ -43,7 +42,6 @@ namespace Transleet.Grains
 
         public override Task OnActivateAsync()
         {
-            _componentCount = _itemState.State.Item.Components.Count;
             return Task.CompletedTask;
         }
 
@@ -88,7 +86,6 @@ namespace Transleet.Grains
         public async Task AddComponentAsync(Guid component)
         {
             _itemState.State.Item.Components.Add(component);
-            _componentCount++;
             await _itemState.WriteStateAsync();
         }
 
@@ -97,7 +94,6 @@ namespace Transleet.Grains
             bool isSuccessful = _itemState.State.Item.Components.Remove(component);
             if (isSuccessful)
             {
-                _componentCount--;
                 await _itemState.WriteStateAsync();
             }
             return isSuccessful;

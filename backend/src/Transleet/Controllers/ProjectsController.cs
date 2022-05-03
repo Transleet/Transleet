@@ -38,7 +38,7 @@ public class ProjectsController : ControllerBase
     [HttpGet]
     [AllowAnonymous]
     [SwaggerOperation(
-        Summary = "Get all projects.",
+        Summary = "Get projects.",
         OperationId = "GetProjects"
     )]
     public async IAsyncEnumerable<Project?> GetProjectsAsync()
@@ -48,6 +48,8 @@ public class ProjectsController : ControllerBase
         {
             yield return await _factory.GetGrain<IProjectGrain>(key).GetAsync();
         }
+
+
     }
 
     [HttpPost]

@@ -3,5 +3,4 @@
 /* eslint-disable */
 
 export type Locale = {
-    id?: string | null;
 };

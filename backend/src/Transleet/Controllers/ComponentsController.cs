@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
 using Orleans;
-
 using Swashbuckle.AspNetCore.Annotations;
-
 using Transleet.Grains;
 using Transleet.Models;
 
@@ -35,21 +32,6 @@ public class ComponentsController : ControllerBase
         return component;
     }
 
-    [HttpGet]
-    [AllowAnonymous]
-    [SwaggerOperation(
-        Summary = "Get all components.",
-        OperationId = "GetComponents"
-    )]
-    public async IAsyncEnumerable<Component?> GetComponentsAsync()
-    {
-        var keys = await _factory.GetKeySet<IComponentGrain>().GetAllAsync();
-        foreach (var key in keys)
-        {
-            yield return await _factory.GetGrain<IComponentGrain>(key).GetAsync();
-        }
-    }
-    
     [HttpPost]
     [SwaggerOperation(
         Summary = "Create a new component.",

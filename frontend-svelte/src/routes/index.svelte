@@ -44,7 +44,7 @@
 			console.log(err);
 		}
 		try {
-			projects = new Map((await ProjectsService.getProjects()).map((item) => [item.id, item]));
+			projects = new Map((await ProjectsService.getProjects([])).map((item) => [item.id, item]));
 		} catch (err) {
 			console.log(err);
 		}
@@ -52,7 +52,8 @@
 	async function createProject() {
 		let project = await ProjectsService.createProject({
 			name: 'Test',
-			description: 'You mother fucker.'
+			description: 'You mother fucker.',
+			components: new Array()
 		});
 		projects.set(project.id, project);
 		projects = projects;

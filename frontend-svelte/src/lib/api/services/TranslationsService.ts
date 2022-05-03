@@ -10,11 +10,12 @@ import { request as __request } from '../core/request';
 export class TranslationsService {
 
     /**
+     * Get translation.
      * @param id 
      * @returns Translation Success
      * @throws ApiError
      */
-    public static getApiTranslations(
+    public static getTranslation(
 id: string,
 ): CancelablePromise<Translation> {
         return __request(OpenAPI, {
@@ -27,12 +28,13 @@ id: string,
     }
 
     /**
+     * Update translation.
      * @param id 
      * @param requestBody 
      * @returns any Success
      * @throws ApiError
      */
-    public static putApiTranslations(
+    public static updateTranslation(
 id: string,
 requestBody?: Translation,
 ): CancelablePromise<any> {
@@ -48,11 +50,12 @@ requestBody?: Translation,
     }
 
     /**
+     * Delete translation.
      * @param id 
      * @returns any Success
      * @throws ApiError
      */
-    public static deleteApiTranslations(
+    public static deleteTranslation(
 id: string,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
@@ -65,11 +68,12 @@ id: string,
     }
 
     /**
+     * Create translation.
      * @param requestBody 
      * @returns any Success
      * @throws ApiError
      */
-    public static postApiTranslations(
+    public static createTranslation(
 requestBody?: Translation,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {

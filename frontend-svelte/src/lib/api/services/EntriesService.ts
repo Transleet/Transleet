@@ -10,11 +10,12 @@ import { request as __request } from '../core/request';
 export class EntriesService {
 
     /**
+     * Get entry.
      * @param id 
      * @returns Entry Success
      * @throws ApiError
      */
-    public static getApiEntries(
+    public static getEntry(
 id: string,
 ): CancelablePromise<Entry> {
         return __request(OpenAPI, {
@@ -27,12 +28,13 @@ id: string,
     }
 
     /**
+     * Update entry.
      * @param id 
      * @param requestBody 
      * @returns any Success
      * @throws ApiError
      */
-    public static putApiEntries(
+    public static updateEntry(
 id: string,
 requestBody?: Entry,
 ): CancelablePromise<any> {
@@ -48,11 +50,12 @@ requestBody?: Entry,
     }
 
     /**
+     * Delete entry.
      * @param id 
      * @returns any Success
      * @throws ApiError
      */
-    public static deleteApiEntries(
+    public static deleteEntry(
 id: string,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
@@ -65,11 +68,12 @@ id: string,
     }
 
     /**
+     * Create entry.
      * @param requestBody 
      * @returns any Success
      * @throws ApiError
      */
-    public static postApiEntries(
+    public static createEntry(
 requestBody?: Entry,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
