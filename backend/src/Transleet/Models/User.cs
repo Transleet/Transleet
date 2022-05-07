@@ -1,11 +1,12 @@
 ﻿using System.Text.Json.Serialization;
-using AspNetCore.Identity.MongoDbCore.Models;
 using Microsoft.AspNetCore.Identity;
 using MongoDB.Bson;
+using Transleet.AspNetCore.Identity.MongoDbCore.Models;
+using Transleet.MongoDbGenericRepository.Models;
 
 namespace Transleet.Models;
 
-public class User : MongoIdentityUser<ObjectId>
+public class User : MongoIdentityUser
 {
     public GithubUserInfo? GithubUserInfo { get; set; }
 

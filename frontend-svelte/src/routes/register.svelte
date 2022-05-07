@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { user } from '$lib/stores';
 
 	import axios from 'axios';
 	let username: string;
@@ -18,8 +19,8 @@
 			password: password
 		});
 		console.log(loginResponse);
-		localStorage.setItem('token', loginResponse.data.token);
-		goto(frontend_base_url+'/register_confirm');
+		$user.token = loginResponse.data.token;
+		goto(frontend_base_url + '/register_confirm');
 	}
 </script>
 

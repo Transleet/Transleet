@@ -1,16 +1,13 @@
 <script lang="ts">
 	import 'virtual:windi.css';
-	import { page } from '$app/stores';
-	import { base, assets } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { OpenAPI } from '$lib/api';
-	let avatarUrl;
-	let islogin: boolean;
+	import { user } from '$lib/stores';
 	let frontend_base_url = import.meta.env.VITE_FRONTEND_BASE_URL;
 	onMount(() => {
 		OpenAPI.TOKEN = async () => {
-			return localStorage.getItem('token');
+			return $user.token;
 		};
 	});
 </script>
@@ -26,7 +23,7 @@
 				<input type="text" placeholder="Search" class="input input-bordered" />
 			</div>
 			<div class="dropdown dropdown-end">
-				{#if islogin}
+				{#if $user.isLogin}
 					<label tabindex="0" class="btn btn-ghost btn-circle avatar">
 						<div class="w-10 rounded-full">
 							<!-- <img src="https://api.lorem.space/image/face?hash=33791"> -->

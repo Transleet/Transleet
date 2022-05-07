@@ -1,13 +1,10 @@
-﻿#nullable enable
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-using MongoDbGenericRepository.Models;
-using Swashbuckle.AspNetCore.Annotations;
+using Transleet.MongoDbGenericRepository.Models;
 
 namespace Transleet.Models;
 
-public class Component : IDocument<ObjectId>
+public class Component : IDocument
 {
     [Key]
     public ObjectId Id { get; set; }

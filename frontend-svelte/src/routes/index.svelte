@@ -4,13 +4,14 @@
 	import { onMount } from 'svelte';
 	import type { Project } from '$lib/api';
 	import { goto } from '$app/navigation';
+	import { user } from '$lib/stores';
 	let backend_base_url = import.meta.env.VITE_BACKEND_BASE_URL;
 	let frontend_base_url = import.meta.env.VITE_FRONTEND_BASE_URL;
 	let projects: Map<string, Project> = new Map();
 	let projectsHubConnection: signalR.HubConnection;
 	onMount(async () => {
 		OpenAPI.TOKEN = async () => {
-			return localStorage.getItem('token');
+			return $user.token;
 		};
 		try {
 			projectsHubConnection = new signalR.HubConnectionBuilder()
@@ -28,7 +29,7 @@
 			projectsHubConnection.stream('Subscribe').subscribe({
 				next: async (notification) => {
 					console.log(notification);
-					if (notification.operation == "CreatedOrUpdated") {
+					if (notification.operation == 'Added' || notification.operation == 'Updated') {
 						let project = await ProjectsService.getProjectById(notification.id);
 						projects.set(project.id, project);
 					} else {
@@ -55,7 +56,7 @@
 		let project = await ProjectsService.createProject({
 			name: 'Test',
 			description: 'You mother fucker.',
-			components:[]
+			components: []
 		});
 		projects.set(project.id, project);
 		projects = projects;
@@ -88,7 +89,7 @@
 						class="btn btn-sm btn-circle absolute right-2 top-2"
 						on:click|stopPropagation={() => removeProject(project.id)}>
 						<svg
-							width="24px"	
+							width="24px"
 							height="24px"
 							viewBox="0 0 24 24"
 							fill="none"

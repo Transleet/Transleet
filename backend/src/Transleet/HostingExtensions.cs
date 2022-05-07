@@ -10,9 +10,9 @@ using Transleet.Models;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MongoDB.Bson;
-using MongoDbGenericRepository;
-using Transleet.Repositories;
+using Transleet.MongoDbGenericRepository;
 using Transleet.Services;
+using Transleet.AspNetCore.Identity.MongoDbCore.Extensions;
 
 namespace Transleet;
 
@@ -24,7 +24,7 @@ internal static class HostingExtensions
         builder.Services.AddControllers(options =>
         {
             options.SuppressAsyncSuffixInActionNames = false;
-            options.ModelBinderProviders.Insert(0,new ObjectIdModelBinderProvider());
+            options.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
         })
             .AddJsonOptions(options =>
             {
@@ -79,9 +79,14 @@ internal static class HostingExtensions
             options.Key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(builder.Configuration["Authentication:JwtBearer:Key"]));
         });
-        var mongoDbContext = new MongoDbContext(builder.Configuration["Database:ConnectionString"], builder.Configuration["Database:Name"]);
+        builder.Services.AddMongoDbContext(options =>
+        {
+            options.ConnectionString = builder.Configuration["Database:ConnectionString"];
+            options.DatabaseName = builder.Configuration["Database:Name"];
+        });
+
         builder.Services.AddIdentity<User, Role>()
-            .AddMongoDbStores<User, Role, ObjectId>(mongoDbContext);
+            .AddMongoDbStores<User, Role>();
 
         builder.Services.AddAuthentication(options =>
             {
@@ -135,9 +140,9 @@ internal static class HostingExtensions
                         .AllowCredentials();
                 });
         });
-        
-        builder.Services.AddSingleton<IProjectRepository, ProjectRepository>();
-        builder.Services.AddSingleton<IComponentRepository, ComponentRepository>();
+
+        builder.Services.AddMongoRepository<Project>();
+        builder.Services.AddMongoRepository<Component>();
         builder.Services.AddSingleton<IProjectService, ProjectService>();
         builder.Services.AddSingleton<IComponentService, ComponentService>();
         builder.Services.AddHostedService<SearchDataUpdateService>();

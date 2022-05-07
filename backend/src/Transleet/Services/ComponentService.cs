@@ -1,7 +1,7 @@
 ﻿using System.Reactive.Subjects;
 using MongoDB.Bson;
 using Transleet.Models;
-using Transleet.Repositories;
+using Transleet.MongoDbGenericRepository.Abstractions;
 
 namespace Transleet.Services
 {
@@ -17,12 +17,12 @@ namespace Transleet.Services
 
     public class ComponentService : IComponentService
     {
-        private readonly IComponentRepository _componentRepository;
+        private readonly IMongoRepository<Component> _componentRepository;
         private readonly IProjectService _projectService;
         private readonly ILogger<ComponentService> _logger;
         private readonly ISubject<ComponentNotification> _subject;
 
-        public ComponentService(IComponentRepository componentRepository, IProjectService projectService, ILogger<ComponentService> logger)
+        public ComponentService(IMongoRepository<Component> componentRepository, IProjectService projectService, ILogger<ComponentService> logger)
         {
             _componentRepository = componentRepository;
             _projectService = projectService;
@@ -44,7 +44,7 @@ namespace Transleet.Services
 
         public Task<Component> GetByIdAsync(ObjectId id)
         {
-            return _componentRepository.GetByIdAsync<Component>(id);
+            return _componentRepository.GetByIdAsync(id);
         }
 
         public async Task AddAsync(Component item)
@@ -53,18 +53,18 @@ namespace Transleet.Services
             item.CreatedAt = DateTimeOffset.Now;
             item.UpdatedAt =DateTimeOffset.Now;
             await _componentRepository.AddOneAsync(item);
-            _subject.OnNext(new ComponentNotification(item.Id,NotificationOperation.CreatedOrUpdated));
+            _subject.OnNext(new ComponentNotification(item.Id,NotificationOperation.Added));
         }
 
         public async Task UpdateAsync(Component item)
         {
             await _componentRepository.UpdateOneAsync(item);
-            _subject.OnNext(new ComponentNotification(item.Id,NotificationOperation.CreatedOrUpdated));
+            _subject.OnNext(new ComponentNotification(item.Id,NotificationOperation.Updated));
         }
 
         public async Task DeleteByIdAsync(ObjectId id)
         {
-            await _componentRepository.DeleteOneAsync<Component>(_ => _.Id == id);
+            await _componentRepository.DeleteOneAsync(_ => _.Id == id);
             _subject.OnNext(new ComponentNotification(id,NotificationOperation.Removed));
         }
 

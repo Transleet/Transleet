@@ -21,6 +21,7 @@ specifiers:
   prettier-plugin-svelte: ^2.7.0
   svelte: ^3.48.0
   svelte-check: ^2.7.0
+  svelte-local-storage-store: ^0.2.6
   svelte-preprocess: ^4.10.6
   tslib: ^2.4.0
   typescript: ~4.5.5
@@ -31,7 +32,7 @@ specifiers:
 devDependencies:
   '@microsoft/signalr': 6.0.4
   '@sveltejs/adapter-node': 1.0.0-next.73
-  '@sveltejs/kit': 1.0.0-next.324_svelte@3.48.0
+  '@sveltejs/kit': 1.0.0-next.326_svelte@3.48.0
   '@typescript-eslint/eslint-plugin': 5.21.0_7fb52627ca92f3ca6f9e828172c768cf
   '@typescript-eslint/parser': 5.21.0_eslint@7.32.0+typescript@4.5.5
   autoprefixer: 10.4.5_postcss@8.4.13
@@ -49,6 +50,7 @@ devDependencies:
   prettier-plugin-svelte: 2.7.0_prettier@2.6.2+svelte@3.48.0
   svelte: 3.48.0
   svelte-check: 2.7.0_postcss@8.4.13+svelte@3.48.0
+  svelte-local-storage-store: 0.2.6_svelte@3.48.0
   svelte-preprocess: 4.10.6_4be263995dddad8577f3fd7500a1e547
   tslib: 2.4.0
   typescript: 4.5.5
@@ -176,8 +178,8 @@ packages:
       tiny-glob: 0.2.9
     dev: true
 
-  /@sveltejs/kit/1.0.0-next.324_svelte@3.48.0:
-    resolution: {integrity: sha512-/CGW9rQpHQLBb2EcMw08yelD/C9hTsypymctUWdhryMTI8n1VWb0gkUcSHsz8n8oAAbKLXqwyHqeLATfcIMg2w==}
+  /@sveltejs/kit/1.0.0-next.326_svelte@3.48.0:
+    resolution: {integrity: sha512-prJqmXZ2H1wmFfnMw7wDujfbkcA8vuubuqUkpVVmXhfh2+SEzQscPTNwxoE5EJxb5sywtLWEvYx3hv1gPS4Lvg==}
     engines: {node: '>=14.13'}
     hasBin: true
     peerDependencies:
@@ -2110,6 +2112,15 @@ packages:
     engines: {node: ^12.20 || ^14.13.1 || >= 16}
     peerDependencies:
       svelte: '>=3.19.0'
+    dependencies:
+      svelte: 3.48.0
+    dev: true
+
+  /svelte-local-storage-store/0.2.6_svelte@3.48.0:
+    resolution: {integrity: sha512-7QLCZ4V/0ydvZRyVChNYx7gVkprzrkACD63PpZINy5oFv9nE+5CAP94QN3NBI2awPeDB+cpUzNCB4Q0Yjr9CYQ==}
+    engines: {node: '>=0.14'}
+    peerDependencies:
+      svelte: ^3.44.1
     dependencies:
       svelte: 3.48.0
     dev: true

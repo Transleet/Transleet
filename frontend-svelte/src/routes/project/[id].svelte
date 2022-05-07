@@ -6,8 +6,8 @@
 	let componentsHubConnnection: signalR.HubConnection;
 	let backend_base_url = import.meta.env.VITE_BACKEND_BASE_URL;
 	let frontend_base_url = import.meta.env.VITE_FRONTEND_BASE_URL;
-	let project:Project;
-	let components:Map<string,Component>;
+	let project: Project;
+	let components: Map<string, Component>;
 	let componentName;
 	onMount(async () => {
 		project = await ProjectsService.getProjectById($page.params.id);
@@ -27,7 +27,7 @@
 			componentsHubConnnection.stream('Subscribe').subscribe({
 				next: async (notification) => {
 					console.log(notification);
-					if (notification.operation == 'CreatedOrUpdated') {
+					if (notification.operation == 'Added' || notification.operation == 'Updated') {
 						let component = await ComponentsService.getComponentById(notification.id);
 						components.set(notification.id, component);
 					} else {

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using Swashbuckle.AspNetCore.Annotations;
 using Transleet.Models;
-using Transleet.Repositories;
 using Transleet.Services;
 
 namespace Transleet.Controllers;

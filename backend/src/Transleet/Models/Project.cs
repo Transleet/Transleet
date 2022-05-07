@@ -1,13 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using MongoDbGenericRepository.Models;
+using MongoDB.Driver;
 using Swashbuckle.AspNetCore.Annotations;
+using Transleet.MongoDbGenericRepository.Models;
 
 namespace Transleet.Models;
 
-[SwaggerSchema()]
-public class Project:IDocument<ObjectId>
+public class Project : IDocument
 {
     [Key]
     public ObjectId Id { get; set; }

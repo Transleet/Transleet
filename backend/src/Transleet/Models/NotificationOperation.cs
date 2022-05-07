@@ -2,6 +2,7 @@
 
 public enum NotificationOperation
 {
-    CreatedOrUpdated,
+    Added,
+    Updated,
     Removed,
 }

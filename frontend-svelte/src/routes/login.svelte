@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { user } from '$lib/stores';
 	import axios from 'axios';
 	let inputText: string;
 	let password: string;
@@ -10,8 +11,7 @@
 			inputText: inputText,
 			password: password
 		});
-		console.log(loginResponse);
-		localStorage.setItem('token', loginResponse.data.token);
+		$user.token = loginResponse.data.token;
 	}
 	async function githubLogin() {
 		goto(

@@ -3,7 +3,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using MongoDB.Bson;
 using Transleet.Models;
-using Transleet.Repositories;
+using Transleet.MongoDbGenericRepository.Abstractions;
 
 namespace Transleet.Services
 {
@@ -19,11 +19,11 @@ namespace Transleet.Services
 
     public class ProjectService:IProjectService
     {
-        private readonly IProjectRepository _repository;
+        private readonly IMongoRepository<Project> _repository;
         private readonly ILogger<ProjectService> _logger;
         private readonly ISubject<ProjectNotification> _subject;
 
-        public ProjectService(IProjectRepository repository, ILogger<ProjectService> logger)
+        public ProjectService(IMongoRepository<Project> repository, ILogger<ProjectService> logger)
         {
             _repository = repository;
             _logger = logger;
@@ -33,7 +33,7 @@ namespace Transleet.Services
 
         public async IAsyncEnumerable<Project> GetAllAsync()
         {
-            foreach (var item in await _repository.GetAllAsync<Project>(_=>true))
+            foreach (var item in await _repository.GetAllAsync(_=>true))
             {
                 yield return item;
             }
@@ -41,7 +41,7 @@ namespace Transleet.Services
 
         public Task<Project> GetByIdAsync(ObjectId id)
         {
-            return _repository.GetByIdAsync<Project>(id);
+            return _repository.GetByIdAsync(id);
         }
 
         public async Task AddAsync(Project item)
@@ -50,19 +50,19 @@ namespace Transleet.Services
             item.CreatedAt = DateTimeOffset.Now;
             item.UpdatedAt = DateTimeOffset.Now;
             await _repository.AddOneAsync(item);
-            _subject.OnNext(new ProjectNotification(item.Id, NotificationOperation.CreatedOrUpdated));
+            _subject.OnNext(new ProjectNotification(item.Id, NotificationOperation.Added));
 
         }
 
         public async Task UpdateAsync(Project item)
         {
             await _repository.UpdateOneAsync(item);
-            _subject.OnNext(new ProjectNotification(item.Id, NotificationOperation.CreatedOrUpdated));
+            _subject.OnNext(new ProjectNotification(item.Id, NotificationOperation.Updated));
         }
 
         public async Task DeleteByIdAsync(ObjectId id)
         {
-            await _repository.DeleteOneAsync<Project>(_ => _.Id == id);
+            await _repository.DeleteOneAsync(_ => _.Id == id);
             _subject.OnNext(new ProjectNotification(id, NotificationOperation.Removed));
         }
 
