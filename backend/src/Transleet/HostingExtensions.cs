@@ -44,7 +44,10 @@ internal static class HostingExtensions
 
         builder.Services.AddDbContext<AppDbContext>(options =>
         {
-            options.UseSqlServer(builder.Configuration["Database:ConnectionString"]);
+            options.UseNpgsql(builder.Configuration["Database:ConnectionString"], npgsqlOptions =>
+            {
+                AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior",true);
+            });
         });
 
         builder.Services.AddIdentity<User, IdentityRole>(options =>
