@@ -3,7 +3,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { defineStore } from 'pinia';
-import { Project } from 'src/lib/api';
+import { Component, Project } from 'src/lib/api';
+
 export const useCacheStore = defineStore('cache', {
   state: () => ({
     home: {
@@ -12,6 +13,7 @@ export const useCacheStore = defineStore('cache', {
     },
     project: {
       main: null as Project | null,
+      components: new Map<string, Component>(),
       edit: false,
     },
     users: {
@@ -29,6 +31,19 @@ export const useCacheStore = defineStore('cache', {
             project.id = '';
           }
           return [project.id, project];
+        })
+      );
+    },
+    getProjectComponents(): Component[] {
+      return [...this.project.components.values()];
+    },
+    setProjectComponents(components: Component[]): void {
+      this.project.components = new Map(
+        components.map((component) => {
+          if (component.key === undefined) {
+            component.key = '';
+          }
+          return [component.key, component];
         })
       );
     },

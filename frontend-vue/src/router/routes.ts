@@ -20,7 +20,10 @@ const routes: RouteRecordRaw[] = [
             component: () => import('components/project/Description.vue'),
           },
           { path: 'history', component: () => import('pages/Project.vue') },
-          { path: 'files', component: () => import('pages/Project.vue') },
+          {
+            path: 'files',
+            component: () => import('components/project/Components.vue'),
+          },
           { path: 'terms', component: () => import('pages/Project.vue') },
           { path: 'memory', component: () => import('pages/Project.vue') },
         ],
