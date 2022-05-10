@@ -5,11 +5,6 @@
 	import { OpenAPI } from '$lib/api';
 	import { user } from '$lib/stores';
 	let frontend_base_url = import.meta.env.VITE_FRONTEND_BASE_URL;
-	onMount(() => {
-		OpenAPI.TOKEN = async () => {
-			return $user.token;
-		};
-	});
 </script>
 
 <header>
