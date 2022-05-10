@@ -11,7 +11,8 @@
 	let componentName;
 	onMount(async () => {
 		project = await ProjectsService.getProjectById($page.params.id);
-		components = new Map(project.components.map((item) => [item.id, item]));
+		console.log(project);
+		components = new Map(project.components?.map((item) => [item.id, item]));
 		try {
 			componentsHubConnnection = new signalR.HubConnectionBuilder()
 				.withUrl(backend_base_url + '/api/hubs/components', {
@@ -46,13 +47,18 @@
 	});
 
 	async function createComponent(name: string) {
-		let component = await ComponentsService.createComponent({
-			name: name,
-			projectId: project.id
-		});
-		project.components = [...project.components, component];
+		let component: Component = {
+			name: name
+		};
+		component = await ComponentsService.createComponent(component);
+		if (project.components) {
+			project.components = [...project.components, component];
+		} else {
+			project.components = [component];
+		}
 		components.set(component.id, component);
 		await ProjectsService.updateProject(project);
+		components = components;
 	}
 </script>
 

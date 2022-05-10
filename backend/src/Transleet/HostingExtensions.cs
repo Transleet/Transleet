@@ -3,16 +3,14 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Transleet.Hubs;
 using Transleet.Models;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using MongoDB.Bson;
-using Transleet.MongoDbGenericRepository;
 using Transleet.Services;
-using Transleet.AspNetCore.Identity.MongoDbCore.Extensions;
 
 namespace Transleet;
 
@@ -24,12 +22,10 @@ internal static class HostingExtensions
         builder.Services.AddControllers(options =>
         {
             options.SuppressAsyncSuffixInActionNames = false;
-            options.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
         })
             .AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-                options.JsonSerializerOptions.Converters.Add(new JsonObjectIdConverter());
             });
 
         builder.Services.AddEndpointsApiExplorer();
@@ -37,19 +33,22 @@ internal static class HostingExtensions
         {
             options.EnableAnnotations();
             options.SwaggerGeneratorOptions.Servers.Add(new OpenApiServer { Url = builder.Configuration["BackendServerUrl"] });
-            options.SchemaFilter<ObjectIdSchemaFilter>();
+            
         });
         builder.Services.AddDataProtection();
         builder.Services.AddHttpClient();
         builder.Services.AddSignalR().AddJsonProtocol(options =>
         {
-            options.PayloadSerializerOptions.Converters.Add(new JsonObjectIdConverter());
             options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter());
         });
 
-        builder.Services.Configure<IdentityOptions>(options =>
+        builder.Services.AddDbContext<AppDbContext>(options =>
         {
-            // Password settings.
+            options.UseSqlServer(builder.Configuration["Database:ConnectionString"]);
+        });
+
+        builder.Services.AddIdentity<User, IdentityRole>(options =>
+        {
             options.Password.RequireDigit = false;
             options.Password.RequireLowercase = false;
             options.Password.RequireNonAlphanumeric = false;
@@ -57,17 +56,15 @@ internal static class HostingExtensions
             options.Password.RequiredLength = 6;
             options.Password.RequiredUniqueChars = 0;
 
-            // Lockout settings.
             options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
             options.Lockout.MaxFailedAccessAttempts = 5;
             options.Lockout.AllowedForNewUsers = true;
 
-            // User settings.
             options.User.AllowedUserNameCharacters =
                 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_";
             options.User.RequireUniqueEmail = false;
-
-        });
+        }).AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders(); ;
 
         builder.Services
             .Configure<GithubOAuthOptions>(builder.Configuration.GetSection("Authentication:GitHub"));
@@ -79,14 +76,6 @@ internal static class HostingExtensions
             options.Key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(builder.Configuration["Authentication:JwtBearer:Key"]));
         });
-        builder.Services.AddMongoDbContext(options =>
-        {
-            options.ConnectionString = builder.Configuration["Database:ConnectionString"];
-            options.DatabaseName = builder.Configuration["Database:Name"];
-        });
-
-        builder.Services.AddIdentity<User, Role>()
-            .AddMongoDbStores<User, Role>();
 
         builder.Services.AddAuthentication(options =>
             {
@@ -140,11 +129,9 @@ internal static class HostingExtensions
                         .AllowCredentials();
                 });
         });
-
-        builder.Services.AddMongoRepository<Project>();
-        builder.Services.AddMongoRepository<Component>();
-        builder.Services.AddSingleton<IProjectService, ProjectService>();
-        builder.Services.AddSingleton<IComponentService, ComponentService>();
+        
+        builder.Services.AddScoped<IProjectService, ProjectService>();
+        builder.Services.AddScoped<IComponentService, ComponentService>();
         builder.Services.AddHostedService<SearchDataUpdateService>();
         return builder.Build();
     }

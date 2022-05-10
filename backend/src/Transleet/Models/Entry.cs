@@ -1,11 +1,12 @@
 ﻿#nullable enable
 
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Transleet.Models;
 
 public class Entry
 {
-    public Guid Key { get; set; }
-
-    public string Text { get; set; } = null!;
-    public Locale Locale { get; set; } = null!;
+    public Guid Id { get; set; }
+    public string Text { get; set; }
+    public Locale Locale { get; set; }
 }

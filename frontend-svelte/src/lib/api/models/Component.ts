@@ -3,13 +3,11 @@
 /* eslint-disable */
 
 import type { Label } from './Label';
-import type { ObjectId } from './ObjectId';
 import type { Translation } from './Translation';
 
 export type Component = {
-    id?: ObjectId;
+    id?: string;
     version?: number;
-    projectId?: ObjectId;
     name?: string | null;
     createdAt?: string;
     updatedAt?: string;

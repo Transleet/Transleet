@@ -6,5 +6,5 @@ public class Locale
 {
 
     [Key]
-    public string Id { get; }
+    public Guid Id { get; set; }
 }

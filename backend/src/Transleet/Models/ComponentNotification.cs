@@ -1,5 +1,3 @@
-﻿using MongoDB.Bson;
+﻿namespace Transleet.Models;
 
-namespace Transleet.Models;
-
-public record ComponentNotification(ObjectId Id, NotificationOperation Operation);
+public record ComponentNotification(Guid Id, NotificationOperation Operation);

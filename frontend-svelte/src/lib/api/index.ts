@@ -7,10 +7,7 @@ export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { Component } from './models/Component';
-export type { Entry } from './models/Entry';
 export type { Label } from './models/Label';
-export type { Locale } from './models/Locale';
-export type { ObjectId } from './models/ObjectId';
 export type { Project } from './models/Project';
 export type { RegisterResource } from './models/RegisterResource';
 export type { Term } from './models/Term';

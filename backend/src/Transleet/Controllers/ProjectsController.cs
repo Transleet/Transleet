@@ -1,8 +1,5 @@
-﻿using System.Linq.Expressions;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Bson;
-using Swashbuckle.AspNetCore.Annotations;
 using Transleet.Models;
 using Transleet.Services;
 
@@ -24,8 +21,8 @@ public class ProjectsController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpGet("{id:length(24)}",Name = "GetProjectById")]
-    public Task<Project> GetProjectAsync(ObjectId id)
+    [HttpGet("{id:guid}", Name = "GetProjectById")]
+    public Task<Project?> GetProjectAsync(Guid id)
     {
         return _service.GetByIdAsync(id);
     }
@@ -38,21 +35,21 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpPost(Name = "CreateProject")]
-    public async Task<IActionResult> PostAsync(Project item)
+    public async Task<IActionResult> CreateProjectAsync(Project item)
     {
         await _service.AddAsync(item);
         return CreatedAtAction(nameof(GetProjectAsync), new { id = item.Id }, item);
     }
 
     [HttpPut(Name = "UpdateProject")]
-    public async Task<IActionResult> UpdateAsync(Project item)
+    public async Task<IActionResult> UpdateProjectAsync(Project item)
     {
         await _service.UpdateAsync(item);
         return Ok();
     }
 
-    [HttpDelete("{id:length(24)}",Name = "DeleteProjectById")]
-    public Task DeleteAsync(ObjectId id)
+    [HttpDelete("{id:guid}", Name = "DeleteProjectById")]
+    public Task DeleteProjectAsync(Guid id)
     {
         return _service.DeleteByIdAsync(id);
     }

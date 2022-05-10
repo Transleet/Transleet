@@ -89,30 +89,28 @@ public class OAuthController : ControllerBase
             await userEmailsResponse.Content.ReadFromJsonAsync<List<GithubEmailInfo>>(
                 cancellationToken: HttpContext.RequestAborted);
         var primaryEmail = userInfo.Emails!.FirstOrDefault(_ => _.Primary = true);
-        var user = await _userManager.FindByEmailAsync(primaryEmail!.Email);
+        var user = await _userManager.FindByEmailAsync(primaryEmail!.Email!);
         if (user is null)
         {
             user = new User()
             {
                 UserName = userInfo.Name,
                 Email = primaryEmail.Email,
-                EmailConfirmed = true,
-                GithubUserInfo = userInfo
+                EmailConfirmed = true
             };
             await _userManager.CreateAsync(user);
         }
-        await _signInManager.SignInAsync(user, true);
+        await _signInManager.SignInAsync(user, false);
         var tokenHandler = new JwtSecurityTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor()
         {
             Issuer = _jwtBearerOptions.CurrentValue.Issuer,
             Audience = _jwtBearerOptions.CurrentValue.Audience,
             Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, user.UserName!), new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), new Claim(ClaimTypes.Email, user.Email!) }),
-            Expires = DateTime.UtcNow.AddDays(7),
+            Expires = DateTimeOffset.Now.AddDays(7).DateTime,
             SigningCredentials =
                 new SigningCredentials(_jwtBearerOptions.CurrentValue.Key, SecurityAlgorithms.HmacSha256)
         };
-        await _signInManager.SignInAsync(user, true);
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return Ok(new { token = tokenHandler.WriteToken(token) });
     }

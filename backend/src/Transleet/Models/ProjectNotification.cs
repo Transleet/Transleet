@@ -1,6 +1,3 @@
-﻿
-using MongoDB.Bson;
+﻿namespace Transleet.Models;
 
-namespace Transleet.Models;
-
-public record ProjectNotification(ObjectId Id, NotificationOperation Operation);
+public record ProjectNotification(Guid Id, NotificationOperation Operation);

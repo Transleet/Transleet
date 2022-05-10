@@ -1,69 +1,70 @@
-﻿using System.Reactive;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using MongoDB.Bson;
+﻿using System.Reactive.Subjects;
+using Microsoft.EntityFrameworkCore;
 using Transleet.Models;
-using Transleet.MongoDbGenericRepository.Abstractions;
 
 namespace Transleet.Services
 {
     public interface IProjectService
     {
         IAsyncEnumerable<Project> GetAllAsync();
-        Task<Project> GetByIdAsync(ObjectId id);
+        Task<Project?> GetByIdAsync(Guid id);
         Task AddAsync(Project item);
         Task UpdateAsync(Project item);
-        Task DeleteByIdAsync(ObjectId id);
+        Task DeleteByIdAsync(Guid id);
         void Subscribe(Action<ProjectNotification> onNext);
     }
 
     public class ProjectService:IProjectService
     {
-        private readonly IMongoRepository<Project> _repository;
+        private readonly AppDbContext _dbContext;
         private readonly ILogger<ProjectService> _logger;
         private readonly ISubject<ProjectNotification> _subject;
 
-        public ProjectService(IMongoRepository<Project> repository, ILogger<ProjectService> logger)
+        public ProjectService(AppDbContext dbContext, ILogger<ProjectService> logger)
         {
-            _repository = repository;
+            _dbContext = dbContext;
             _logger = logger;
             _subject = new Subject<ProjectNotification>();
 
         }
 
-        public async IAsyncEnumerable<Project> GetAllAsync()
+        public  IAsyncEnumerable<Project> GetAllAsync() 
         {
-            foreach (var item in await _repository.GetAllAsync(_=>true))
-            {
-                yield return item;
-            }
+            return _dbContext.Projects.AsAsyncEnumerable();
         }
 
-        public Task<Project> GetByIdAsync(ObjectId id)
+        public Task<Project?> GetByIdAsync(Guid id)
         {
-            return _repository.GetByIdAsync(id);
+            return _dbContext.Projects.Include(_=>_.Components).FirstOrDefaultAsync(_=>_.Id==id);
         }
 
         public async Task AddAsync(Project item)
         {
-            item.Id = ObjectId.GenerateNewId();
             item.CreatedAt = DateTimeOffset.Now;
             item.UpdatedAt = DateTimeOffset.Now;
-            await _repository.AddOneAsync(item);
+            await _dbContext.AddAsync(item);
+            await _dbContext.SaveChangesAsync();
             _subject.OnNext(new ProjectNotification(item.Id, NotificationOperation.Added));
 
         }
 
         public async Task UpdateAsync(Project item)
         {
-            await _repository.UpdateOneAsync(item);
+            _dbContext.Projects.Update(item);
+            await _dbContext.SaveChangesAsync();
             _subject.OnNext(new ProjectNotification(item.Id, NotificationOperation.Updated));
         }
 
-        public async Task DeleteByIdAsync(ObjectId id)
+        public async Task DeleteByIdAsync(Guid id)
         {
-            await _repository.DeleteOneAsync(_ => _.Id == id);
-            _subject.OnNext(new ProjectNotification(id, NotificationOperation.Removed));
+            var item = await _dbContext.Projects.FindAsync(id);
+            if (item != null)
+            {
+                _dbContext.Projects.Remove(item);
+                await _dbContext.SaveChangesAsync();
+                _subject.OnNext(new ProjectNotification(id, NotificationOperation.Removed));
+            }
+            
         }
 
         public void Subscribe(Action<ProjectNotification> onNext)

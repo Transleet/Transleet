@@ -2,7 +2,5 @@
 
 public class Translation
 {
-    public Guid Key { get; set; }
-    public Entry From { get; set; } = null!;
-    public Entry To { get; set; } = null!;
+    public Guid Id { get; set; }
 }

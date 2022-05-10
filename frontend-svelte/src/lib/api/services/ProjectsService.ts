@@ -1,7 +1,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { ObjectId } from '../models/ObjectId';
 import type { Project } from '../models/Project';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -12,13 +11,11 @@ export class ProjectsService {
 
     /**
      * @param id 
-     * @param requestBody 
      * @returns Project Success
      * @throws ApiError
      */
     public static getProjectById(
 id: string,
-requestBody?: ObjectId,
 ): CancelablePromise<Project> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -26,20 +23,16 @@ requestBody?: ObjectId,
             path: {
                 'id': id,
             },
-            body: requestBody,
-            mediaType: 'application/json',
         });
     }
 
     /**
      * @param id 
-     * @param requestBody 
      * @returns any Success
      * @throws ApiError
      */
     public static deleteProjectById(
 id: string,
-requestBody?: ObjectId,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'DELETE',
@@ -47,8 +40,6 @@ requestBody?: ObjectId,
             path: {
                 'id': id,
             },
-            body: requestBody,
-            mediaType: 'application/json',
         });
     }
 

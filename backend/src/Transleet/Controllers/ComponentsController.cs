@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Bson;
-using Swashbuckle.AspNetCore.Annotations;
 using Transleet.Models;
 using Transleet.Services;
 
@@ -17,8 +15,8 @@ public class ComponentsController : ControllerBase
     public ComponentsController(IComponentService service) => _service = service;
 
     [AllowAnonymous]
-    [HttpGet("{id:length(24)}",Name = "GetComponentById")]
-    public Task<Component> GetComponentAsync(ObjectId id)
+    [HttpGet("{id:guid}",Name = "GetComponentById")]
+    public Task<Component?> GetComponentAsync(Guid id)
     {
         return _service.GetByIdAsync(id);
     }
@@ -36,8 +34,8 @@ public class ComponentsController : ControllerBase
         return _service.UpdateAsync(item);
     }
 
-    [HttpDelete("{id:length(24)}",Name = "DeleteComponentById")]
-    public Task DeleteAsync(ObjectId id)
+    [HttpDelete("{id:guid}", Name = "DeleteComponentById")]
+    public Task DeleteAsync(Guid id)
     {
         return _service.DeleteByIdAsync(id);
     }

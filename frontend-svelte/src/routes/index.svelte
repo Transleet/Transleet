@@ -55,8 +55,7 @@
 	async function createProject() {
 		let project = await ProjectsService.createProject({
 			name: 'Test',
-			description: 'You mother fucker.',
-			components: []
+			description: 'You mother fucker.'
 		});
 		projects.set(project.id, project);
 		projects = projects;

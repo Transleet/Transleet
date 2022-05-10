@@ -1,71 +1,63 @@
 ﻿using System.Reactive.Subjects;
-using MongoDB.Bson;
+using Microsoft.EntityFrameworkCore;
 using Transleet.Models;
-using Transleet.MongoDbGenericRepository.Abstractions;
 
 namespace Transleet.Services
 {
     public interface IComponentService
     {
-        IAsyncEnumerable<Component> GetAllByProjectIdAsync(ObjectId projectId);
-        Task<Component> GetByIdAsync(ObjectId id);
+        Task<Component?> GetByIdAsync(Guid id);
         Task AddAsync(Component item);
         Task UpdateAsync(Component item);
-        Task DeleteByIdAsync(ObjectId id);
+        Task DeleteByIdAsync(Guid id);
         void Subscribe(Action<ComponentNotification> onNext);
     }
 
     public class ComponentService : IComponentService
     {
-        private readonly IMongoRepository<Component> _componentRepository;
+        private readonly AppDbContext _dbContext;
         private readonly IProjectService _projectService;
         private readonly ILogger<ComponentService> _logger;
         private readonly ISubject<ComponentNotification> _subject;
 
-        public ComponentService(IMongoRepository<Component> componentRepository, IProjectService projectService, ILogger<ComponentService> logger)
+        public ComponentService(AppDbContext dbContext, IProjectService projectService, ILogger<ComponentService> logger)
         {
-            _componentRepository = componentRepository;
+            _dbContext = dbContext;
             _projectService = projectService;
             _logger = logger;
             _subject = new Subject<ComponentNotification>();
         }
 
-        public async IAsyncEnumerable<Component> GetAllByProjectIdAsync(ObjectId projectId)
+        public Task<Component?> GetByIdAsync(Guid id)
         {
-            var project = await _projectService.GetByIdAsync(projectId);
-            if (project.Components is not null)
-            {
-                foreach (var item in project.Components)
-                {
-                    yield return item;
-                }
-            }
-        }
-
-        public Task<Component> GetByIdAsync(ObjectId id)
-        {
-            return _componentRepository.GetByIdAsync(id);
+            return _dbContext.Components.FindAsync(id).AsTask();
         }
 
         public async Task AddAsync(Component item)
         {
-            item.Id = ObjectId.GenerateNewId();
             item.CreatedAt = DateTimeOffset.Now;
             item.UpdatedAt =DateTimeOffset.Now;
-            await _componentRepository.AddOneAsync(item);
+            await _dbContext.Components.AddAsync(item);
+            await _dbContext.SaveChangesAsync();
             _subject.OnNext(new ComponentNotification(item.Id,NotificationOperation.Added));
         }
 
         public async Task UpdateAsync(Component item)
         {
-            await _componentRepository.UpdateOneAsync(item);
+            _dbContext.Components.Update(item);
+            await _dbContext.SaveChangesAsync();
             _subject.OnNext(new ComponentNotification(item.Id,NotificationOperation.Updated));
         }
 
-        public async Task DeleteByIdAsync(ObjectId id)
+        public async Task DeleteByIdAsync(Guid id)
         {
-            await _componentRepository.DeleteOneAsync(_ => _.Id == id);
-            _subject.OnNext(new ComponentNotification(id,NotificationOperation.Removed));
+            var item = await _dbContext.Components.FindAsync(id);
+            if (item != null)
+            {
+                _dbContext.Components.Remove(item);
+                await _dbContext.SaveChangesAsync();
+                _subject.OnNext(new ComponentNotification(id, NotificationOperation.Removed));
+            }
         }
 
         public void Subscribe(Action<ComponentNotification> onNext)

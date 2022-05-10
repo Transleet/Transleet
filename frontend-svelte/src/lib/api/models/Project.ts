@@ -3,11 +3,10 @@
 /* eslint-disable */
 
 import type { Component } from './Component';
-import type { ObjectId } from './ObjectId';
 import type { Term } from './Term';
 
 export type Project = {
-    id?: ObjectId;
+    id?: string;
     version?: number;
     displayName?: string | null;
     name?: string | null;

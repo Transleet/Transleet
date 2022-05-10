@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 export type Label = {
-    id?: string | null;
+    id?: string;
     name?: string | null;
     type?: string | null;
     description?: string | null;

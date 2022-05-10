@@ -2,14 +2,11 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { Entry } from './Entry';
+import type { Label } from './Label';
 
 export type Term = {
-    key?: string | null;
+    id?: string;
     type?: string | null;
-    from?: Entry;
-    to?: Entry;
-    labels?: Array<string> | null;
+    labels?: Array<Label> | null;
     description?: string | null;
-    variants?: Array<string> | null;
 };

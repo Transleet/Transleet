@@ -1,16 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Driver;
-using Swashbuckle.AspNetCore.Annotations;
-using Transleet.MongoDbGenericRepository.Models;
 
 namespace Transleet.Models;
 
-public class Project : IDocument
+public class Project
 {
     [Key]
-    public ObjectId Id { get; set; }
+    public Guid Id { get; set; }
     public int Version { get; set; }
     public string? DisplayName { get; set; }
     public string? Name { get; set; }

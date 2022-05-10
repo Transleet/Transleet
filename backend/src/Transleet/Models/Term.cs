@@ -4,12 +4,8 @@ namespace Transleet.Models;
 
 public class Term
 {
-    public string? Key { get; set; }
-
-    public string Type { get; set; } = null!;
-    public Entry From { get; set; } = null!;
-    public Entry To { get; set; } = null!;
-    public List<Guid> Labels { get; set; } = null!;
+    public Guid Id { get; set; }
+    public string Type { get; set; }
+    public List<Label> Labels { get; set; }
     public string? Description { get; set; }
-    public List<Guid> Variants { get; set; } = null!;
 }
