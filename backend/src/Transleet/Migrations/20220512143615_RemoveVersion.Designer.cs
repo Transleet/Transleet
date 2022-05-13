@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Transleet;
@@ -11,9 +12,11 @@ using Transleet;
 namespace Transleet.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220512143615_RemoveVersion")]
+    partial class RemoveVersion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -200,12 +203,6 @@ namespace Transleet.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<bool>("IsSource")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsSuggestion")
-                        .HasColumnType("boolean");
-
                     b.Property<Guid>("LocaleId")
                         .HasColumnType("uuid");
 
@@ -213,14 +210,9 @@ namespace Transleet.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("TranslationId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
                     b.HasIndex("LocaleId");
-
-                    b.HasIndex("TranslationId");
 
                     b.ToTable("Entries");
                 });
@@ -262,14 +254,6 @@ namespace Transleet.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<string>("DisplayName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -363,7 +347,7 @@ namespace Transleet.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ComponentId")
+                    b.Property<Guid?>("ComponentId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -518,15 +502,7 @@ namespace Transleet.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Transleet.Models.Translation", "Translation")
-                        .WithMany("Entries")
-                        .HasForeignKey("TranslationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Locale");
-
-                    b.Navigation("Translation");
                 });
 
             modelBuilder.Entity("Transleet.Models.Label", b =>
@@ -558,13 +534,9 @@ namespace Transleet.Migrations
 
             modelBuilder.Entity("Transleet.Models.Translation", b =>
                 {
-                    b.HasOne("Transleet.Models.Component", "Component")
+                    b.HasOne("Transleet.Models.Component", null)
                         .WithMany("Translations")
-                        .HasForeignKey("ComponentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Component");
+                        .HasForeignKey("ComponentId");
                 });
 
             modelBuilder.Entity("Transleet.Models.Component", b =>
@@ -589,11 +561,6 @@ namespace Transleet.Migrations
             modelBuilder.Entity("Transleet.Models.Term", b =>
                 {
                     b.Navigation("Labels");
-                });
-
-            modelBuilder.Entity("Transleet.Models.Translation", b =>
-                {
-                    b.Navigation("Entries");
                 });
 #pragma warning restore 612, 618
         }

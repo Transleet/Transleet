@@ -1,11 +1,12 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Identity;
 
 namespace Transleet.Models;
 
 public class User : IdentityUser
 {
-
+    public List<Organization> Organizations { get; set; }
 }
 public class GithubUserInfo
 {

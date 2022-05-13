@@ -75,27 +75,6 @@ namespace Transleet.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Projects",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Version = table.Column<int>(type: "integer", nullable: false),
-                    DisplayName = table.Column<string>(type: "text", nullable: true),
-                    Name = table.Column<string>(type: "text", nullable: true),
-                    Avatar = table.Column<string>(type: "text", nullable: true),
-                    Description = table.Column<string>(type: "text", nullable: true),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Status = table.Column<short>(type: "smallint", nullable: true),
-                    AccessLevel = table.Column<short>(type: "smallint", nullable: true),
-                    Hide = table.Column<bool>(type: "boolean", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Projects", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -218,6 +197,57 @@ namespace Transleet.Migrations
                         principalTable: "Locales",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OrganizationUser",
+                columns: table => new
+                {
+                    OrganizationsId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UsersId = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrganizationUser", x => new { x.OrganizationsId, x.UsersId });
+                    table.ForeignKey(
+                        name: "FK_OrganizationUser_AspNetUsers_UsersId",
+                        column: x => x.UsersId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_OrganizationUser_Organizations_OrganizationsId",
+                        column: x => x.OrganizationsId,
+                        principalTable: "Organizations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Projects",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Version = table.Column<int>(type: "integer", nullable: false),
+                    DisplayName = table.Column<string>(type: "text", nullable: true),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    Avatar = table.Column<string>(type: "text", nullable: true),
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    Status = table.Column<short>(type: "smallint", nullable: true),
+                    AccessLevel = table.Column<short>(type: "smallint", nullable: true),
+                    Hide = table.Column<bool>(type: "boolean", nullable: true),
+                    OrganizationId = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Projects", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Projects_Organizations_OrganizationId",
+                        column: x => x.OrganizationId,
+                        principalTable: "Organizations",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -361,6 +391,16 @@ namespace Transleet.Migrations
                 column: "TermId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_OrganizationUser_UsersId",
+                table: "OrganizationUser",
+                column: "UsersId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Projects_OrganizationId",
+                table: "Projects",
+                column: "OrganizationId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Terms_ProjectId",
                 table: "Terms",
                 column: "ProjectId");
@@ -396,7 +436,7 @@ namespace Transleet.Migrations
                 name: "Labels");
 
             migrationBuilder.DropTable(
-                name: "Organizations");
+                name: "OrganizationUser");
 
             migrationBuilder.DropTable(
                 name: "Translations");
@@ -405,19 +445,22 @@ namespace Transleet.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
                 name: "Locales");
 
             migrationBuilder.DropTable(
                 name: "Terms");
 
             migrationBuilder.DropTable(
+                name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
                 name: "Components");
 
             migrationBuilder.DropTable(
                 name: "Projects");
+
+            migrationBuilder.DropTable(
+                name: "Organizations");
         }
     }
 }

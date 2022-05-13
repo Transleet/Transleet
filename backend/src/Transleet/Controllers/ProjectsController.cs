@@ -22,14 +22,14 @@ public class ProjectsController : ControllerBase
 
     [AllowAnonymous]
     [HttpGet("{id:guid}", Name = "GetProjectById")]
-    public Task<Project?> GetProjectAsync(Guid id)
+    public Task<Project?> GetProjectByIdAsync(Guid id)
     {
         return _service.GetByIdAsync(id);
     }
 
     [HttpGet(Name = "GetAllProjects")]
     [AllowAnonymous]
-    public IAsyncEnumerable<Project> GetProjectsAsync()
+    public IAsyncEnumerable<Project> GetAllProjectsAsync()
     {
         return _service.GetAllAsync();
     }
@@ -38,7 +38,7 @@ public class ProjectsController : ControllerBase
     public async Task<IActionResult> CreateProjectAsync(Project item)
     {
         await _service.AddAsync(item);
-        return CreatedAtAction(nameof(GetProjectAsync), new { id = item.Id }, item);
+        return CreatedAtAction(nameof(GetProjectByIdAsync), new { id = item.Id }, item);
     }
 
     [HttpPut(Name = "UpdateProject")]
@@ -49,7 +49,7 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpDelete("{id:guid}", Name = "DeleteProjectById")]
-    public Task DeleteProjectAsync(Guid id)
+    public Task DeleteProjectByIdAsync(Guid id)
     {
         return _service.DeleteByIdAsync(id);
     }

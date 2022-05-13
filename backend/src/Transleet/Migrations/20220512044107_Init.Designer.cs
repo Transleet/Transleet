@@ -12,7 +12,7 @@ using Transleet;
 namespace Transleet.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20220510141428_Init")]
+    [Migration("20220512044107_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -157,6 +157,21 @@ namespace Transleet.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("OrganizationUser", b =>
+                {
+                    b.Property<Guid>("OrganizationsId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("UsersId")
+                        .HasColumnType("text");
+
+                    b.HasKey("OrganizationsId", "UsersId");
+
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("OrganizationUser");
+                });
+
             modelBuilder.Entity("Transleet.Models.Component", b =>
                 {
                     b.Property<Guid>("Id")
@@ -290,6 +305,9 @@ namespace Transleet.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
+                    b.Property<Guid?>("OrganizationId")
+                        .HasColumnType("uuid");
+
                     b.Property<short?>("Status")
                         .HasColumnType("smallint");
 
@@ -300,6 +318,8 @@ namespace Transleet.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
 
                     b.ToTable("Projects");
                 });
@@ -458,6 +478,21 @@ namespace Transleet.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("OrganizationUser", b =>
+                {
+                    b.HasOne("Transleet.Models.Organization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Transleet.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Transleet.Models.Component", b =>
                 {
                     b.HasOne("Transleet.Models.Project", null)
@@ -487,6 +522,15 @@ namespace Transleet.Migrations
                         .HasForeignKey("TermId");
                 });
 
+            modelBuilder.Entity("Transleet.Models.Project", b =>
+                {
+                    b.HasOne("Transleet.Models.Organization", "Organization")
+                        .WithMany("Projects")
+                        .HasForeignKey("OrganizationId");
+
+                    b.Navigation("Organization");
+                });
+
             modelBuilder.Entity("Transleet.Models.Term", b =>
                 {
                     b.HasOne("Transleet.Models.Project", null)
@@ -506,6 +550,11 @@ namespace Transleet.Migrations
                     b.Navigation("Labels");
 
                     b.Navigation("Translations");
+                });
+
+            modelBuilder.Entity("Transleet.Models.Organization", b =>
+                {
+                    b.Navigation("Projects");
                 });
 
             modelBuilder.Entity("Transleet.Models.Project", b =>

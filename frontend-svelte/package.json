@@ -13,12 +13,12 @@
 		"api": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 openapi --input https://localhost:7000/swagger/v1/swagger.json --output ./src/lib/api --client axios"
 	},
 	"devDependencies": {
-		"@microsoft/signalr": "^6.0.4",
+		"@microsoft/signalr": "^6.0.5",
 		"@sveltejs/adapter-node": "^1.0.0-next.73",
 		"@sveltejs/kit": "next",
-		"@typescript-eslint/eslint-plugin": "^5.21.0",
-		"@typescript-eslint/parser": "^5.21.0",
-		"autoprefixer": "^10.4.5",
+		"@typescript-eslint/eslint-plugin": "^5.23.0",
+		"@typescript-eslint/parser": "^5.23.0",
+		"autoprefixer": "^10.4.7",
 		"axios": "^0.26.1",
 		"cross-env": "^7.0.3",
 		"daisyui": "^2.14.3",
@@ -37,9 +37,9 @@
 		"svelte-preprocess": "^4.10.6",
 		"tslib": "^2.4.0",
 		"typescript": "~4.5.5",
-		"vite": "^2.9.6",
+		"vite": "^2.9.9",
 		"vite-plugin-windicss": "^1.8.4",
-		"windicss": "^3.5.1"
+		"windicss": "^3.5.3"
 	},
 	"type": "module"
 }

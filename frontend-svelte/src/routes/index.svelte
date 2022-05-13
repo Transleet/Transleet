@@ -16,7 +16,7 @@
 		try {
 			projectsHubConnection = new signalR.HubConnectionBuilder()
 				.withUrl(backend_base_url + '/api/hubs/projects', {
-					accessTokenFactory: () => localStorage.getItem('token')
+					accessTokenFactory: () => $user.token
 				})
 				.configureLogging(signalR.LogLevel.Information)
 				.build();
@@ -47,7 +47,6 @@
 		}
 		try {
 			projects = new Map((await ProjectsService.getAllProjects()).map((item) => [item.id, item]));
-			console.log(projects);
 		} catch (err) {
 			console.log(err);
 		}
@@ -81,7 +80,7 @@
 		<button class="btn p-2" on:click={createProject}>New Project</button>
 	</div>
 	<ul class="flex flex-wrap">
-		{#each [...projects.values()] as project}
+		{#each [...projects.values()] as project (project.id)}
 			<li>
 				<div class="card w-60 p-2" on:click={() => navigateToProjectDetials(project.id)}>
 					<button

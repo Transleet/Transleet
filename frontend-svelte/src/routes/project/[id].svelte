@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { ComponentsService, ProjectsService, type Component, type Project } from '$lib/api';
+import { user } from '$lib/stores';
 	import * as signalR from '@microsoft/signalr';
 	import { onMount } from 'svelte';
 	let componentsHubConnnection: signalR.HubConnection;
@@ -11,12 +12,11 @@
 	let componentName;
 	onMount(async () => {
 		project = await ProjectsService.getProjectById($page.params.id);
-		console.log(project);
 		components = new Map(project.components?.map((item) => [item.id, item]));
 		try {
 			componentsHubConnnection = new signalR.HubConnectionBuilder()
 				.withUrl(backend_base_url + '/api/hubs/components', {
-					accessTokenFactory: () => localStorage.getItem('token')
+					accessTokenFactory: () => $user.token
 				})
 				.configureLogging(signalR.LogLevel.Information)
 				.build();

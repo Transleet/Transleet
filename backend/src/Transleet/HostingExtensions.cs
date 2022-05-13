@@ -135,6 +135,7 @@ internal static class HostingExtensions
         
         builder.Services.AddScoped<IProjectService, ProjectService>();
         builder.Services.AddScoped<IComponentService, ComponentService>();
+        builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddHostedService<SearchDataUpdateService>();
         return builder.Build();
     }

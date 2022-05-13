@@ -7,7 +7,6 @@ import type { Translation } from './Translation';
 
 export type Component = {
     id?: string;
-    version?: number;
     name?: string | null;
     createdAt?: string;
     updatedAt?: string;
