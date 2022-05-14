@@ -36,46 +36,45 @@ public class AuthorizationController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpPost("token"), Produces("application/json")]
-    public async Task<IActionResult> GetToken()
+    [HttpPost("token",Name = "GetToken"), Produces("application/json")]
+    public async Task<IActionResult> GetTokenAsync([FromBody]LoginResource loginResource)
     {
-        var resource = await HttpContext.Request.ReadFromJsonAsync<LoginResource>();
         User? user;
-        if (resource!.InputText.Contains('@'))
+        if (loginResource!.InputText.Contains('@'))
         {
-            user = await _userManager.FindByEmailAsync(resource.InputText);
+            user = await _userManager.FindByEmailAsync(loginResource.InputText);
             if (user is null)
             {
-                return BadRequest($"Can't find a user whose email is {resource.InputText}");
+                return BadRequest($"Can't find a user whose email is {loginResource.InputText}");
             }
         }
         else
         {
-            user = await _userManager.FindByNameAsync(resource.InputText);
+            user = await _userManager.FindByNameAsync(loginResource.InputText);
             if (user is null)
             {
-                return BadRequest($"Can't find a user whose name is {resource.InputText}");
+                return BadRequest($"Can't find a user whose name is {loginResource.InputText}");
             }
         }
 
-        if (await _userManager.CheckPasswordAsync(user, resource.Password))
+        if (await _userManager.CheckPasswordAsync(user, loginResource.Password))
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor()
             {
                 Issuer = _jwtBearerOptions.CurrentValue.Issuer,
                 Audience = _jwtBearerOptions.CurrentValue.Audience,
-                Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, user.UserName), new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), new Claim(ClaimTypes.Email, user.Email) }),
+                Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, user.Id) }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials =
                     new SigningCredentials(_jwtBearerOptions.CurrentValue.Key, SecurityAlgorithms.HmacSha256)
             };
             await _signInManager.SignInAsync(user, true);
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            return Ok(new { token = tokenHandler.WriteToken(token) });
+            return Ok(new { id = user.Id, token = tokenHandler.WriteToken(token) });
         }
         return BadRequest("Wrong password!");
     }
 
-    private record LoginResource(string InputText, string Password);
+    public record LoginResource(string InputText, string Password);
 }

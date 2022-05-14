@@ -21,4 +21,5 @@ export type User = {
     lockoutEnabled?: boolean;
     accessFailedCount?: number;
     organizations?: Array<Organization> | null;
+    avatarUrl?: string | null;
 };

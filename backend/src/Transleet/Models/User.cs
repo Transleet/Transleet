@@ -7,6 +7,7 @@ namespace Transleet.Models;
 public class User : IdentityUser
 {
     public List<Organization> Organizations { get; set; }
+    public Uri? AvatarUrl { get; set; }
 }
 public class GithubUserInfo
 {

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Transleet;
@@ -11,9 +12,11 @@ using Transleet;
 namespace Transleet.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220514063316_AddUserAvatarUrl")]
+    partial class AddUserAvatarUrl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -508,11 +511,9 @@ namespace Transleet.Migrations
 
             modelBuilder.Entity("Transleet.Models.Component", b =>
                 {
-                    b.HasOne("Transleet.Models.Project", "Project")
+                    b.HasOne("Transleet.Models.Project", null)
                         .WithMany("Components")
                         .HasForeignKey("ProjectId");
-
-                    b.Navigation("Project");
                 });
 
             modelBuilder.Entity("Transleet.Models.Entry", b =>

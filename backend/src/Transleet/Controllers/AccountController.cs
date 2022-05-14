@@ -11,7 +11,7 @@ namespace Transleet.Controllers;
 [Route("api/account")]
 public class AccountController : ControllerBase
 {
-        
+
     private readonly IConfiguration _configuration;
     private readonly SignInManager<User> _signInManager;
     private readonly UserManager<User> _userManager;
@@ -48,11 +48,12 @@ public class AccountController : ControllerBase
         {
             return Ok(new
             {
-                username =user.UserName,email =user.Email
+                username = user.UserName,
+                email = user.Email
             });
         }
 
-        return BadRequest();
+        return BadRequest(result.Errors);
     }
 }
 

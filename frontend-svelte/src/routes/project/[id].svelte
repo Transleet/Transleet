@@ -1,22 +1,24 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { ComponentsService, ProjectsService, type Component, type Project } from '$lib/api';
-import { user } from '$lib/stores';
+	import { ComponentsService, OpenAPI, ProjectsService, type Component, type Project } from '$lib/api';
+	import { userStore } from '$lib/stores';
 	import * as signalR from '@microsoft/signalr';
 	import { onMount } from 'svelte';
 	let componentsHubConnnection: signalR.HubConnection;
 	let backend_base_url = import.meta.env.VITE_BACKEND_BASE_URL;
-	let frontend_base_url = import.meta.env.VITE_FRONTEND_BASE_URL;
 	let project: Project;
 	let components: Map<string, Component>;
 	let componentName;
 	onMount(async () => {
+		OpenAPI.TOKEN= async () => {
+			return $userStore.token;
+		};
 		project = await ProjectsService.getProjectById($page.params.id);
 		components = new Map(project.components?.map((item) => [item.id, item]));
 		try {
 			componentsHubConnnection = new signalR.HubConnectionBuilder()
 				.withUrl(backend_base_url + '/api/hubs/components', {
-					accessTokenFactory: () => $user.token
+					accessTokenFactory: () => $userStore.token
 				})
 				.configureLogging(signalR.LogLevel.Information)
 				.build();
@@ -59,6 +61,10 @@ import { user } from '$lib/stores';
 		components.set(component.id, component);
 		await ProjectsService.updateProject(project);
 		components = components;
+	}
+
+	async function removeComponent(){
+		
 	}
 </script>
 

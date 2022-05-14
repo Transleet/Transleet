@@ -14,7 +14,7 @@ namespace Transleet.Services
         void Subscribe(Action<ProjectNotification> onNext);
     }
 
-    public class ProjectService:IProjectService
+    public class ProjectService : IProjectService
     {
         private readonly AppDbContext _dbContext;
         private readonly ILogger<ProjectService> _logger;
@@ -28,14 +28,14 @@ namespace Transleet.Services
 
         }
 
-        public  IAsyncEnumerable<Project> GetAllAsync() 
+        public IAsyncEnumerable<Project> GetAllAsync()
         {
             return _dbContext.Projects.AsAsyncEnumerable();
         }
 
         public Task<Project?> GetByIdAsync(Guid id)
         {
-            return _dbContext.Projects.Include(_=>_.Components).FirstOrDefaultAsync(_=>_.Id==id);
+            return _dbContext.Projects.Include(_ => _.Components).FirstOrDefaultAsync(_ => _.Id == id);
         }
 
         public async Task AddAsync(Project item)
@@ -57,14 +57,14 @@ namespace Transleet.Services
 
         public async Task DeleteByIdAsync(Guid id)
         {
-            var item = await _dbContext.Projects.FindAsync(id);
+            var item = await _dbContext.Projects.Include(_=>_.Components).FirstOrDefaultAsync(x => x.Id == id);
             if (item != null)
             {
                 _dbContext.Projects.Remove(item);
                 await _dbContext.SaveChangesAsync();
                 _subject.OnNext(new ProjectNotification(id, NotificationOperation.Removed));
             }
-            
+
         }
 
         public void Subscribe(Action<ProjectNotification> onNext)

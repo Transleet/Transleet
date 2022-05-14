@@ -95,6 +95,7 @@ public class OAuthController : ControllerBase
             user = new User()
             {
                 UserName = userInfo.Name,
+                AvatarUrl = userInfo.AvatarUrl,
                 Email = primaryEmail.Email,
                 EmailConfirmed = true
             };
@@ -106,12 +107,12 @@ public class OAuthController : ControllerBase
         {
             Issuer = _jwtBearerOptions.CurrentValue.Issuer,
             Audience = _jwtBearerOptions.CurrentValue.Audience,
-            Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, user.UserName!), new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), new Claim(ClaimTypes.Email, user.Email!) }),
+            Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, user.Id)}),
             Expires = DateTimeOffset.Now.AddDays(7).DateTime,
             SigningCredentials =
                 new SigningCredentials(_jwtBearerOptions.CurrentValue.Key, SecurityAlgorithms.HmacSha256)
         };
         var token = tokenHandler.CreateToken(tokenDescriptor);
-        return Ok(new { token = tokenHandler.WriteToken(token) });
+        return Ok(new { id = user.Id, token = tokenHandler.WriteToken(token) });
     }
 }

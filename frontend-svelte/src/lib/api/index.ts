@@ -10,6 +10,7 @@ export type { Component } from './models/Component';
 export type { Entry } from './models/Entry';
 export type { Label } from './models/Label';
 export type { Locale } from './models/Locale';
+export type { LoginResource } from './models/LoginResource';
 export type { Organization } from './models/Organization';
 export type { Project } from './models/Project';
 export type { RegisterResource } from './models/RegisterResource';

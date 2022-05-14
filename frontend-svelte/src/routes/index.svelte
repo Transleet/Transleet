@@ -4,19 +4,20 @@
 	import { onMount } from 'svelte';
 	import type { Project } from '$lib/api';
 	import { goto } from '$app/navigation';
-	import { user } from '$lib/stores';
+	import { userStore } from '$lib/stores';
+	import { Modal, Content, Trigger } from 'sv-popup';
 	let backend_base_url = import.meta.env.VITE_BACKEND_BASE_URL;
 	let frontend_base_url = import.meta.env.VITE_FRONTEND_BASE_URL;
 	let projects: Map<string, Project> = new Map();
 	let projectsHubConnection: signalR.HubConnection;
 	onMount(async () => {
 		OpenAPI.TOKEN = async () => {
-			return $user.token;
+			return $userStore.token;
 		};
 		try {
 			projectsHubConnection = new signalR.HubConnectionBuilder()
 				.withUrl(backend_base_url + '/api/hubs/projects', {
-					accessTokenFactory: () => $user.token
+					accessTokenFactory: () => $userStore.token
 				})
 				.configureLogging(signalR.LogLevel.Information)
 				.build();
@@ -51,11 +52,8 @@
 			console.log(err);
 		}
 	});
-	async function createProject() {
-		let project = await ProjectsService.createProject({
-			name: 'Test',
-			description: 'You mother fucker.'
-		});
+	async function createProject(project: Project) {
+		project = await ProjectsService.createProject(project);
 		projects.set(project.id, project);
 		projects = projects;
 	}
@@ -77,7 +75,16 @@
 	<div class="pl-4">
 		<h class="p-2 text-2xl">Projects</h>
 		<br />
-		<button class="btn p-2" on:click={createProject}>New Project</button>
+		<Modal basic button={false}>
+			<Content>
+				<h1>New project</h1>
+
+				<button class="btn p-2" on:click={createProject}>OK</button>
+			</Content>
+			<Trigger>
+				<button class="btn p-2">New Project</button>
+			</Trigger>
+		</Modal>
 	</div>
 	<ul class="flex flex-wrap">
 		{#each [...projects.values()] as project (project.id)}

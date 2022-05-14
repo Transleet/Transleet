@@ -1,9 +1,7 @@
 import { writable } from "svelte-local-storage-store"
 
-export const user = writable("user", {
+export const userStore = writable("user", {
     id:"",
-    name: "",
-    email: "",
     token: "",
     isLogin: false,
 });

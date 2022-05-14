@@ -30,23 +30,23 @@ namespace Transleet.Services
 
         public Task<Component?> GetByIdAsync(Guid id)
         {
-            return _dbContext.Components.FindAsync(id).AsTask();
+            return _dbContext.Components.FirstOrDefaultAsync(_ => _.Id == id);
         }
 
         public async Task AddAsync(Component item)
         {
             item.CreatedAt = DateTimeOffset.Now;
-            item.UpdatedAt =DateTimeOffset.Now;
+            item.UpdatedAt = DateTimeOffset.Now;
             await _dbContext.Components.AddAsync(item);
             await _dbContext.SaveChangesAsync();
-            _subject.OnNext(new ComponentNotification(item.Id,NotificationOperation.Added));
+            _subject.OnNext(new ComponentNotification(item.Id, NotificationOperation.Added));
         }
 
         public async Task UpdateAsync(Component item)
         {
             _dbContext.Components.Update(item);
             await _dbContext.SaveChangesAsync();
-            _subject.OnNext(new ComponentNotification(item.Id,NotificationOperation.Updated));
+            _subject.OnNext(new ComponentNotification(item.Id, NotificationOperation.Updated));
         }
 
         public async Task DeleteByIdAsync(Guid id)
