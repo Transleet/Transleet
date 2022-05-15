@@ -1,4 +1,7 @@
-﻿namespace Transleet.Models;
+﻿
+
+namespace Transleet.Models;
+
 
 public class Translation
 {

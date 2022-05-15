@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
+
 namespace Transleet.Models;
+
 
 public class Component
 {

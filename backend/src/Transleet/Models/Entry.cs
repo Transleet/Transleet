@@ -3,7 +3,9 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore.Internal;
 
+
 namespace Transleet.Models;
+
 
 public class Entry
 {

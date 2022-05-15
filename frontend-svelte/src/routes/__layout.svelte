@@ -18,7 +18,6 @@
 	onMount(async () => {
 		if ($userStore.isLogin) {
 			user = await UsersService.getUserById($userStore.id);
-			console.log(user);
 		}
 	});
 </script>

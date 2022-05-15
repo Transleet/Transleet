@@ -1,6 +1,9 @@
 ﻿#nullable enable
 
+
+
 namespace Transleet.Models;
+
 
 public class Term
 {

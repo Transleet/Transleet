@@ -8,6 +8,7 @@
 	import { Modal, Content, Trigger } from 'sv-popup';
 	let backend_base_url = import.meta.env.VITE_BACKEND_BASE_URL;
 	let frontend_base_url = import.meta.env.VITE_FRONTEND_BASE_URL;
+	let project: Project;
 	let projects: Map<string, Project> = new Map();
 	let projectsHubConnection: signalR.HubConnection;
 	onMount(async () => {
@@ -52,8 +53,8 @@
 			console.log(err);
 		}
 	});
-	async function createProject(project: Project) {
-		project = await ProjectsService.createProject(project);
+	async function createProject(name: string) {
+		project = await ProjectsService.createProject({ name: name });
 		projects.set(project.id, project);
 		projects = projects;
 	}
@@ -78,8 +79,7 @@
 		<Modal basic button={false}>
 			<Content>
 				<h1>New project</h1>
-
-				<button class="btn p-2" on:click={createProject}>OK</button>
+				<button class="btn p-2" on:click={() => createProject('111111')}>OK</button>
 			</Content>
 			<Trigger>
 				<button class="btn p-2">New Project</button>

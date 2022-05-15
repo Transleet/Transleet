@@ -2,6 +2,8 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Identity;
 
+
+
 namespace Transleet.Models;
 
 public class User : IdentityUser

@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
+
 namespace Transleet.Models;
+
 
 public class Organization
 {
