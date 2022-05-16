@@ -1,0 +1,27 @@
+﻿<Window
+    x:Class="Transleet.Desktop.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Transleet.Desktop"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:pages="using:Transleet.Desktop.Pages"
+    mc:Ignorable="d">
+
+
+    <NavigationView x:Name="NavigationView"
+                    IsSettingsVisible="True"
+                    PaneDisplayMode="Left"
+                    IsBackButtonVisible="Collapsed">
+        <NavigationView.AutoSuggestBox>
+            <AutoSuggestBox QueryIcon="Find"></AutoSuggestBox>
+        </NavigationView.AutoSuggestBox>
+        <NavigationView.MenuItems>
+            <NavigationViewItem Icon="Library" Content="Projects" Tag="ProjectsPage"></NavigationViewItem>
+        </NavigationView.MenuItems>
+        <NavigationView.FooterMenuItems>
+            <NavigationViewItem Icon="Contact" Content="Account" Tag="ProfilePage"></NavigationViewItem>
+        </NavigationView.FooterMenuItems>
+        <Frame x:Name="MainContextFrame" Content="{x:Bind ViewModel.ContentPage,Mode=OneWay}"></Frame>
+    </NavigationView>
+</Window>
