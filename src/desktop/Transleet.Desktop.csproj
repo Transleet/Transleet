@@ -15,6 +15,9 @@
 		<LangVersion>preview</LangVersion>
 	</PropertyGroup>
 	<ItemGroup>
+	  <None Remove="Views\ProjectDetialsPage.xaml" />
+	</ItemGroup>
+	<ItemGroup>
 		<AppxManifest Include="Package.appxmanifest">
 			<SubType>Designer</SubType>
 		</AppxManifest>
@@ -31,11 +34,22 @@
 
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0-preview3" />
+		<PackageReference Include="CommunityToolkit.WinUI.Notifications" Version="7.1.2" />
+		<PackageReference Include="CommunityToolkit.WinUI.UI" Version="7.1.2" />
+		<PackageReference Include="CommunityToolkit.WinUI.UI.Behaviors" Version="7.1.2" />
+		<PackageReference Include="CommunityToolkit.WinUI.UI.Controls" Version="7.1.2" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0-preview.4.22229.4" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0-preview.4.22229.4" />
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.1.0-preview3" />
+		<PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="2.0.8" />
 		<PackageReference Include="Refit.HttpClientFactory" Version="6.3.2" />
 		<Manifest Include="$(ApplicationManifest)" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Page Update="Views\ProjectDetialsPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </Page>
 	</ItemGroup>
 
 	<ItemGroup>

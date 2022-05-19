@@ -1,19 +1,13 @@
 ﻿using System;
-using System.IO.IsolatedStorage;
-using System.Threading;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.UI.Dispatching;
-using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Refit;
-using Transleet.Desktop;
-using Transleet.Desktop.Pages;
 using Transleet.Desktop.Services;
 using Transleet.Desktop.ViewModels;
-using WinRT;
+using Transleet.Desktop.Views;
 
-namespace App1
+namespace Transleet.Desktop
 {
     internal class Program
     {
@@ -22,22 +16,19 @@ namespace App1
         static void Main(string[] args)
         {
             Host.CreateDefaultBuilder()
-                .ConfigureAppConfiguration((context,config) =>
-                {
-                    config.AddJsonFile("./appsettings.json");
-
-                })
                 .ConfigureServices(services =>
             {
-                services.AddTransient<ProjectsPage>();
-                services.AddTransient<SettingsPage>();
-                services.AddTransient<ProfilePage>();
+                services.AddTransient<Page, ProjectsPage>();
+                services.AddTransient<Page, SettingsPage>();
+                services.AddTransient<Page, ProfilePage>();
+                services.AddTransient<Page, ProjectDetialsPage>();
                 services.AddTransient<MainWindowViewModel>();
                 services.AddTransient<ProjectsPageViewModel>();
                 services.AddSingleton<MainWindow>();
+                services.AddSingleton<NavigationManager>();
                 services.AddRefitClient<IProjectService>().ConfigureHttpClient(options =>
                 {
-                    options.BaseAddress = new Uri("https://localhost:7999/api");
+                    options.BaseAddress = new Uri("https://localhost:57999/api");
                 });
                 services.AddHostedService<AppStartupService>();
             }).Build().Run();
