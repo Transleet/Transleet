@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Transleet.Desktop"
+    xmlns:views="using:Transleet.Desktop.Views"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:interactions="using:Microsoft.Xaml.Interactions.Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -10,9 +11,10 @@
     mc:Ignorable="d">
     <NavigationView IsSettingsVisible="True"
                     PaneDisplayMode="Left"
-                    IsBackButtonVisible="Collapsed">
+                    IsBackButtonVisible="Collapsed"
+                    Content="{x:Bind ViewModel.NavigationManager.Page,Mode=OneWay}">
         <interactivity:Interaction.Behaviors>
-            <interactions:EventTriggerBehavior EventName="SelectionChanged">
+            <interactions:EventTriggerBehavior EventName="ItemInvoked">
                 <interactions:InvokeCommandAction Command="{x:Bind ViewModel.NavigateToPageCommand}"></interactions:InvokeCommandAction>
             </interactions:EventTriggerBehavior>
         </interactivity:Interaction.Behaviors>
@@ -20,11 +22,20 @@
             <AutoSuggestBox QueryIcon="Find"></AutoSuggestBox>
         </NavigationView.AutoSuggestBox>
         <NavigationView.MenuItems>
-            <NavigationViewItem Icon="Library" Content="Projects" Tag="ProjectsPage"></NavigationViewItem>
+            <NavigationViewItem Icon="Library" Content="Projects">
+                <NavigationViewItem.Tag>
+                    <local:TypeGetter Type="views:ProjectsPage">
+                    </local:TypeGetter>
+                </NavigationViewItem.Tag>
+            </NavigationViewItem>
         </NavigationView.MenuItems>
         <NavigationView.FooterMenuItems>
-            <NavigationViewItem Icon="Contact" Content="Account" Tag="ProfilePage"></NavigationViewItem>
+            <NavigationViewItem Icon="Contact" Content="Account">
+                <NavigationViewItem.Tag>
+                    <local:TypeGetter Type="views:ProfilePage">
+                    </local:TypeGetter>
+                </NavigationViewItem.Tag>
+            </NavigationViewItem>
         </NavigationView.FooterMenuItems>
-        <Frame Content="{x:Bind ViewModel.NavigationManager.Page,Mode=OneWay}"></Frame>
     </NavigationView>
 </Window>

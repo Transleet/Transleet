@@ -14,25 +14,42 @@ namespace Transleet.Desktop.ViewModels
     [ObservableObject]
     public partial class MainWindowViewModel
     {
-        [ObservableProperty] private NavigationManager _navigationManager;
+        private readonly ProjectsPageViewModel _projectsPageViewModel;
 
-        public MainWindowViewModel(NavigationManager navigationManager)
+        
+
+        public MainWindowViewModel(ProjectsPageViewModel projectsPageViewModel,NavigationManager navigationManager)
         {
-            _navigationManager = navigationManager;
+            _projectsPageViewModel = projectsPageViewModel;
             NavigateToPageCommand = new (NavigateToPageAsync);
+            NavigationManager = navigationManager;
         }
 
-        public AsyncRelayCommand<NavigationViewSelectionChangedEventArgs?> NavigateToPageCommand { get; }
+        public NavigationManager NavigationManager { get; set; }
+        public AsyncRelayCommand<NavigationViewItemInvokedEventArgs?> NavigateToPageCommand { get; }
 
-        private async Task NavigateToPageAsync(NavigationViewSelectionChangedEventArgs? args)
+
+        private async Task NavigateToPageAsync(NavigationViewItemInvokedEventArgs? args)
         {
-            if (args.IsSettingsSelected)
+            if (args.IsSettingsInvoked)
             {
-                await NavigationManager.NavigateToAsync("SettingsPage");
-                return;
+                await NavigationManager.NavigateToAsync(typeof(SettingsPage));
             }
-            var item = args.SelectedItem as NavigationViewItem;
-            await NavigationManager.NavigateToAsync((item.Tag as string)!);
+            else
+            {
+                var item = args.InvokedItemContainer as NavigationViewItem;
+
+                var type = (item.Tag as TypeGetter).Type;
+                if (type==typeof(ProjectsPage))
+                {
+                    await NavigationManager.NavigateToAsync(type, _projectsPageViewModel);
+                }
+                else
+                {
+                    await NavigationManager.NavigateToAsync(type);
+                }
+                
+            }
         }
     }
 }

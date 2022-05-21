@@ -17,21 +17,17 @@ namespace Transleet.Desktop
         {
             Host.CreateDefaultBuilder()
                 .ConfigureServices(services =>
-            {
-                services.AddTransient<Page, ProjectsPage>();
-                services.AddTransient<Page, SettingsPage>();
-                services.AddTransient<Page, ProfilePage>();
-                services.AddTransient<Page, ProjectDetialsPage>();
-                services.AddTransient<MainWindowViewModel>();
-                services.AddTransient<ProjectsPageViewModel>();
-                services.AddSingleton<MainWindow>();
-                services.AddSingleton<NavigationManager>();
-                services.AddRefitClient<IProjectService>().ConfigureHttpClient(options =>
                 {
-                    options.BaseAddress = new Uri("https://localhost:57999/api");
-                });
-                services.AddHostedService<AppStartupService>();
-            }).Build().Run();
+                    services.AddTransient<MainWindowViewModel>();
+                    services.AddTransient<ProjectsPageViewModel>();
+                    services.AddSingleton<MainWindow>();
+                    services.AddSingleton<NavigationManager>();
+                    services.AddRefitClient<IProjectService>().ConfigureHttpClient(options =>
+                    {
+                        options.BaseAddress = new Uri("https://localhost:57999/api");
+                    });
+                    services.AddHostedService<AppStartupService>();
+                }).Build().Run();
         }
     }
 }

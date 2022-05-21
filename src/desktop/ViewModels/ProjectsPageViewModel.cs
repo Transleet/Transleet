@@ -19,7 +19,6 @@ namespace Transleet.Desktop.ViewModels
         [ObservableProperty] private ObservableCollection<Project> _projects;
         [ObservableProperty] private int _selectedIndex;
         private readonly IProjectService _projectService;
-        private readonly ProjectDetialsPage _projectDetialsPage;
 
         public ProjectsPageViewModel(IProjectService projectService)
         {
