@@ -4,7 +4,7 @@
     "Transleet": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "applicationUrl": "https://localhost:7000;http://localhost:5095",
+      "applicationUrl": "https://localhost:57999;http://localhost:59999",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
