@@ -10,7 +10,6 @@ specifiers:
   axios: ^0.27.2
   cross-env: ^7.0.3
   daisyui: ^2.15.0
-  dtsgenerator: ^3.15.1
   eslint: ^8.16.0
   eslint-config-prettier: ^8.5.0
   eslint-plugin-svelte3: ^4.0.0
@@ -42,7 +41,6 @@ devDependencies:
   axios: 0.27.2
   cross-env: 7.0.3
   daisyui: 2.15.0_ugi4xkrfysqkt4c4y6hkyfj344
-  dtsgenerator: 3.15.1
   eslint: 8.16.0
   eslint-config-prettier: 8.5.0_eslint@8.16.0
   eslint-plugin-svelte3: 4.0.0_vypdqzeyqutkgs6qzc7qod4c64
@@ -442,15 +440,6 @@ packages:
     hasBin: true
     dev: true
 
-  /agent-base/6.0.2:
-    resolution: {integrity: sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==}
-    engines: {node: '>= 6.0.0'}
-    dependencies:
-      debug: 4.3.4
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-
   /ajv/6.12.6:
     resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
     dependencies:
@@ -657,14 +646,6 @@ packages:
       cross-spawn: 7.0.3
     dev: true
 
-  /cross-fetch/3.1.5:
-    resolution: {integrity: sha512-lvb1SBsI0Z7GDwmuid+mU3kWVBwTVUbe7S0H52yaaAdQOXq2YktTCZdlAcNKFzE6QtRz0snpw9bNiPeOIkkQvw==}
-    dependencies:
-      node-fetch: 2.6.7
-    transitivePeerDependencies:
-      - encoding
-    dev: true
-
   /cross-spawn/7.0.3:
     resolution: {integrity: sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==}
     engines: {node: '>= 8'}
@@ -773,24 +754,6 @@ packages:
     engines: {node: '>=6.0.0'}
     dependencies:
       esutils: 2.0.3
-    dev: true
-
-  /dtsgenerator/3.15.1:
-    resolution: {integrity: sha512-ny3Fl5uF8ePCUPSHuMU6OJQ31mbUJ5cH0rxclJsMot+BSpgykz3Rz3Gjy9fOjKAXJCPNEyukvMYhSkChNgAS4w==}
-    engines: {node: '>= 10.0'}
-    hasBin: true
-    dependencies:
-      commander: 9.2.0
-      cross-fetch: 3.1.5
-      debug: 4.3.4
-      glob: 7.2.3
-      https-proxy-agent: 5.0.1
-      js-yaml: 4.1.0
-      tslib: 2.4.0
-      typescript: 4.6.4
-    transitivePeerDependencies:
-      - encoding
-      - supports-color
     dev: true
 
   /electron-to-chromium/1.4.137:
@@ -1360,16 +1323,6 @@ packages:
     engines: {node: '>= 0.4.0'}
     dependencies:
       function-bind: 1.1.1
-    dev: true
-
-  /https-proxy-agent/5.0.1:
-    resolution: {integrity: sha512-dFcAjpTQFgoLMzC2VwU+C/CbS7uRL0lWmxDITmqm7C+7F0Odmj6s9l6alZc6AELXhrnggM2CeWSXHGOdX2YtwA==}
-    engines: {node: '>= 6'}
-    dependencies:
-      agent-base: 6.0.2
-      debug: 4.3.4
-    transitivePeerDependencies:
-      - supports-color
     dev: true
 
   /ignore/5.2.0:

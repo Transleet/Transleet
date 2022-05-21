@@ -37,7 +37,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: node-app
-          path: ./build
+          path: ./.svelte-kit/output/server
 
   deploy:
     runs-on: ubuntu-latest
