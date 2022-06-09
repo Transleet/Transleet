@@ -67,10 +67,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useSettingStore } from '../store/setting';
+import { useSettingStore } from '../stores/setting';
 import SignalrHubs from '../signalr/index';
 import AvatarHelper from '../components/AvatarHelper.vue';
-import { useCacheStore } from '../store/cache';
+import { useCacheStore } from '../stores/cache';
 // eslint-disable-next-line @typescript-eslint/unbound-method
 const { t } = useI18n();
 const setting = useSettingStore();

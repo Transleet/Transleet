@@ -1,4 +1,12 @@
 {
   "singleQuote": true,
-  "semi": true
+  "semi": true,
+  "vue/multi-word-component-names": [
+    "error",
+    {
+      "ignores": [
+        "src/pages/*.vue"
+      ]
+    }
+  ]
 }

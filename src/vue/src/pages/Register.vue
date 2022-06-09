@@ -57,7 +57,7 @@ import axios from 'axios';
 import { useQuasar } from 'quasar';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useSettingStore } from '../store/setting';
+import { useSettingStore } from '../stores/setting';
 
 const $q = useQuasar();
 const setting = useSettingStore();
@@ -136,4 +136,8 @@ async function submit() {
       });
     });
 }
+</script>
+
+<script lang="ts">
+export default { name: 'RegisterPage' }
 </script>

@@ -10,7 +10,7 @@ export default defineComponent({
 </script>
 
 <script setup lang="ts">
-import { useSettingStore } from './store/setting';
+import { useSettingStore } from './stores/setting';
 import { Dark } from 'quasar';
 const setting = useSettingStore();
 Dark.set(setting.dark)

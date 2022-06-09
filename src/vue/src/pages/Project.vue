@@ -82,7 +82,7 @@
         class="q-mx-md q-my-md"
         style="font-size: 24px; font-weight: bold; padding-left: 24px"
       >
-        {{ cache.project.main.displayName }}
+        {{ cache.project.main?.displayName }}
       </div>
       <div class="row-md q-col-gutter-md">
         <q-list class="col-2 q-mx-md q-my-md" padding>
@@ -162,7 +162,7 @@
                   track-color="grey-3"
                 >
                   <q-avatar size="100px">
-                    <img :src="cache.project.main.avatar + ''" />
+                    <img :src="cache.project.main?.avatar + ''" />
                   </q-avatar>
                 </q-circular-progress>
               </div>
@@ -216,7 +216,7 @@
 import { useRoute } from 'vue-router';
 import { onMounted, ref } from 'vue';
 import SignalrHubs from 'src/signalr';
-import { useCacheStore } from '../store/cache';
+import { useCacheStore } from '../stores/cache';
 
 const route = useRoute();
 const cache = useCacheStore();
@@ -230,6 +230,12 @@ onMounted(async () => {
 
   isLoading.value = false;
 });
+</script>
+
+<script lang="ts">
+export default {
+  name: 'ProjectPage',
+}
 </script>
 
 <style scoped lang="scss"></style>

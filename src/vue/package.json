@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "vue",
   "version": "0.0.1",
   "description": "Transleet frontend",
   "productName": "Transleet",
@@ -8,52 +8,45 @@
   "scripts": {
     "lint": "eslint --ext .js,.ts,.vue ./",
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
-    "test": "echo \"No test specified\" && exit 0",
-    "api": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 openapi --input https://localhost:7000/swagger/v1/swagger.json --output ./src/lib/api"
+    "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
     "@datatraccorporation/markdown-it-mermaid": "^0.5.0",
-    "@microsoft/signalr": "^6.0.3",
-    "@quasar/extras": "^1.13.5",
+    "@microsoft/signalr": "^6.0.5",
+    "@quasar/extras": "^1.0.0",
     "axios": "^0.21.1",
-    "core-js": "^3.6.5",
-    "pinia": "^2.0.12",
+    "markdown-it-abbr": "^1.0.4",
+    "markdown-it-deflist": "^2.1.0",
+    "markdown-it-emoji": "^2.0.2",
+    "markdown-it-footnote": "^3.0.3",
+    "markdown-it-ins": "^3.0.1",
+    "markdown-it-mark": "^3.0.1",
+    "markdown-it-sub": "^1.0.0",
+    "markdown-it-sup": "^1.0.0",
+    "markdown-it-task-lists": "^2.1.1",
+    "pinia": "^2.0.11",
     "pinia-plugin-persist": "^1.0.0",
-    "quasar": "^2.6.6",
+    "quasar": "^2.6.0",
     "vue": "^3.0.0",
     "vue-i18n": "^9.0.0",
     "vue-router": "^4.0.0"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "^7.13.14",
-    "@quasar/app-webpack": "^3.5.1",
-    "@quasar/quasar-app-extension-qmarkdown": "^2.0.0-beta.4",
-    "@types/markdown-it-emoji": "^2.0.2",
+    "@intlify/vite-plugin-vue-i18n": "^3.3.1",
+    "@quasar/app-vite": "^1.0.0",
+    "@quasar/quasar-app-extension-qmarkdown": "^2.0.0-beta.7",
     "@types/node": "^12.20.21",
     "@typescript-eslint/eslint-plugin": "^5.10.0",
     "@typescript-eslint/parser": "^5.10.0",
-    "cross-env": "^7.0.3",
-    "electron": "^18.0.4",
-    "electron-packager": "^15.2.0",
-    "eslint": "^7.14.0",
+    "autoprefixer": "^10.4.2",
+    "eslint": "^8.10.0",
     "eslint-config-prettier": "^8.1.0",
-    "eslint-plugin-vue": "^7.0.0",
-    "openapi-typescript-codegen": "^0.22.0",
-    "prettier": "^2.5.1"
+    "eslint-plugin-vue": "^8.5.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.5.4"
   },
-  "browserslist": [
-    "last 10 Chrome versions",
-    "last 10 Firefox versions",
-    "last 4 Edge versions",
-    "last 7 Safari versions",
-    "last 8 Android versions",
-    "last 8 ChromeAndroid versions",
-    "last 8 FirefoxAndroid versions",
-    "last 10 iOS versions",
-    "last 5 Opera versions"
-  ],
   "engines": {
-    "node": ">= 12.22.1",
+    "node": "^18 || ^16 || ^14.19",
     "npm": ">= 6.13.4",
     "yarn": ">= 1.21.1"
   }

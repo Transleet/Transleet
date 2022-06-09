@@ -43,7 +43,7 @@
 import { onMounted } from 'vue';
 import SignalrHubs from 'src/signalr';
 import NewProject from 'src/components/NewProject.vue';
-import { useCacheStore } from '../store/cache';
+import { useCacheStore } from '../stores/cache';
 import QGrid from 'src/components/quasar-extend/QGrid.vue';
 import QGridItem from 'src/components/quasar-extend/QGridItem.vue';
 import ProjectCard from '../components/ProjectCard.vue';
@@ -73,7 +73,7 @@ onMounted(async () => {
       if (notification.operation === 0) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         let proj = await ProjectsService.getProject(<string>notification.id);
-        if(proj.id === undefined) return;
+        if (proj.id === undefined) return;
         cache.home.projects.set(proj.id, proj);
       } else {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -94,4 +94,10 @@ async function remove() {
   }
   console.log('123');
 }
+</script>
+
+<script lang="ts">
+export default {
+  name: 'IndexPage',
+};
 </script>

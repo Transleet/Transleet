@@ -62,7 +62,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useCacheStore } from '../store/cache';
+import { useCacheStore } from '../stores/cache';
 import { Project } from 'src/lib/api';
 import { ProjectsService } from '../lib/api/services/ProjectsService';
 const cache = useCacheStore();

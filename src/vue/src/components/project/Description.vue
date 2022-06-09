@@ -51,7 +51,7 @@ import * as mermaid from '@datatraccorporation/markdown-it-mermaid'
 import SignalrHubs from 'src/signalr';
 
 export default defineComponent({
-  name: 'Description',
+  name: 'ProjectDescription',
   components: {
     QMarkdown,
   },

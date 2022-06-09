@@ -52,7 +52,7 @@ import { useQuasar } from 'quasar';
 import { ref } from 'vue';
 import axios from 'axios';
 import { useI18n } from 'vue-i18n';
-import { useSettingStore } from '../store/setting';
+import { useSettingStore } from '../stores/setting';
 
 const $q = useQuasar();
 // eslint-disable-next-line @typescript-eslint/unbound-method
@@ -104,5 +104,11 @@ function submit() {
         timeout: 1500,
       });
     });
+}
+</script>
+
+<script lang="ts">
+export default {
+  name: 'LoginPage',
 }
 </script>

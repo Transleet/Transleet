@@ -3,8 +3,8 @@ import {
   HubConnectionBuilder,
   LogLevel,
 } from '@microsoft/signalr';
-import { useSettingStore } from '../store/setting';
-import { useCacheStore } from '../store/cache';
+import { useSettingStore } from '../stores/setting';
+import { useCacheStore } from '../stores/cache';
 
 const cache = useCacheStore();
 const setting = useSettingStore();

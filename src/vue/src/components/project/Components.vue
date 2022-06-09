@@ -8,7 +8,13 @@
 </template>
 
 <script setup lang="ts">
-import { useCacheStore } from '../../store/cache';
+import { useCacheStore } from '../../stores/cache';
 import { ComponentsService } from '../../lib/api/services/ComponentsService';
 let cache = useCacheStore();
+</script>
+
+<script>
+export default {
+  name: 'component',
+}
 </script>
