@@ -2,6 +2,10 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import type { Component } from './Component';
+import type { Organization } from './Organization';
+import type { Term } from './Term';
+
 export type Project = {
     id?: string;
     displayName?: string | null;
@@ -10,9 +14,10 @@ export type Project = {
     description?: string | null;
     createdAt?: string;
     updatedAt?: string;
-    terms?: Array<string> | null;
-    components?: Array<string> | null;
+    terms?: Array<Term> | null;
+    components?: Array<Component> | null;
     status?: number | null;
     accessLevel?: number | null;
     hide?: boolean | null;
+    organization?: Organization;
 };

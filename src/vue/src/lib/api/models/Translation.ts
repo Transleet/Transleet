@@ -2,10 +2,11 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import type { Component } from './Component';
 import type { Entry } from './Entry';
 
 export type Translation = {
-    key?: string;
-    from?: Entry;
-    to?: Entry;
+    id?: string;
+    component?: Component;
+    entries?: Array<Entry> | null;
 };

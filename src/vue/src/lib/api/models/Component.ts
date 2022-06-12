@@ -2,11 +2,14 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import type { Label } from './Label';
+import type { Translation } from './Translation';
+
 export type Component = {
-    key?: string;
+    id?: string;
     name?: string | null;
-    type?: string | null;
-    path?: string | null;
-    labels?: Array<string> | null;
-    translations?: Array<string> | null;
+    createdAt?: string;
+    updatedAt?: string;
+    labels?: Array<Label> | null;
+    translations?: Array<Translation> | null;
 };

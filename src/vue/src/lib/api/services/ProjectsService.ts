@@ -10,12 +10,11 @@ import { request as __request } from '../core/request';
 export class ProjectsService {
 
     /**
-     * Get a project by its id.
      * @param id 
      * @returns Project Success
      * @throws ApiError
      */
-    public static getProject(
+    public static getProjectById(
 id: string,
 ): CancelablePromise<Project> {
         return __request(OpenAPI, {
@@ -28,12 +27,11 @@ id: string,
     }
 
     /**
-     * Delete a project by its id.
      * @param id 
      * @returns any Success
      * @throws ApiError
      */
-    public static deleteProject(
+    public static deleteProjectById(
 id: string,
 ): CancelablePromise<any> {
         return __request(OpenAPI, {
@@ -46,11 +44,10 @@ id: string,
     }
 
     /**
-     * Get all projects.
      * @returns Project Success
      * @throws ApiError
      */
-    public static getProjects(): CancelablePromise<Array<Project>> {
+    public static getAllProjects(): CancelablePromise<Array<Project>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/projects',
@@ -58,7 +55,6 @@ id: string,
     }
 
     /**
-     * Create a new project.
      * @param requestBody 
      * @returns any Success
      * @throws ApiError
@@ -75,7 +71,6 @@ requestBody?: Project,
     }
 
     /**
-     * Update a project.
      * @param requestBody 
      * @returns any Success
      * @throws ApiError

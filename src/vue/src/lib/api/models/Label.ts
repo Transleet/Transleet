@@ -2,8 +2,9 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type Locale = {
+export type Label = {
     id?: string;
     name?: string | null;
-    displayName?: string | null;
+    type?: string | null;
+    description?: string | null;
 };

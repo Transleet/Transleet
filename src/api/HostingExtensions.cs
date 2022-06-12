@@ -35,7 +35,7 @@ internal static class HostingExtensions
         {
             options.EnableAnnotations();
             options.SwaggerGeneratorOptions.Servers.Add(new OpenApiServer { Url = builder.Configuration["BackendServerUrl"] });
-            
+
         });
         builder.Services.AddDataProtection();
         builder.Services.AddHttpClient();
@@ -46,9 +46,9 @@ internal static class HostingExtensions
 
         builder.Services.AddDbContext<AppDbContext>(options =>
         {
-            options.UseNpgsql(builder.Configuration["Database:ConnectionString"], npgsqlOptions =>
+            options.UseNpgsql(builder.Configuration["Database:ConnectionString"]!, npgsqlOptions =>
             {
-                AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior",true);
+                AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
             });
         });
 
@@ -76,10 +76,10 @@ internal static class HostingExtensions
 
         builder.Services.Configure<JwtOptions>(options =>
         {
-            options.Issuer = builder.Configuration["Authentication:JwtBearer:Issuer"];
-            options.Audience = builder.Configuration["Authentication:JwtBearer:Audience"];
+            options.Issuer = builder.Configuration["Authentication:JwtBearer:Issuer"]!;
+            options.Audience = builder.Configuration["Authentication:JwtBearer:Audience"]!;
             options.Key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Authentication:JwtBearer:Key"]));
+                Encoding.UTF8.GetBytes(builder.Configuration["Authentication:JwtBearer:Key"]!));
         });
 
         builder.Services.AddAuthentication(options =>
@@ -128,13 +128,13 @@ internal static class HostingExtensions
             options.AddPolicy("DevelopmentCorsPolicy", corsPolicyBuilder =>
                 {
                     corsPolicyBuilder
-                        .WithOrigins("http://localhost:3000")
+                        .WithOrigins("http://localhost:9000")
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials();
                 });
         });
-        
+
         builder.Services.AddScoped<IProjectService, ProjectService>();
         builder.Services.AddScoped<IComponentService, ComponentService>();
         builder.Services.AddScoped<IUserService, UserService>();
